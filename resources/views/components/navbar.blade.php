@@ -20,21 +20,23 @@
             <div class="w-1/3 flex justify-center">
                 <a href="{{ route('home') }}">
                     <img src="{{ asset('aset/logo/Whisnu-Santika_Logo-2025-White.png') }}" loading="lazy"
-                        decoding="async" alt="whisnu-santika" class="object-cover w-32 md:w-40 lg:w-52 rounded-lg">
+                        decoding="async" alt="whisnu-santika" class="object-cover hidden md:block w-52 rounded-lg">
+                    <img src="{{ asset('aset/logo/Whisnu-Santika_Logo-2025-2-White.png') }}" loading="lazy"
+                        decoding="async" alt="whisnu-santika" class="object-cover md:hidden w-52 rounded-lg">
                 </a>
             </div>
 
             <!-- Right -->
-            <div class="w-1/3 flex items-center justify-end gap-4 lg:gap-5">
+            <div class="w-1/3 flex items-center justify-end gap-2 md:gap-4">
                 <!-- Account & Cart (selalu tampil) -->
-                <a href="{{ route('home') }}" class="inline-flex text-xl">
+                <a href="{{ route('home') }}" class="inline-flex text-lg">
                     <i class="bi bi-person"></i>
                 </a>
-                <a href="{{ route('home') }}#cart" class="inline-flex text-xl">
+                <a href="{{ route('home') }}#cart" class="inline-flex text-lg">
                     <i class="bi bi-bag"></i>
                 </a>
                 <!-- Search (mobile/tablet saja, desktop pakai tombol di kiri) -->
-                <button id="searchBtnMobile" class="text-xl lg:hidden search-toggle-btn">
+                <button id="searchBtnMobile" class="text-lg lg:hidden search-toggle-btn">
                     <i class="bi bi-search"></i>
                 </button>
             </div>

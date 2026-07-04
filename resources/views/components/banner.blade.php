@@ -5,12 +5,4 @@
         <img src="{{ asset('aset/banner/banner.jpg') }}" alt="Banner" loading="lazy" decoding="async"
             class="object-cover w-full rounded-lg">
     </div>
-
-    <!-- ===================== Icon Row ===================== -->
-    <div class="flex items-center justify-center gap-6 p-6 text-3xl text-white">
-        <a href="#" class="hover:opacity-70 transition"><i class="bi bi-heart"></i></a>
-        <a href="#" class="hover:opacity-70 transition"><i class="bi bi-infinity"></i></a>
-        <a href="#" class="hover:opacity-70 transition"><i class="bi bi-circle"></i></a>
-        <a href="#" class="hover:opacity-70 transition"><i class="bi bi-magic"></i></a>
-    </div>
 </section>
