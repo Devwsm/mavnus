@@ -1,4 +1,4 @@
-<footer class="bg-[#5E0006] relative bottom-0 text-white">
+<footer class="flex flex-col w-full h-full text-white bg-[#5E0006]">
 
     <!-- ===================== Quick Links ===================== -->
     <div class="border-b border-white/10 px-6 py-6">
