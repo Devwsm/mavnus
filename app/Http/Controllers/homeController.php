@@ -15,4 +15,8 @@ class homeController extends Controller
     {
         return view('pages.clothes');
     }
+    public function accessoris()
+    {
+        return view('pages.accessoris');
+    }
 }

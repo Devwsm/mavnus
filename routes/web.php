@@ -10,4 +10,5 @@ Route::get('/', function () {
 Route::prefix('/')->group(function () {
     Route::get('/', [homeController::class, 'home'])->name('home');
     Route::get('/clothes', [homeController::class, 'clothes'])->name('clothes');
+    Route::get('/accessoris', [homeController::class, 'accessoris'])->name('accessoris');
 });

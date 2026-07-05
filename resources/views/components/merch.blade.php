@@ -86,7 +86,7 @@
             <h2 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">
                 Accessoris
             </h2>
-            <a href="{{ route('home') }}#store"
+            <a href="{{ route('accessoris') }}#store"
                 class="text-sm font-semibold uppercase tracking-wide underline underline-offset-4 hover:opacity-70 transition">
                 Shop All
             </a>
