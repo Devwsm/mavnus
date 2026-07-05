@@ -2,16 +2,7 @@
 
     <!-- ===================== Albums ===================== -->
     <div class="flex flex-col gap-4">
-        <!-- ===================== Section Header ===================== -->
-        <div class="flex items-center text-black justify-between">
-            <h2 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">
-                Albums
-            </h2>
-            <a href="{{ route('albums') }}"
-                class="text-sm font-semibold uppercase tracking-wide underline underline-offset-4 hover:opacity-70 transition">
-                Shop All
-            </a>
-        </div>
+        @include('components/filters')
 
         <!-- ===================== Product Albums Grid ===================== -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
