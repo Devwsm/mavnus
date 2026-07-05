@@ -19,4 +19,8 @@ class homeController extends Controller
     {
         return view('pages.accessoris');
     }
+    public function albums()
+    {
+        return view('pages.albums');
+    }
 }

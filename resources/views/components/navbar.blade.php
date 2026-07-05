@@ -50,7 +50,7 @@
             <a href="{{ route('accessoris') }}">
                 <h1 class="font-bold uppercase text-sm tracking-wide">Accessories</h1>
             </a>
-            <a href="{{ route('home') }}">
+            <a href="{{ route('albums') }}">
                 <h1 class="font-bold uppercase text-sm tracking-wide">Albums</h1>
             </a>
             <a href="{{ route('home') }}">
@@ -90,7 +90,7 @@
         <a href="{{ route('accessoris') }}" class="menu-link">
             <h1 class="text-xl font-bold uppercase">Accessories</h1>
         </a>
-        <a href="{{ route('home') }}" class="menu-link">
+        <a href="{{ route('albums') }}" class="menu-link">
             <h1 class="text-xl font-bold uppercase">Albums</h1>
         </a>
         <a href="{{ route('home') }}" class="menu-link">
