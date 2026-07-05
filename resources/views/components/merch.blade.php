@@ -3,7 +3,7 @@
     <!-- ===================== T-Shirts ===================== -->
     <div class="flex flex-col gap-4">
         <!-- ===================== Section Header ===================== -->
-        <div class="flex items-center text-white justify-between">
+        <div class="flex items-center text-black justify-between">
             <h2 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">
                 Best Sellers
             </h2>
@@ -17,7 +17,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
 
             <!-- Product 1 -->
-            <a href="{{ route('home') }}#store" class="flex flex-col bg-[#5E0006] gap-4 p-6">
+            <a href="{{ route('home') }}#store" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Yalla-Front.png') }}" loading="lazy" decoding="async"
                         alt="Product Name"
@@ -32,7 +32,7 @@
             </a>
 
             <!-- Product 2 -->
-            <a href="{{ route('home') }}#store" class="flex flex-col bg-[#5E0006] gap-4 p-6">
+            <a href="{{ route('home') }}#store" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Yalla-Back.png') }}" loading="lazy" decoding="async"
                         alt="Product Name"
@@ -47,7 +47,7 @@
             </a>
 
             <!-- Product 3 -->
-            <a href="{{ route('home') }}#store" class="flex flex-col bg-[#5E0006] gap-4 p-6">
+            <a href="{{ route('home') }}#store" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Habibi-Front.png') }}" loading="lazy" decoding="async"
                         alt="Product Name"
@@ -62,7 +62,7 @@
             </a>
 
             <!-- Product 4 -->
-            <a href="{{ route('home') }}#store" class="flex flex-col bg-[#5E0006] gap-4 p-6">
+            <a href="{{ route('home') }}#store" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Habibi-Back.png') }}" loading="lazy" decoding="async"
                         alt="Product Name"
@@ -82,7 +82,7 @@
     <!-- ===================== Accessoris ===================== -->
     <div class="flex flex-col gap-4">
         <!-- ===================== Section Header ===================== -->
-        <div class="flex items-center text-white justify-between">
+        <div class="flex items-center text-black justify-between">
             <h2 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">
                 Accessoris
             </h2>
@@ -96,7 +96,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
 
             <!-- Product 1 -->
-            <a href="{{ route('home') }}#store" class="flex flex-col bg-[#5E0006] gap-4 p-6">
+            <a href="{{ route('home') }}#store" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Yalla-Front.png') }}" loading="lazy" decoding="async"
                         alt="Product Name"
@@ -111,7 +111,7 @@
             </a>
 
             <!-- Product 2 -->
-            <a href="{{ route('home') }}#store" class="flex flex-col bg-[#5E0006] gap-4 p-6">
+            <a href="{{ route('home') }}#store" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Yalla-Back.png') }}" loading="lazy" decoding="async"
                         alt="Product Name"
@@ -126,7 +126,7 @@
             </a>
 
             <!-- Product 3 -->
-            <a href="{{ route('home') }}#store" class="flex flex-col bg-[#5E0006] gap-4 p-6">
+            <a href="{{ route('home') }}#store" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Habibi-Front.png') }}" loading="lazy" decoding="async"
                         alt="Product Name"
@@ -141,7 +141,7 @@
             </a>
 
             <!-- Product 4 -->
-            <a href="{{ route('home') }}#store" class="flex flex-col bg-[#5E0006] gap-4 p-6">
+            <a href="{{ route('home') }}#store" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Habibi-Back.png') }}" loading="lazy" decoding="async"
                         alt="Product Name"
@@ -156,7 +156,7 @@
             </a>
 
             <!-- Product 5 -->
-            <a href="{{ route('home') }}#store" class="flex flex-col bg-[#5E0006] gap-4 p-6">
+            <a href="{{ route('home') }}#store" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Yalla-Front.png') }}" loading="lazy" decoding="async"
                         alt="Product Name"
@@ -171,7 +171,7 @@
             </a>
 
             <!-- Product 6 -->
-            <a href="{{ route('home') }}#store" class="flex flex-col bg-[#5E0006] gap-4 p-6">
+            <a href="{{ route('home') }}#store" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Yalla-Back.png') }}" loading="lazy" decoding="async"
                         alt="Product Name"
@@ -186,7 +186,7 @@
             </a>
 
             <!-- Product 7 -->
-            <a href="{{ route('home') }}#store" class="flex flex-col bg-[#5E0006] gap-4 p-6">
+            <a href="{{ route('home') }}#store" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Habibi-Front.png') }}" loading="lazy" decoding="async"
                         alt="Product Name"
@@ -201,7 +201,7 @@
             </a>
 
             <!-- Product 8 -->
-            <a href="{{ route('home') }}#store" class="flex flex-col bg-[#5E0006] gap-4 p-6">
+            <a href="{{ route('home') }}#store" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Habibi-Back.png') }}" loading="lazy" decoding="async"
                         alt="Product Name"
@@ -221,7 +221,7 @@
     <!-- ===================== Albums ===================== -->
     <div class="flex flex-col gap-4">
         <!-- ===================== Section Header ===================== -->
-        <div class="flex items-center text-white justify-between">
+        <div class="flex items-center text-black justify-between">
             <h2 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">
                 Albums
             </h2>
@@ -235,7 +235,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
 
             <!-- Product 1 -->
-            <a href="{{ route('home') }}#store" class="flex flex-col bg-[#5E0006] gap-4 p-6">
+            <a href="{{ route('home') }}#store" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-full">
                     <img src="{{ asset('aset/albums/vamos.png') }}" loading="lazy" decoding="async"
                         alt="Product Name"
@@ -250,7 +250,7 @@
             </a>
 
             <!-- Product 2 -->
-            <a href="{{ route('home') }}#store" class="flex flex-col bg-[#5E0006] gap-4 p-6">
+            <a href="{{ route('home') }}#store" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-full">
                     <img src="{{ asset('aset/albums/mambo-jambo.png') }}" loading="lazy" decoding="async"
                         alt="Product Name"
@@ -265,7 +265,7 @@
             </a>
 
             <!-- Product 3 -->
-            <a href="{{ route('home') }}#store" class="flex flex-col bg-[#5E0006] gap-4 p-6">
+            <a href="{{ route('home') }}#store" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-full">
                     <img src="{{ asset('aset/albums/cartel.png') }}" loading="lazy" decoding="async"
                         alt="Product Name"
@@ -280,7 +280,7 @@
             </a>
 
             <!-- Product 4 -->
-            <a href="{{ route('home') }}#store" class="flex flex-col bg-[#5E0006] gap-4 p-6">
+            <a href="{{ route('home') }}#store" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-full">
                     <img src="{{ asset('aset/albums/tequila.png') }}" loading="lazy" decoding="async"
                         alt="Product Name"
@@ -295,7 +295,7 @@
             </a>
 
             <!-- Product 5 -->
-            <a href="{{ route('home') }}#store" class="flex flex-col bg-[#5E0006] gap-4 p-6">
+            <a href="{{ route('home') }}#store" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-full">
                     <img src="{{ asset('aset/albums/yalla.png') }}" loading="lazy" decoding="async"
                         alt="Product Name"
@@ -310,7 +310,7 @@
             </a>
 
             <!-- Product 6 -->
-            <a href="{{ route('home') }}#store" class="flex flex-col bg-[#5E0006] gap-4 p-6">
+            <a href="{{ route('home') }}#store" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-full">
                     <img src="{{ asset('aset/albums/be-yours.png') }}" loading="lazy" decoding="async"
                         alt="Product Name"
@@ -325,7 +325,7 @@
             </a>
 
             <!-- Product 7 -->
-            <a href="{{ route('home') }}#store" class="flex flex-col bg-[#5E0006] gap-4 p-6">
+            <a href="{{ route('home') }}#store" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-full">
                     <img src="{{ asset('aset/albums/jTown.png') }}" loading="lazy" decoding="async"
                         alt="Product Name"

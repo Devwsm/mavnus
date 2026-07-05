@@ -9,7 +9,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="bg-black flex flex-col w-full">
+<body class="bg-[#FFFDF9 ] flex flex-col w-full">
     <div class="flex flex-col justify-center items-center">
         @yield('content')
     </div>

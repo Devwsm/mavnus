@@ -1,4 +1,4 @@
-<footer class="flex flex-col w-full justify-center items-center bg-[#5E0006]">
+<footer class="flex flex-col w-full justify-center items-center bg-black">
     <div class="flex flex-col w-fit text-white">
         <!-- ===================== Quick Links ===================== -->
         <div class="border-b border-white/10 px-6 py-6">
@@ -44,9 +44,9 @@
                 <div class="relative">
                     <select
                         class="w-full appearance-none bg-white/5 border border-white/30 rounded px-4 py-2 text-sm outline-none">
-                        <option class="bg-[#5E0006] text-white">Indonesia | IDR Rp</option>
-                        <option class="bg-[#5E0006] text-white">United States | USD $</option>
-                        <option class="bg-[#5E0006] text-white">Australia | AUD $</option>
+                        <option class="bg-black text-white">Indonesia | IDR Rp</option>
+                        <option class="bg-black text-white">United States | USD $</option>
+                        <option class="bg-black text-white">Australia | AUD $</option>
                     </select>
                     <i
                         class="bi bi-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-sm pointer-events-none"></i>

@@ -1,5 +1,5 @@
 <div class="navbar-cover">
-    <div id="navbar" class="fixed top-0 left-0 w-full bg-[#5E0006] text-white z-50 transition-transform duration-300">
+    <div id="navbar" class="fixed top-0 left-0 w-full bg-black text-white z-50 transition-transform duration-300">
 
         <!-- ===================== SECTION 1: Search | Logo | Account & Cart ===================== -->
         <div class="flex items-center justify-between px-4 py-4 border-b border-white/10 lg:border-none">
@@ -61,7 +61,7 @@
 
     <!-- ===================== Search Bar (slides down under navbar, dipakai di semua ukuran layar) ===================== -->
     <div id="searchBar"
-        class="fixed left-0 w-full bg-[#5E0006] text-white z-40 px-4 py-3
+        class="fixed left-0 w-full bg-black text-white z-40 px-4 py-3
         -translate-y-full opacity-0 transition-all duration-300">
         <div class="flex items-center gap-3 bg-white/10 rounded-full px-4 py-2 lg:max-w-md lg:mx-auto">
             <i class="bi bi-search text-lg"></i>
@@ -77,7 +77,7 @@
 
     <!-- ===================== Mobile Half-Screen Drawer (Burger) ===================== -->
     <div id="mobileMenu"
-        class="fixed top-0 left-0 h-full w-1/2 sm:w-2/5 bg-[#5E0006] text-white z-60
+        class="fixed top-0 left-0 h-full w-1/2 sm:w-2/5 bg-black text-white z-60
         flex flex-col items-start justify-center gap-7 px-8
         -translate-x-full transition-transform duration-300">
         <button id="closeBtn" class="absolute top-5 right-5 text-3xl">
