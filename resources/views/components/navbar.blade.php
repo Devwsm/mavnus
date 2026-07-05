@@ -42,18 +42,18 @@
             </div>
         </div>
 
-        <!-- ===================== SECTION 2: T-Shirts | Accessories | Albums | Tour (desktop only) ===================== -->
+        <!-- ===================== SECTION 2: clothes | Accessories | Albums | Tour (desktop only) ===================== -->
         <div class="hidden lg:flex items-center justify-center gap-10 py-3 border-t border-white/10">
-            <a href="{{ route('home') }}#store">
-                <h1 class="font-bold uppercase text-sm tracking-wide">T-Shirts</h1>
+            <a href="{{ route('clothes') }}">
+                <h1 class="font-bold uppercase text-sm tracking-wide">clothes</h1>
             </a>
-            <a href="{{ route('home') }}#store">
+            <a href="{{ route('home') }}">
                 <h1 class="font-bold uppercase text-sm tracking-wide">Accessories</h1>
             </a>
-            <a href="{{ route('home') }}#new-music">
+            <a href="{{ route('home') }}">
                 <h1 class="font-bold uppercase text-sm tracking-wide">Albums</h1>
             </a>
-            <a href="{{ route('home') }}#tour">
+            <a href="{{ route('home') }}">
                 <h1 class="font-bold uppercase text-sm tracking-wide">Tour</h1>
             </a>
         </div>
@@ -84,16 +84,16 @@
             <i class="bi bi-x"></i>
         </button>
 
-        <a href="{{ route('home') }}#store" class="menu-link">
-            <h1 class="text-xl font-bold uppercase">T-Shirts</h1>
+        <a href="{{ route('clothes') }}" class="menu-link">
+            <h1 class="text-xl font-bold uppercase">clothes</h1>
         </a>
-        <a href="{{ route('home') }}#store" class="menu-link">
+        <a href="{{ route('home') }}" class="menu-link">
             <h1 class="text-xl font-bold uppercase">Accessories</h1>
         </a>
-        <a href="{{ route('home') }}#new-music" class="menu-link">
+        <a href="{{ route('home') }}" class="menu-link">
             <h1 class="text-xl font-bold uppercase">Albums</h1>
         </a>
-        <a href="{{ route('home') }}#tour" class="menu-link">
+        <a href="{{ route('home') }}" class="menu-link">
             <h1 class="text-xl font-bold uppercase">Tour</h1>
         </a>
     </div>

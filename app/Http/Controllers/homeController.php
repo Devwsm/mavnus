@@ -11,4 +11,8 @@ class homeController extends Controller
     {
         return view('pages.home');
     }
+    public function clothes()
+    {
+        return view('pages.clothes');
+    }
 }
