@@ -20,12 +20,12 @@
             <a href="{{ route('clothes') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Yalla-Front.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="Yalla"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        Yalla
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -35,12 +35,12 @@
             <a href="{{ route('clothes') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Yalla-Back.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="Yalla"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        Yalla
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -50,12 +50,12 @@
             <a href="{{ route('clothes') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Habibi-Front.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="Habibi"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        Habibi
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -65,12 +65,12 @@
             <a href="{{ route('clothes') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Habibi-Back.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="Habibi"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        Habibi
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -99,12 +99,12 @@
             <a href="{{ route('accessoris') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Yalla-Front.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="Yalla"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        Yalla
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -114,12 +114,12 @@
             <a href="{{ route('accessoris') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Yalla-Back.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="Yalla"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        Yalla
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -129,12 +129,12 @@
             <a href="{{ route('accessoris') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Habibi-Front.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="Habibi"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        Habibi
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -144,12 +144,12 @@
             <a href="{{ route('accessoris') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Habibi-Back.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="Habibi"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        Habibi
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -159,12 +159,12 @@
             <a href="{{ route('accessoris') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Yalla-Front.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="Yalla"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        Yalla
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -174,12 +174,12 @@
             <a href="{{ route('accessoris') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Yalla-Back.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="Yalla"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        Yalla
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -189,12 +189,12 @@
             <a href="{{ route('accessoris') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Habibi-Front.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="Habibi"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        Habibi
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -204,12 +204,12 @@
             <a href="{{ route('accessoris') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Habibi-Back.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="Habibi"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        Habibi
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -238,12 +238,12 @@
             <a href="{{ route('albums') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-full">
                     <img src="{{ asset('aset/albums/vamos.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="Vamos"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        Vamos
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -253,12 +253,12 @@
             <a href="{{ route('albums') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-full">
                     <img src="{{ asset('aset/albums/mambo-jambo.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="mambo jambo"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        mambo jambo
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -268,12 +268,12 @@
             <a href="{{ route('albums') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-full">
                     <img src="{{ asset('aset/albums/cartel.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="cartel"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        cartel
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -283,12 +283,12 @@
             <a href="{{ route('albums') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-full">
                     <img src="{{ asset('aset/albums/tequila.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="tequila"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        tequila
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -298,12 +298,12 @@
             <a href="{{ route('albums') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-full">
                     <img src="{{ asset('aset/albums/yalla.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="yalla"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        yalla
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -313,12 +313,12 @@
             <a href="{{ route('albums') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-full">
                     <img src="{{ asset('aset/albums/be-yours.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="i`l be yours"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        i`l be yours
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -328,12 +328,12 @@
             <a href="{{ route('albums') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-full">
                     <img src="{{ asset('aset/albums/jTown.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="jTown"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        jTown
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>

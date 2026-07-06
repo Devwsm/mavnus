@@ -11,12 +11,12 @@
             <a href="{{ route('accessoris') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Yalla-Front.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="Yalla"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        Yalla
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -26,12 +26,12 @@
             <a href="{{ route('accessoris') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Yalla-Back.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="Yalla"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        Yalla
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -41,12 +41,12 @@
             <a href="{{ route('accessoris') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Habibi-Front.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="Habibi"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        Habibi
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -56,12 +56,12 @@
             <a href="{{ route('accessoris') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Habibi-Back.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="Habibi"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        Habibi
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -71,12 +71,12 @@
             <a href="{{ route('accessoris') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Yalla-Front.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="Yalla"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        Yalla
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -86,12 +86,12 @@
             <a href="{{ route('accessoris') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Yalla-Back.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="Yalla"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        Yalla
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -101,12 +101,12 @@
             <a href="{{ route('accessoris') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Habibi-Front.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="Habibi"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        Habibi
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>
@@ -116,12 +116,12 @@
             <a href="{{ route('accessoris') }}" class="flex flex-col bg-black gap-4 p-6">
                 <div class="w-full overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Habibi-Back.png') }}" loading="lazy" decoding="async"
-                        alt="Product Name"
+                        alt="Habibi"
                         class="w-full h-full object-cover object-center transition-transform duration-500">
                 </div>
                 <div class="flex flex-col text-center gap-2">
                     <h3 class="text-sm font-semibold uppercase tracking-wide text-white transition">
-                        Product Name
+                        Habibi
                     </h3>
                     <p class="text-sm text-white">Rp250.000</p>
                 </div>

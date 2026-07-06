@@ -44,9 +44,9 @@
                 <div class="relative">
                     <select
                         class="w-full appearance-none bg-white/5 border border-white/30 rounded px-4 py-2 text-sm outline-none">
-                        <option class="bg-black text-white">Indonesia | IDR Rp</option>
-                        <option class="bg-black text-white">United States | USD $</option>
-                        <option class="bg-black text-white">Australia | AUD $</option>
+                        <option aria-label="IDR" class="bg-black text-white">Indonesia | IDR Rp</option>
+                        <option aria-label="USD" class="bg-black text-white">United States | USD $</option>
+                        <option aria-label="AUD" class="bg-black text-white">Australia | AUD $</option>
                     </select>
                     <i
                         class="bi bi-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-sm pointer-events-none"></i>
@@ -64,11 +64,9 @@
             </p>
 
             <div class="flex items-center gap-5 text-lg">
-                <a href="#" class="hover:opacity-70 transition"><i class="bi bi-instagram"></i></a>
-                <a href="#" class="hover:opacity-70 transition"><i class="bi bi-facebook"></i></a>
-                <a href="#" class="hover:opacity-70 transition"><i class="bi bi-twitter-x"></i></a>
-                <a href="#" class="hover:opacity-70 transition"><i class="bi bi-youtube"></i></a>
-                <a href="#" class="hover:opacity-70 transition"><i class="bi bi-spotify"></i></a>
+                <a href="https://www.instagram.com/whisnusantika/" class="hover:opacity-70 transition"><i class="bi bi-instagram"></i></a>
+                <a href="https://www.youtube.com/@WhisnuSantika" class="hover:opacity-70 transition"><i class="bi bi-youtube"></i></a>
+                <a href="https://open.spotify.com/artist/6gvsmDZKW5wRvjKCPnbHDh" class="hover:opacity-70 transition"><i class="bi bi-spotify"></i></a>
             </div>
         </div>
     </div>
