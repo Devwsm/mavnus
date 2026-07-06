@@ -65,7 +65,7 @@
         -translate-y-full opacity-0 transition-all duration-300">
         <div class="flex items-center gap-3 bg-white/10 rounded-full px-4 py-2 lg:max-w-md lg:mx-auto">
             <i class="bi bi-search text-lg"></i>
-            <input type="text" placeholder="Search"
+            <input type="text" placeholder="Clothes, Accessoris, albums....."
                 class="bg-transparent outline-none placeholder-white/70 text-white w-full text-sm">
         </div>
     </div>
