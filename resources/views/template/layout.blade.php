@@ -7,6 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Mavnus</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="icon" href="{{ asset('aset/logo/Whisnu-Santika_Logo-2025-2-White.png') }}" type="image/png">
 </head>
 
 <body class="bg-black flex flex-col w-full">
