@@ -29,7 +29,7 @@
             <!-- Right -->
             <div class="w-1/3 flex items-center justify-end gap-2 md:gap-4">
                 <!-- Account & Cart (selalu tampil) -->
-                <a href="{{ route('home') }}" class="inline-flex text-lg">
+                <a href="{{ route('dashboard') }}" class="inline-flex text-lg">
                     <i class="bi bi-person"></i>
                 </a>
                 <a href="{{ route('home') }}#cart" class="inline-flex text-lg">
