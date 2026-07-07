@@ -24,4 +24,5 @@ Route::prefix('/')->group(function () {
     Route::get('/clothes', [homeController::class, 'clothes'])->name('clothes');
     Route::get('/accessoris', [homeController::class, 'accessoris'])->name('accessoris');
     Route::get('/albums', [homeController::class, 'albums'])->name('albums');
+    Route::get('/product_detail', [homeController::class, 'product_detail'])->name('product_detail');
 });

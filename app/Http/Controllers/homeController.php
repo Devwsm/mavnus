@@ -23,4 +23,8 @@ class homeController extends Controller
     {
         return view('pages.albums');
     }
+    public function product_detail()
+    {
+        return view('pages.product_detail');
+    }
 }
