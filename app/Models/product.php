@@ -38,10 +38,15 @@ class product extends Model
         return $this->hasOne(Clothes::class, 'product_id', 'id_product');
     }
 
-    // Scope: filter produk yang kategorinya "clothes" saja
-    public function scopeClothesCategory($query)
+    
+    // Sync status
+    public function syncActiveStatus(): void
     {
-        return $query->where('category', 'clothes');
+        $totalStock = $this->clothes?->variants->sum('stock') ?? 0;
+
+        $this->update([
+            'is_active' => $totalStock > 0,
+        ]);
     }
 
     // Scope: filter produk yang statusnya aktif (stok tersedia)
@@ -50,6 +55,12 @@ class product extends Model
         return $query->where('is_active', true);
     }
 
+    // Scope: filter produk yang kategorinya "clothes" saja
+    public function scopeClothesCategory($query)
+    {
+        return $query->where('category', 'clothes');
+    }
+    
     // Accessor: format harga jadi "Rp250.000", dipanggil lewat $product->formatted_price
     public function getFormattedPriceAttribute(): string
     {

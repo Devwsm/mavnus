@@ -14,6 +14,8 @@
                 <form action="{{ route('clothes.store') }}" method="POST" enctype="multipart/form-data"
                     class="flex flex-col gap-6">
                     @csrf
+                    @include('components/errors/errors')
+                    @include('components/errors/success')
                     {{-- Data Dasar --}}
                     <div class="flex flex-col gap-4 bg-[#0D0D0D] border border-white/10 rounded-xl p-6">
                         <h2 class="text-xs font-semibold uppercase tracking-widest text-[#B71C1C]">Data Dasar</h2>
@@ -31,9 +33,9 @@
                         </div>
                         <div>
                             <label class="block text-sm font-semibold mb-1.5">Deskripsi</label>
-                            <textarea id="inputDescription" name="description" rows="3"
+                            <input type="text" id="inputDescription" name="description"
                                 class="w-full bg-black border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-white/30 focus:outline-none focus:border-[#B71C1C]"
-                                placeholder="Deskripsi singkat produk"></textarea>
+                                placeholder="Deskripsi singkat produk"></input>
                         </div>
                     </div>
                     {{-- Detail Clothes --}}
@@ -45,7 +47,7 @@
                                 <label class="block text-sm font-semibold mb-1.5">Warna</label>
                                 <input type="text" id="inputColor" name="color"
                                     class="w-full bg-black border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-white/30 focus:outline-none focus:border-[#B71C1C]"
-                                    placeholder="Black">
+                                    placeholder="Black / Blue....">
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold mb-1.5">Material</label>
@@ -68,7 +70,7 @@
                                     <option value="L">L</option>
                                     <option value="XL">XL</option>
                                 </select>
-                                <input type="number" name="variants[0][stock]" placeholder="Stok"
+                                <input type="number" name="variants[0][stock]" placeholder="Stock"
                                     class="variant-stock min-w-0 flex-1 bg-black border border-white/10 rounded-lg px-4 py-2 text-white placeholder-white/30 focus:outline-none focus:border-[#B71C1C]">
                                 <button type="button"
                                     class="removeVariantBtn text-white/40 hover:text-[#B71C1C] text-xl px-2 shrink-0">
@@ -150,7 +152,7 @@
 
         inputPrice.addEventListener('input', () => {
             const value = parseInt(inputPrice.value || 0);
-            previewPrice.textContent = 'Rp' + value.toLocaleString('id-ID');
+            previewPrice.textContent = 'Rp.' + value.toLocaleString('id-ID');
         });
 
         inputColor.addEventListener('input', () => {
@@ -189,46 +191,90 @@
             }
         }
 
+        function updateSizeAvailability() {
+            const rows = variantRows.querySelectorAll('.variant-row');
+            const selectedSizes = Array.from(rows).map(row => row.querySelector('.variant-size').value);
+
+            rows.forEach(row => {
+                const select = row.querySelector('.variant-size');
+                Array.from(select.options).forEach(option => {
+                    const isUsedElsewhere = selectedSizes.includes(option.value) && option.value !== select
+                        .value;
+                    option.disabled = isUsedElsewhere;
+                });
+            });
+        }
+
+        function getNextAvailableSize(excludeSelect) {
+            const rows = variantRows.querySelectorAll('.variant-row');
+            const usedSizes = Array.from(rows)
+                .map(row => row.querySelector('.variant-size'))
+                .filter(select => select !== excludeSelect)
+                .map(select => select.value);
+
+            const allSizes = ['S', 'M', 'L', 'XL'];
+            return allSizes.find(size => !usedSizes.includes(size)) || '';
+        }
+
         function bindVariantRow(row) {
-            row.querySelector('.variant-size').addEventListener('change', updateVariantPreview);
+            row.querySelector('.variant-size').addEventListener('change', () => {
+                updateVariantPreview();
+                updateSizeAvailability();
+            });
             row.querySelector('.variant-stock').addEventListener('input', updateVariantPreview);
             row.querySelector('.removeVariantBtn').addEventListener('click', () => {
                 if (variantRows.querySelectorAll('.variant-row').length > 1) {
                     row.remove();
                     updateVariantPreview();
+                    updateSizeAvailability();
                 }
             });
         }
 
         bindVariantRow(variantRows.querySelector('.variant-row'));
+        updateSizeAvailability();
 
         addVariantBtn.addEventListener('click', () => {
+            const nextSize = getNextAvailableSize(null);
+
+            if (!nextSize) {
+                alert('Semua ukuran (S, M, L, XL) sudah dipilih. Tidak ada ukuran tersisa untuk ditambahkan.');
+                return;
+            }
+
             const newRow = variantRows.querySelector('.variant-row').cloneNode(true);
-            newRow.querySelector('.variant-size').name = `variants[${variantIndex}][size]`;
+            const newSelect = newRow.querySelector('.variant-size');
+
+            newSelect.name = `variants[${variantIndex}][size]`;
+            newSelect.value = nextSize;
             newRow.querySelector('.variant-stock').name = `variants[${variantIndex}][stock]`;
             newRow.querySelector('.variant-stock').value = '';
             variantIndex++;
-            variantRows.appendChild(newRow);
-            bindVariantRow(newRow);
-        });
 
-        // ---- Image preview ----
+            variantRows.appendChild(newRow);
+
+            bindVariantRow(newRow);
+            updateSizeAvailability();
+        });
+        
+        // ---- Image preview (akumulatif, bisa ditambah satu-satu) ----
         const inputImages = document.getElementById('inputImages');
         const previewImage = document.getElementById('previewImage');
         const previewImagePlaceholder = document.getElementById('previewImagePlaceholder');
         const imageThumbs = document.getElementById('imageThumbs');
 
-        inputImages.addEventListener('change', () => {
-            imageThumbs.innerHTML = '';
-            const files = Array.from(inputImages.files);
+        let selectedFiles = [];
 
-            if (files.length === 0) {
+        function renderImagePreview() {
+            imageThumbs.innerHTML = '';
+
+            if (selectedFiles.length === 0) {
                 previewImage.classList.add('hidden');
                 previewImagePlaceholder.classList.remove('hidden');
                 return;
             }
 
-            files.forEach((file, index) => {
+            selectedFiles.forEach((file, index) => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     if (index === 0) {
@@ -237,13 +283,38 @@
                         previewImagePlaceholder.classList.add('hidden');
                     }
 
-                    const thumb = document.createElement('img');
-                    thumb.src = e.target.result;
-                    thumb.className = 'w-16 h-16 object-cover rounded-md border border-white/10';
-                    imageThumbs.appendChild(thumb);
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'relative';
+                    wrapper.innerHTML = `
+                    <img src="${e.target.result}" class="w-16 h-16 object-cover rounded-md border border-white/10">
+                    <button type="button" data-index="${index}"
+                        class="removeImageBtn absolute -top-1.5 -right-1.5 bg-[#B71C1C] hover:bg-[#891212] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                        <i class="bi bi-x"></i>
+                    </button>
+                `;
+                    imageThumbs.appendChild(wrapper);
+
+                    wrapper.querySelector('.removeImageBtn').addEventListener('click', () => {
+                        selectedFiles.splice(index, 1);
+                        syncInputFiles();
+                        renderImagePreview();
+                    });
                 };
                 reader.readAsDataURL(file);
             });
+        }
+
+        function syncInputFiles() {
+            const dataTransfer = new DataTransfer();
+            selectedFiles.forEach(file => dataTransfer.items.add(file));
+            inputImages.files = dataTransfer.files;
+        }
+
+        inputImages.addEventListener('change', () => {
+            const newFiles = Array.from(inputImages.files);
+            selectedFiles = selectedFiles.concat(newFiles);
+            syncInputFiles();
+            renderImagePreview();
         });
     </script>
 @endsection

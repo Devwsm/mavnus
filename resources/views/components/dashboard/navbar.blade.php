@@ -1,11 +1,11 @@
 {{-- desktop --}}
 <div class="nav z-50 fixed bottom-5 left-1/2 -translate-x-1/2 hidden lg:flex gap-2">
-    <div class="flex justify-center items-center p-6 rounded-lg bg-[#1A1A1B] shrink-0">
+    <div class="flex justify-center items-center p-6 rounded-lg bg-[#0D0D0D] shrink-0">
         <a href="{{ route('dashboard') }}" class="text-white text-[2rem]">
             <i class="bi bi-house-door-fill"></i>
         </a>
     </div>
-    <div class="flex justify-center items-center gap-4 p-6 rounded-lg bg-[#1A1A1B] shrink-0">
+    <div class="flex justify-center items-center gap-4 p-6 rounded-lg bg-[#0D0D0D] shrink-0">
         <a href="{{ route('dashboard.clothes') }}" class="text-white text-[2rem]">
             <i class="bi bi-bag-fill"></i>
         </a>
@@ -16,7 +16,7 @@
             <i class="bi bi-disc-fill"></i>
         </a>
     </div>
-    <div class="flex justify-center items-center p-6 rounded-lg bg-[#1A1A1B] shrink-0">
+    <div class="flex justify-center items-center p-6 rounded-lg bg-[#0D0D0D] shrink-0">
         <a href="{{ route('logout') }}" class="text-[#B71C1C] hover:text-[#891212] text-[2rem]">
             <i class="bi bi-box-arrow-right font-bold"></i>
         </a>
@@ -39,7 +39,7 @@
 
 {{-- Mobile Fullscreen --}}
 <div id="dashMobileMenu"
-    class="fixed top-0 right-0 h-full w-1/2 bg-black text-white z-80
+    class="fixed top-0 right-0 h-full w-1/2 bg-[#0D0D0D] text-white z-80
     flex flex-col items-center justify-center gap-8 border-r-gray-200
     translate-x-full transition-transform duration-300 lg:hidden">
 

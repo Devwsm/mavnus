@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\product;
 use App\Models\clothes;
 use App\Models\ClothesVariant;
-use App\Models\product;
 use App\Models\ProductImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -69,7 +69,7 @@ class clothesController extends Controller
 
         DB::transaction(function () use ($validated, $request) {
             // 1. Simpan data dasar produk ke tabel products
-            $product = Product::create([
+            $product = product::create([
                 'category'    => 'clothes',
                 'name'        => $validated['name'],
                 'slug'        => Str::slug($validated['name']) . '-' . uniqid(), // slug unik biar gak bentrok antar produk
@@ -79,7 +79,7 @@ class clothesController extends Controller
             ]);
 
             // 2. Simpan detail warna & material, terhubung ke product di atas
-            $clothes = Clothes::create([
+            $clothes = clothes::create([
                 'product_id' => $product->id_product,
                 'color'      => $validated['color'],
                 'material'   => $validated['material'],

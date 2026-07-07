@@ -18,30 +18,39 @@
                     + Tambah Clothes
                 </a>
             </div>
+            <div class="flex flex-col w-full">
+                @include('components/errors/errors')
+                @include('components/errors/success')
+            </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 @forelse ($products as $product)
                     @php
                         $totalStock = $product->clothes->variants->sum('stock');
+                        $extraImages = $product->images->slice(1, 3);
+                        $remainingCount = $product->images->count() - 4;
                     @endphp
-                    <div class="bg-[#0D0D0D] border border-white/10 rounded-2xl overflow-hidden 
-                            hover:border-white/20 transition">
+                    <div
+                        class="group bg-[#0D0D0D] border border-white/10 rounded-2xl overflow-hidden hover:border-white/20 transition-all duration-300">
+
                         {{-- Foto --}}
                         <div class="relative w-full aspect-square bg-black overflow-hidden">
                             @if ($product->images->first())
                                 <img src="{{ Storage::url($product->images->first()->image_path) }}"
-                                    alt="{{ $product->name }}" class="w-full h-full object-cover object-center">
+                                    alt="{{ $product->name }}"
+                                    class="w-full h-full object-cover object-center group-hover:scale-105 transition duration-500">
                             @else
                                 <div class="w-full h-full flex items-center justify-center">
                                     <i class="bi bi-image text-white/15 text-4xl"></i>
                                 </div>
                             @endif
-                            @if ($product->images->count() > 1)
-                                <span
-                                    class="absolute top-3 left-3 bg-black/70 backdrop-blur text-white/90 text-[10px] font-bold px-2 py-1 rounded-md">
-                                    {{ $product->images->count() }} foto
-                                </span>
-                            @endif
+
+                            {{-- Gradient overlay biar strip foto & badge lebih nempel --}}
+                            <div
+                                class="absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-black/80 to-transparent pointer-events-none">
+                            </div>
+
+                            {{-- Status badge --}}
                             <div class="absolute top-3 right-3">
                                 @if ($product->is_active)
                                     <span
@@ -57,7 +66,26 @@
                                     </span>
                                 @endif
                             </div>
+
+                            {{-- Strip mini thumbnail (kalau foto lebih dari 1) --}}
+                            @if ($product->images->count() > 1)
+                                <div class="absolute bottom-3 left-3 flex items-center gap-1.5">
+                                    @foreach ($extraImages as $extra)
+                                        <div class="w-7 h-7 rounded-md overflow-hidden ring-1.5 ring-white/40">
+                                            <img src="{{ Storage::url($extra->image_path) }}" alt="{{ $product->name }}"
+                                                class="w-full h-full object-cover object-center">
+                                        </div>
+                                    @endforeach
+
+                                    @if ($remainingCount > 0)
+                                        <div class="w-7 h-7 rounded-md bg-[#B71C1C] flex items-center justify-center">
+                                            <span class="text-white text-[10px] font-bold">+{{ $remainingCount }}</span>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
                         </div>
+
                         {{-- Info --}}
                         <div class="flex flex-col gap-3 p-4">
                             <div>
@@ -68,6 +96,7 @@
                                     {{ $product->description ?: 'Tidak ada deskripsi' }}
                                 </p>
                             </div>
+
                             <div class="flex items-center justify-between">
                                 <span class="text-white font-bold">{{ $product->formatted_price }}</span>
                                 <div class="flex items-center gap-1.5">
@@ -76,19 +105,27 @@
                                     <span class="text-white/50 text-xs">{{ $product->clothes->material }}</span>
                                 </div>
                             </div>
+
                             <div class="flex items-center justify-between pt-3 border-t border-white/6">
                                 <span class="text-white/40 text-xs">Total Stok</span>
                                 <span class="text-white text-sm font-semibold">{{ $totalStock }} pcs</span>
                             </div>
+
                             <div class="flex flex-wrap gap-1.5">
                                 @foreach ($product->clothes->variants as $variant)
+                                    @php
+                                        $stockColor =
+                                            $variant->stock === 0
+                                                ? 'text-[#e05656] border-[#B71C1C]/30 bg-[#B71C1C]/5'
+                                                : ($variant->stock <= 3
+                                                    ? 'text-amber-400 border-amber-400/20 bg-amber-400/5'
+                                                    : 'text-green-400 border-green-400/20 bg-green-400/5');
+                                    @endphp
                                     <span
-                                        class="flex items-center gap-1 bg-black border border-white/10 rounded-md px-2 py-1 text-[11px]">
-                                        <span class="text-white/50 font-medium">{{ $variant->size }}</span>
-                                        <span class="text-white/25">·</span>
-                                        <span class="{{ $variant->stock === 0 ? 'text-[#B71C1C]' : 'text-white/70' }}">
-                                            {{ $variant->stock }}
-                                        </span>
+                                        class="flex items-center gap-1 border rounded-md px-2 py-1 text-[11px] {{ $stockColor }}">
+                                        <span class="font-medium opacity-70">{{ $variant->size }}</span>
+                                        <span class="opacity-30">·</span>
+                                        <span class="font-semibold">{{ $variant->stock }}</span>
                                     </span>
                                 @endforeach
                             </div>
