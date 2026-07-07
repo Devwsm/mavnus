@@ -18,13 +18,13 @@ Route::prefix('/')->group(function () {
 
 Route::prefix('/dashboard')->middleware('cekLogin')->group(function () {
     Route::get('/', [dashboardController::class, 'dashboard'])->name('dashboard');
-    
+
     Route::prefix('/clothes')->middleware('cekLogin')->group(function () {
         Route::get('/', [clothesController::class, 'clothes'])->name('dashboard.clothes');
         Route::post('/store', [clothesController::class, 'store'])->name('clothes.store');
         Route::delete('/{product}', [clothesController::class, 'destroy'])->name('clothes.destroy');
+        Route::put('/{product}', [clothesController::class, 'update'])->name('clothes.update');
     });
-    
 });
 
 Route::prefix('/')->group(function () {

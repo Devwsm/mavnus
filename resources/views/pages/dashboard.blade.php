@@ -132,11 +132,7 @@
 
                             {{-- Aksi --}}
                             <div class="flex items-center gap-2 pt-3 border-t border-white/6">
-                                <a href="#"
-                                    class="flex-1 flex items-center justify-center gap-1.5 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold py-2 rounded-lg transition">
-                                    <i class="bi bi-pencil-square"></i>
-                                    Edit
-                                </a>
+                                @include('components/dashboard/modal-edit-clothes')
                                 @include('components/dashboard/btn-hapus-clothes')
                             </div>
                         </div>
