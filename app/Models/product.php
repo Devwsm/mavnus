@@ -26,26 +26,31 @@ class product extends Model
         'price' => 'integer',
     ];
 
+    // Relasi: satu produk bisa punya banyak foto, diurutkan sesuai sort_order
     public function images()
     {
         return $this->hasMany(ProductImage::class, 'product_id', 'id_product')->orderBy('sort_order');
     }
 
+    // Relasi: satu produk (kategori clothes) punya satu detail warna/material
     public function clothes()
     {
         return $this->hasOne(Clothes::class, 'product_id', 'id_product');
     }
 
+    // Scope: filter produk yang kategorinya "clothes" saja
     public function scopeClothesCategory($query)
     {
         return $query->where('category', 'clothes');
     }
 
+    // Scope: filter produk yang statusnya aktif (stok tersedia)
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
 
+    // Accessor: format harga jadi "Rp250.000", dipanggil lewat $product->formatted_price
     public function getFormattedPriceAttribute(): string
     {
         return 'Rp' . number_format($this->price, 0, ',', '.');
