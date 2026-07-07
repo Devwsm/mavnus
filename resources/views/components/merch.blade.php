@@ -17,7 +17,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
             <!-- Product 1 -->
-            <a href="{{ route('clothes') }}"
+            <a href="{{ route('product_detail') }}"
                 class="group flex flex-col bg-black gap-4 p-5 rounded-2xl overflow-hidden border border-white/5 hover:border-white/15 hover:bg-black/80 transition-all duration-300">
                 <div class="w-full aspect-square overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Yalla-Front.png') }}" loading="lazy" decoding="async" alt="Yalla"
@@ -32,7 +32,7 @@
             </a>
 
             <!-- Product 2 -->
-            <a href="{{ route('clothes') }}"
+            <a href="{{ route('product_detail') }}"
                 class="group flex flex-col bg-black gap-4 p-5 rounded-2xl overflow-hidden border border-white/5 hover:border-white/15 hover:bg-black/80 transition-all duration-300">
                 <div class="w-full aspect-square overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Yalla-Back.png') }}" loading="lazy" decoding="async" alt="Yalla"
@@ -66,7 +66,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
             <!-- Product 3 -->
-            <a href="{{ route('accessoris') }}"
+            <a href="{{ route('product_detail') }}"
                 class="group flex flex-col bg-black gap-4 p-5 rounded-2xl overflow-hidden border border-white/5 hover:border-white/15 hover:bg-black/80 transition-all duration-300">
                 <div class="w-full aspect-square overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Habibi-Front.png') }}" loading="lazy" decoding="async" alt="Habibi"
@@ -81,7 +81,7 @@
             </a>
 
             <!-- Product 4 -->
-            <a href="{{ route('accessoris') }}"
+            <a href="{{ route('product_detail') }}"
                 class="group flex flex-col bg-black gap-4 p-5 rounded-2xl overflow-hidden border border-white/5 hover:border-white/15 hover:bg-black/80 transition-all duration-300">
                 <div class="w-full aspect-square overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/merch/Habibi-Back.png') }}" loading="lazy" decoding="async" alt="Habibi"
@@ -115,7 +115,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
             <!-- Product 1 -->
-            <a href="{{ route('albums') }}"
+            <a href="{{ route('product_detail') }}"
                 class="group flex flex-col bg-black gap-4 p-5 rounded-2xl overflow-hidden border border-white/5 hover:border-white/15 hover:bg-black/80 transition-all duration-300">
                 <div class="w-full aspect-square overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/albums/vamos.png') }}" loading="lazy" decoding="async" alt="Vamos"
@@ -130,7 +130,7 @@
             </a>
 
             <!-- Product 1 -->
-            <a href="{{ route('albums') }}"
+            <a href="{{ route('product_detail') }}"
                 class="group flex flex-col bg-black gap-4 p-5 rounded-2xl overflow-hidden border border-white/5 hover:border-white/15 hover:bg-black/80 transition-all duration-300">
                 <div class="w-full aspect-square overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/albums/mambo-jambo.png') }}" loading="lazy" decoding="async" alt="mambo jambo"
@@ -145,7 +145,7 @@
             </a>
 
             <!-- Product 3 -->
-            <a href="{{ route('albums') }}"
+            <a href="{{ route('product_detail') }}"
                 class="group flex flex-col bg-black gap-4 p-5 rounded-2xl overflow-hidden border border-white/5 hover:border-white/15 hover:bg-black/80 transition-all duration-300">
                 <div class="w-full aspect-square overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/albums/cartel.png') }}" loading="lazy" decoding="async" alt="cartel"
@@ -160,7 +160,7 @@
             </a>
 
             <!-- Product 4 -->
-            <a href="{{ route('albums') }}"
+            <a href="{{ route('product_detail') }}"
                 class="group flex flex-col bg-black gap-4 p-5 rounded-2xl overflow-hidden border border-white/5 hover:border-white/15 hover:bg-black/80 transition-all duration-300">
                 <div class="w-full aspect-square overflow-hidden rounded-lg">
                     <img src="{{ asset('aset/albums/tequila.png') }}" loading="lazy" decoding="async" alt="tequila"
