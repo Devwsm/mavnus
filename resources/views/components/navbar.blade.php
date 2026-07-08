@@ -29,16 +29,14 @@
             <!-- Right -->
             <div class="w-1/3 flex items-center justify-end gap-2 md:gap-4">
                 <!-- Account & Cart (selalu tampil) -->
-                <a href="{{ route('dashboard') }}" class="inline-flex text-lg">
+                <a href="{{ route('dashboard') }}" class="hidden lg:inline-flex text-lg">
                     <i class="bi bi-person"></i>
-                </a>
-                <a href="{{ route('home') }}#cart" class="inline-flex text-lg">
-                    <i class="bi bi-bag"></i>
                 </a>
                 <!-- Search (mobile/tablet saja, desktop pakai tombol di kiri) -->
                 <button id="searchBtnMobile" class="text-lg lg:hidden search-toggle-btn">
                     <i class="bi bi-search"></i>
                 </button>
+                @include('components/cart')
             </div>
         </div>
 
@@ -82,7 +80,7 @@
 
     <!-- ===================== Mobile Half-Screen Drawer (Burger) ===================== -->
     <div id="mobileMenu"
-        class="fixed top-0 left-0 h-full w-1/2 sm:w-2/5 bg-black text-white z-60
+        class="fixed top-0 left-0 h-full w-3/4 md:w-1/2 sm:w-2/5 bg-black text-white z-60
         flex flex-col items-start justify-center gap-7 px-8
         -translate-x-full transition-transform duration-300">
         <button id="closeBtn" class="absolute top-5 right-5 text-3xl">
@@ -100,6 +98,10 @@
         </a>
         <a href="{{ route('home') }}" class="menu-link">
             <h1 class="text-xl font-bold uppercase">Tour</h1>
+        </a>
+        <!-- Account & Cart (selalu tampil) -->
+        <a href="{{ route('dashboard') }}" class="menu-link inline-flex lg:hidden text-lg">
+            <i class="bi bi-person"></i>
         </a>
     </div>
 </div>

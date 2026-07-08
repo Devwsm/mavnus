@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\cartController;
 use App\Http\Controllers\clothesController;
 use App\Http\Controllers\dashboardController;
 use App\Http\Controllers\homeController;
@@ -31,6 +32,13 @@ Route::prefix('/dashboard')->middleware('cekLogin')->group(function () {
 Route::prefix('/')->group(function () {
     Route::get('/', [homeController::class, 'home'])->name('home');
     Route::get('/search', [searchController::class, 'search'])->name('search');
+
+    Route::prefix('/cart')->group(function () {
+        Route::get('/', [cartController::class, 'index'])->name('cart.index');
+        Route::post('/add', [cartController::class, 'add'])->name('cart.add');
+        Route::patch('/{cartItem}', [cartController::class, 'update'])->name('cart.update');
+        Route::delete('/{cartItem}', [cartController::class, 'destroy'])->name('cart.destroy');
+    });
 
     Route::prefix('/clothes')->middleware('cekLogin')->group(function () {
         Route::get('/', [homeController::class, 'clothes'])->name('clothes');

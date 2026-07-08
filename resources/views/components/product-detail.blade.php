@@ -22,7 +22,7 @@
                     <div class="flex gap-4">
                         @foreach ($product->images->skip(1) as $index => $image)
                             <button type="button"
-                                onclick="document.getElementById('mainImage').src = '{{ Storage::url($image->image_path) }}'; openGallery{{ $index + 1 }}"
+                                onclick="document.getElementById('mainImage').src = '{{ Storage::url($image->image_path) }}'; openGallery({{ $index }})"
                                 class="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden border border-transparent hover:border-gray-400">
                                 <img src="{{ Storage::url($image->image_path) }}" alt="{{ $product->name }}"
                                     class="absolute inset-0 w-full h-full object-contain" />
@@ -59,7 +59,8 @@
                     <span class="text-sm font-medium">Select Size</span>
                     <div class="flex flex-wrap gap-3">
                         @foreach ($product->clothes->variants as $variant)
-                            <button type="button" onclick="toggleSize('{{ $variant->size }}', {{ $variant->stock }})"
+                            <button type="button"
+                                onclick="toggleSize('{{ $variant->size }}', {{ $variant->stock }}, {{ $variant->id_clothes_variant }})"
                                 data-size="{{ $variant->size }}"
                                 class="size-btn px-4 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm hover:border-gray-500 {{ $variant->stock === 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
                                 @disabled($variant->stock === 0)>
@@ -134,6 +135,7 @@
 <script>
     let selectedSize = null; // size yang sedang aktif dipilih, null kalau belum ada
     let selectedStock = 0; // stok dari size yang aktif, jadi batas atas qty
+    let selectedVariantId = null; // id_clothes_variant dari size yang aktif, dikirim ke cart
 
     // Update tampilan visual tombol size (hitam = aktif, putih = tidak aktif)
     function updateSizeButtons() {
@@ -153,23 +155,27 @@
     }
 
     // Pilih/batalkan size saat diklik (toggle)
-    function toggleSize(size, stock) {
+    function toggleSize(size, stock, variantId) {
         if (stock === 0) {
             document.getElementById('size-message').textContent = 'Ukuran ini sedang tidak tersedia.';
             return;
         }
 
+        // Klik size yang sudah aktif → batalkan pilihan
         if (selectedSize === size) {
             selectedSize = null;
             selectedStock = 0;
+            selectedVariantId = null;
             document.getElementById('size-message').textContent = '';
             updateSizeButtons();
             setQtyEnabled(false);
             return;
         }
 
+        // Klik size baru → pilih size itu
         selectedSize = size;
         selectedStock = stock;
+        selectedVariantId = variantId;
         document.getElementById('size-message').textContent = '';
         document.getElementById('stock-message').textContent = `Stok tersedia: ${stock} pcs`;
         updateSizeButtons();
@@ -247,6 +253,28 @@
     });
 
     setQtyEnabled(false);
+
+    // ---- Add to Cart ----
+    addToCartBtn.addEventListener('click', () => {
+        if (!selectedSize) return;
+
+        fetch('{{ route('cart.add') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({
+                    product_id: {{ $product->id_product }},
+                    clothes_variant_id: selectedVariantId,
+                    quantity: parseInt(qtyInput.value, 10),
+                }),
+            })
+            .then(res => res.json())
+            .then(() => {
+                openCart();
+            });
+    });
 
     // ---- Gallery modal ----
     const galleryImages = [
