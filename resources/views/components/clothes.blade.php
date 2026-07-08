@@ -8,7 +8,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
             @forelse ($products as $product)
-                <a href="{{ route('product_detail.clothes', $product) }}"
+                <a href="{{ route('product_detail.clothes', $product->slug) }}"
                     class="group flex flex-col bg-black gap-4 p-5 rounded-2xl overflow-hidden border border-white/5 hover:border-white/15 hover:bg-black/80 transition-all duration-300">
                     <div class="w-full aspect-square overflow-hidden rounded-lg">
                         @if ($product->images->first())

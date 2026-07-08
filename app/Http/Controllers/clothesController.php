@@ -225,12 +225,14 @@ class clothesController extends Controller
             ->route('dashboard')
             ->with('success', 'Produk berhasil diperbarui.');
     }
-    
-    public function show(Product $product)
+
+    public function show(string $slug)
     {
-        $product->load(['images', 'clothes.variants']);
+        // Assume your table column for the slug is `slug`
+        $product = Product::where('slug', $slug)
+            ->with(['images', 'clothes.variants'])
+            ->firstOrFail();
 
         return view('pages.product_detail', compact('product'));
-        // sesuaikan nama view-nya dengan file kamu yang sebenarnya
     }
 }
