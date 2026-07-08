@@ -33,34 +33,43 @@ class homeController extends Controller
 
         return view('pages.home', compact('clothesProducts', 'accessoriesProducts', 'albumsProducts'));
     }
-    
+
     public function clothes()
     {
-        $products = product::clothesCategory()
+        $products = Product::clothesCategory()
             ->active()
             ->with(['images', 'clothes.variants'])
+            ->when(request('price_min'), fn($query, $min) => $query->where('price', '>=', $min))
+            ->when(request('price_max'), fn($query, $max) => $query->where('price', '<=', $max))
             ->latest()
-            ->paginate(12);
+            ->paginate(12)
+            ->withQueryString();
         return view('pages.clothes', compact('products'));
     }
-    
+
     public function accessoris()
     {
-        $products = product::accessoriesCategory()
+        $products = Product::accessoriesCategory()
             ->active()
             ->with('images')
+            ->when(request('price_min'), fn($query, $min) => $query->where('price', '>=', $min))
+            ->when(request('price_max'), fn($query, $max) => $query->where('price', '<=', $max))
             ->latest()
-            ->paginate(12);
+            ->paginate(12)
+            ->withQueryString();
         return view('pages.accessoris', compact('products'));
     }
-    
+
     public function albums()
     {
-        $products = product::albumsCategory()
+        $products = Product::albumsCategory()
             ->active()
             ->with('images')
+            ->when(request('price_min'), fn($query, $min) => $query->where('price', '>=', $min))
+            ->when(request('price_max'), fn($query, $max) => $query->where('price', '<=', $max))
             ->latest()
-            ->paginate(12);
+            ->paginate(12)
+            ->withQueryString();
         return view('pages.albums', compact('products'));
     }
 }
