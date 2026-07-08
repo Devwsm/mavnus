@@ -32,22 +32,22 @@ class product extends Model
         return $this->hasMany(ProductImage::class, 'product_id', 'id_product')->orderBy('sort_order');
     }
 
-    // Relasi: satu produk (kategori clothes) punya satu detail warna/material
+    // Relasi: satu produk (kategori cl othes) punya satu detail warna/material
     public function clothes()
     {
-        return $this->hasOne(Clothes::class, 'product_id', 'id_product');
+        return $this->hasOne(clothes::class, 'product_id', 'id_product');
     }
 
     // Relasi: satu produk (kategori accessoris) punya satu detail warna/material
     public function accessories()
     {
-        return $this->hasOne(Accessoris::class, 'product_id', 'id_product');
+        return $this->hasOne(accessoris::class, 'product_id', 'id_product');
     }
 
     // Relasi: satu produk (kategori albums) punya satu detail warna/material
     public function albums()
     {
-        return $this->hasOne(Albums::class, 'product_id', 'id_product');
+        return $this->hasOne(albums::class, 'product_id', 'id_product');
     }
 
 

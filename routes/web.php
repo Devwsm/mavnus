@@ -40,7 +40,7 @@ Route::prefix('/')->group(function () {
         Route::delete('/{cartItem}', [cartController::class, 'destroy'])->name('cart.destroy');
     });
 
-    Route::prefix('/clothes')->middleware('cekLogin')->group(function () {
+    Route::prefix('/clothes')->group(function () {
         Route::get('/', [homeController::class, 'clothes'])->name('clothes');
         Route::get('/{slug}', [clothesController::class, 'show'])->name('product_detail.clothes');
     });

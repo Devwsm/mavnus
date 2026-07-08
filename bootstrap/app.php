@@ -14,7 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         //
         $middleware->alias([
-            'cekLogin' => \App\Http\Middleware\CekLogin::class,
+            'cekLogin' => \App\Http\Middleware\cekLogin::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
