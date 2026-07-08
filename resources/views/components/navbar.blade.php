@@ -77,12 +77,12 @@
 
     <!-- ===================== Mobile Menu Backdrop ===================== -->
     <div id="menuBackdrop"
-        class="fixed inset-0 bg-black/50 z-[55] opacity-0 pointer-events-none transition-opacity duration-300">
+        class="fixed inset-0 bg-black/50 z-55 opacity-0 pointer-events-none transition-opacity duration-300">
     </div>
 
     <!-- ===================== Mobile Half-Screen Drawer (Burger) ===================== -->
     <div id="mobileMenu"
-        class="fixed top-0 left-0 h-full w-1/2 sm:w-2/5 bg-black text-white z-[60]
+        class="fixed top-0 left-0 h-full w-1/2 sm:w-2/5 bg-black text-white z-60
         flex flex-col items-start justify-center gap-7 px-8
         -translate-x-full transition-transform duration-300">
         <button id="closeBtn" class="absolute top-5 right-5 text-3xl">
