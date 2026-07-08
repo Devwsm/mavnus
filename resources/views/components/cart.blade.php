@@ -11,12 +11,12 @@
 
 {{-- Cart Drawer (half-screen, dari kanan) --}}
 <div id="cartDrawer"
-    class="fixed top-0 right-0 h-full w-3/4 md:w-1/2 sm:w-2/5 bg-black text-white z-80
+    class="fixed top-0 right-0 h-full w-3/4 md:w-1/2 bg-black text-white z-80
     flex flex-col translate-x-full transition-transform duration-300">
 
     <div class="flex items-center justify-between p-6 border-b border-white/10">
-        <h2 class="text-lg font-bold uppercase tracking-wide">Cart</h2>
-        <button id="cartCloseBtn" class="text-2xl">
+        <h2 class="text-xl font-bold uppercase tracking-wide">Cart</h2>
+        <button id="cartCloseBtn" class="text-3xl">
             <i class="bi bi-x"></i>
         </button>
     </div>
@@ -75,24 +75,24 @@
             }
 
             cartItemsWrapper.innerHTML = data.items.map(item => `
-                <div class="flex gap-3">
-                    <div class="w-16 h-16 rounded-lg overflow-hidden bg-[#0D0D0D] shrink-0 flex items-center justify-center">
-                        ${item.image ? `<img src="${item.image}" class="w-full h-full object-cover object-center">` : `<i class="bi bi-image text-white/20"></i>`}
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="w-20 h-20 rounded-lg overflow-hidden bg-[#0D0D0D] shrink-0 flex items-center justify-center">
+                        ${item.image ? `<img src="${item.image}" class="w-full h-full object-cover object-center">` : `<i class="bi bi-image text-white/20 text-xl"></i>`}
                     </div>
-                    <div class="flex flex-col flex-1 gap-1">
-                        <span class="text-sm font-semibold">${item.name}</span>
-                        ${item.size ? `<span class="text-xs text-white/40">Size: ${item.size}</span>` : ''}
+                    <div class="flex flex-col flex-1 gap-1.5">
+                        <span class="text-base font-semibold">${item.name}</span>
+                        ${item.size ? `<span class="text-sm text-white/40">Size: ${item.size}</span>` : ''}
                         <div class="flex items-center justify-between mt-1">
-                            <div class="flex items-center gap-2 border border-white/10 rounded-lg">
-                                <button onclick="changeQty(${item.id}, ${item.quantity - 1})" class="px-2 py-1 text-white/60 hover:text-white">-</button>
-                                <span class="text-sm">${item.quantity}</span>
-                                <button onclick="changeQty(${item.id}, ${item.quantity + 1})" ${item.quantity >= item.max ? 'disabled' : ''} class="px-2 py-1 text-white/60 hover:text-white disabled:opacity-30">+</button>
+                            <div class="flex items-center gap-3 border border-white/10 rounded-lg">
+                                <button onclick="changeQty(${item.id}, ${item.quantity - 1})" class="px-3 py-1.5 text-white/60 hover:text-white text-lg">-</button>
+                                <span class="text-base">${item.quantity}</span>
+                                <button onclick="changeQty(${item.id}, ${item.quantity + 1})" ${item.quantity >= item.max ? 'disabled' : ''} class="px-3 py-1.5 text-white/60 hover:text-white text-lg disabled:opacity-30">+</button>
                             </div>
-                            <button onclick="removeCartItem(${item.id})" class="text-white/40 hover:text-[#B71C1C] text-sm">
+                            <button onclick="removeCartItem(${item.id})" class="text-white/40 hover:text-[#B71C1C] text-base">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </div>
-                        <span class="text-xs text-white/50">${item.subtotal}</span>
+                        <span class="text-sm text-white/50">${item.subtotal}</span>
                     </div>
                 </div>
             `).join('');
