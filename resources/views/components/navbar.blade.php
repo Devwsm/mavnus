@@ -65,19 +65,24 @@
         -translate-y-full opacity-0 transition-all duration-300">
         <div class="flex items-center gap-3 bg-white/10 rounded-full px-4 py-2 lg:max-w-md lg:mx-auto">
             <i class="bi bi-search text-lg"></i>
-            <input type="text" placeholder="Clothes, Accessoris, albums....."
-                class="bg-transparent outline-none placeholder-white/70 text-white w-full text-sm">
+            <input id="searchInput" type="text" placeholder="Clothes, Accessoris, albums....."
+                class="bg-transparent outline-none placeholder-white/70 text-white w-full text-sm" autocomplete="off">
+        </div>
+
+        {{-- Hasil pencarian --}}
+        <div id="searchResults"
+            class="hidden lg:max-w-md lg:mx-auto mt-2 bg-[#0D0D0D] border border-white/10 rounded-xl overflow-hidden max-h-80 overflow-y-auto">
         </div>
     </div>
 
     <!-- ===================== Mobile Menu Backdrop ===================== -->
     <div id="menuBackdrop"
-        class="fixed inset-0 bg-black/50 z-55 opacity-0 pointer-events-none transition-opacity duration-300">
+        class="fixed inset-0 bg-black/50 z-[55] opacity-0 pointer-events-none transition-opacity duration-300">
     </div>
 
     <!-- ===================== Mobile Half-Screen Drawer (Burger) ===================== -->
     <div id="mobileMenu"
-        class="fixed top-0 left-0 h-full w-1/2 sm:w-2/5 bg-black text-white z-60
+        class="fixed top-0 left-0 h-full w-1/2 sm:w-2/5 bg-black text-white z-[60]
         flex flex-col items-start justify-center gap-7 px-8
         -translate-x-full transition-transform duration-300">
         <button id="closeBtn" class="absolute top-5 right-5 text-3xl">
@@ -167,6 +172,7 @@
             searchBar.classList.remove("-translate-y-full", "opacity-0");
         } else {
             searchBar.classList.add("-translate-y-full", "opacity-0");
+            searchResults.classList.add("hidden");
         }
     }
 
@@ -174,4 +180,81 @@
         btn.addEventListener("click", toggleSearchBar);
     });
     window.addEventListener("resize", positionSearchBar);
+
+    // ---------- Live Search ----------
+    const searchInput = document.getElementById("searchInput");
+    const searchResults = document.getElementById("searchResults");
+    let searchTimeout = null;
+
+    searchInput.addEventListener("input", () => {
+        const query = searchInput.value.trim();
+
+        clearTimeout(searchTimeout);
+
+        if (query.length < 2) {
+            searchResults.classList.add("hidden");
+            searchResults.innerHTML = "";
+            return;
+        }
+
+        // Debounce 300ms, biar gak fetch tiap ketukan huruf
+        searchTimeout = setTimeout(() => {
+            fetch(`{{ route('search') }}?q=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(data => renderSearchResults(data.results))
+                .catch(() => {
+                    searchResults.innerHTML =
+                        `<p class="text-white/40 text-sm p-4">Terjadi kesalahan, coba lagi.</p>`;
+                    searchResults.classList.remove("hidden");
+                });
+        }, 300);
+    });
+
+    function renderSearchResults(results) {
+        if (results.length === 0) {
+            searchResults.innerHTML = `<p class="text-white/40 text-sm p-4">Produk tidak ditemukan.</p>`;
+            searchResults.classList.remove("hidden");
+            return;
+        }
+
+        searchResults.innerHTML = results.map(item => `
+            <a href="${item.url}" class="flex items-center gap-3 p-3 hover:bg-white/5 transition border-b border-white/5 last:border-0">
+                <div class="w-12 h-12 rounded-md overflow-hidden bg-black shrink-0 flex items-center justify-center">
+                    ${item.image
+                        ? `<img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover object-center">`
+                        : `<i class="bi bi-image text-white/20"></i>`
+                    }
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-sm font-semibold text-white">${item.name}</span>
+                    <span class="text-xs text-white/40">${item.category} · ${item.price}</span>
+                </div>
+            </a>
+        `).join('');
+
+        searchResults.classList.remove("hidden");
+    }
+
+    // Klik di luar search bar → sembunyikan hasil
+    document.addEventListener("click", (e) => {
+        if (!searchBar.contains(e.target) && !e.target.closest(".search-toggle-btn")) {
+            searchResults.classList.add("hidden");
+        }
+    });
+
+    // Tutup search bar sepenuhnya + reset input
+    function closeSearchBar() {
+        searchOpen = false;
+        searchBar.classList.add("-translate-y-full", "opacity-0");
+        searchResults.classList.add("hidden");
+        searchResults.innerHTML = "";
+        searchInput.value = "";
+    }
+
+    // Klik di luar search bar → tutup search bar & reset
+    document.addEventListener("click", (e) => {
+        if (searchOpen && !searchBar.contains(e.target) && !e.target.closest(".search-toggle-btn")) {
+            closeSearchBar();
+        }
+    });
 </script>

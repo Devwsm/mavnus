@@ -4,6 +4,7 @@ use App\Http\Controllers\clothesController;
 use App\Http\Controllers\dashboardController;
 use App\Http\Controllers\homeController;
 use App\Http\Controllers\loginController;
+use App\Http\Controllers\searchController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -29,6 +30,8 @@ Route::prefix('/dashboard')->middleware('cekLogin')->group(function () {
 
 Route::prefix('/')->group(function () {
     Route::get('/', [homeController::class, 'home'])->name('home');
+    Route::get('/search', [searchController::class, 'search'])->name('search');
+
     Route::prefix('/clothes')->middleware('cekLogin')->group(function () {
         Route::get('/', [homeController::class, 'clothes'])->name('clothes');
         Route::get('/{slug}', [clothesController::class, 'show'])->name('product_detail.clothes');
