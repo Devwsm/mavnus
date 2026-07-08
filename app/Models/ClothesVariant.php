@@ -20,6 +20,6 @@ class ClothesVariant extends Model
 
     public function clothes()
     {
-        return $this->belongsTo(Clothes::class, 'clothes_id', 'id_clothes');
+        return $this->belongsTo(clothes::class, 'clothes_id', 'id_clothes');
     }
 }
