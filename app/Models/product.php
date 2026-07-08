@@ -38,7 +38,18 @@ class product extends Model
         return $this->hasOne(Clothes::class, 'product_id', 'id_product');
     }
 
+    public function accessories()
+    {
+        return $this->hasOne(Accessoris::class, 'product_id', 'id_product');
+    }
+
+    public function albums()
+    {
+        return $this->hasOne(Albums::class, 'product_id', 'id_product');
+    }
+
     
+
     // Sync status
     public function syncActiveStatus(): void
     {
@@ -60,7 +71,7 @@ class product extends Model
     {
         return $query->where('category', 'clothes');
     }
-    
+
     // Accessor: format harga jadi "Rp250.000", dipanggil lewat $product->formatted_price
     public function getFormattedPriceAttribute(): string
     {
