@@ -225,4 +225,12 @@ class clothesController extends Controller
             ->route('dashboard')
             ->with('success', 'Produk berhasil diperbarui.');
     }
+    
+    public function show(Product $product)
+    {
+        $product->load(['images', 'clothes.variants']);
+
+        return view('pages.product_detail', compact('product'));
+        // sesuaikan nama view-nya dengan file kamu yang sebenarnya
+    }
 }

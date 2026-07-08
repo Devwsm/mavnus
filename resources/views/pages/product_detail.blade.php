@@ -5,7 +5,7 @@
             @include('components/navbar')
         </div>
         <div class="relative flex flex-col justify-center items-center w-full h-full">>
-            @include('components/product_detail')
+            @include('components/product-detail')
         </div>
         @include('components/footer')
     </div>

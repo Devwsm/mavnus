@@ -24,6 +24,7 @@ Route::prefix('/dashboard')->middleware('cekLogin')->group(function () {
         Route::post('/store', [clothesController::class, 'store'])->name('clothes.store');
         Route::delete('/{product}', [clothesController::class, 'destroy'])->name('clothes.destroy');
         Route::put('/{product}', [clothesController::class, 'update'])->name('clothes.update');
+        Route::get('/{product}', [clothesController::class, 'show'])->name('product_detail.clothes');
     });
 });
 
@@ -32,5 +33,4 @@ Route::prefix('/')->group(function () {
     Route::get('/clothes', [homeController::class, 'clothes'])->name('clothes');
     Route::get('/accessoris', [homeController::class, 'accessoris'])->name('accessoris');
     Route::get('/albums', [homeController::class, 'albums'])->name('albums');
-    Route::get('/product_detail', [homeController::class, 'product_detail'])->name('product_detail');
 });
