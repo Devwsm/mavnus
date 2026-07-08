@@ -16,8 +16,24 @@ class homeController extends Controller
             ->latest()                // urutkan dari produk terbaru ditambahkan
             ->take(4)                 // batasi cuma 4 produk (sesuai slot grid di landing page)
             ->get();                  // eksekusi query, hasilnya disimpan ke variable
-        return view('pages.home', compact('clothesProducts'));
+
+        $accessoriesProducts = product::accessoriesCategory()
+            ->active()
+            ->with('images')
+            ->latest()
+            ->take(4)
+            ->get();
+
+        $albumsProducts = product::albumsCategory()
+            ->active()
+            ->with('images')
+            ->latest()
+            ->take(4)
+            ->get();
+
+        return view('pages.home', compact('clothesProducts', 'accessoriesProducts', 'albumsProducts'));
     }
+    
     public function clothes()
     {
         $products = product::clothesCategory()
@@ -27,12 +43,24 @@ class homeController extends Controller
             ->paginate(12);
         return view('pages.clothes', compact('products'));
     }
+    
     public function accessoris()
     {
-        return view('pages.accessoris');
+        $products = product::accessoriesCategory()
+            ->active()
+            ->with('images')
+            ->latest()
+            ->paginate(12);
+        return view('pages.accessoris', compact('products'));
     }
+    
     public function albums()
     {
-        return view('pages.albums');
+        $products = product::albumsCategory()
+            ->active()
+            ->with('images')
+            ->latest()
+            ->paginate(12);
+        return view('pages.albums', compact('products'));
     }
 }

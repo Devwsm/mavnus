@@ -48,7 +48,7 @@ class product extends Model
         return $this->hasOne(Albums::class, 'product_id', 'id_product');
     }
 
-    
+
 
     // Sync status
     public function syncActiveStatus(): void
@@ -70,6 +70,16 @@ class product extends Model
     public function scopeClothesCategory($query)
     {
         return $query->where('category', 'clothes');
+    }
+
+    public function scopeAccessoriesCategory($query)
+    {
+        return $query->where('category', 'accessories');
+    }
+
+    public function scopeAlbumsCategory($query)
+    {
+        return $query->where('category', 'album');
     }
 
     // Accessor: format harga jadi "Rp250.000", dipanggil lewat $product->formatted_price
