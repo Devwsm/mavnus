@@ -1,24 +1,49 @@
 {{-- desktop --}}
 <div class="nav z-50 fixed bottom-5 left-1/2 -translate-x-1/2 hidden lg:flex gap-2">
     <div class="flex justify-center items-center p-6 rounded-lg bg-[#0D0D0D] shrink-0">
-        <a href="{{ route('dashboard') }}" class="text-white text-[2rem]">
+        <a href="{{ route('dashboard') }}"
+            class="group relative text-white/70 hover:text-white text-[2rem] transition {{ request()->routeIs('dashboard') ? 'text-[#B71C1C]' : '' }}">
             <i class="bi bi-house-door-fill"></i>
+            <span
+                class="absolute -top-9 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition">
+                Dashboard
+            </span>
         </a>
     </div>
     <div class="flex justify-center items-center gap-4 p-6 rounded-lg bg-[#0D0D0D] shrink-0">
-        <a href="{{ route('dashboard.clothes') }}" class="text-white text-[2rem]">
+        <a href="{{ route('dashboard.clothes') }}"
+            class="group relative text-white/70 hover:text-white text-[2rem] transition {{ request()->routeIs('dashboard.clothes') ? 'text-[#B71C1C]' : '' }}">
             <i class="bi bi-bag-fill"></i>
+            <span
+                class="absolute -top-9 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition">
+                Clothes
+            </span>
         </a>
-        <a href="{{ route('dashboard') }}" class="text-white text-[2rem]">
-            <i class="bi bi-smartwatch"></i>
+        <a href="{{ route('dashboard') }}"
+            class="group relative text-white/70 hover:text-white text-[2rem] transition {{ request()->routeIs('dashboard.accessories') ? 'text-[#B71C1C]' : '' }}">
+            <i class="bi bi-gem"></i>
+            <span
+                class="absolute -top-9 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition">
+                Accessories
+            </span>
         </a>
-        <a href="{{ route('dashboard') }}" class="text-white text-[2rem]">
+        <a href="{{ route('dashboard') }}"
+            class="group relative text-white/70 hover:text-white text-[2rem] transition {{ request()->routeIs('dashboard.albums') ? 'text-[#B71C1C]' : '' }}">
             <i class="bi bi-disc-fill"></i>
+            <span
+                class="absolute -top-9 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition">
+                Albums
+            </span>
         </a>
     </div>
     <div class="flex justify-center items-center p-6 rounded-lg bg-[#0D0D0D] shrink-0">
-        <a href="{{ route('logout') }}" class="text-[#B71C1C] hover:text-[#891212] text-[2rem]">
-            <i class="bi bi-box-arrow-right font-bold"></i>
+        <a href="{{ route('logout') }}"
+            class="group relative text-[#B71C1C] hover:text-[#891212] text-[2rem] transition">
+            <i class="bi bi-box-arrow-right"></i>
+            <span
+                class="absolute -top-9 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition">
+                Logout
+            </span>
         </a>
     </div>
 </div>
@@ -43,20 +68,29 @@
     flex flex-col items-center justify-center gap-8 border-r-gray-200
     translate-x-full transition-transform duration-300 lg:hidden">
 
-    <a href="{{ route('dashboard') }}" class="flex items-center text-white">
+    <a href="{{ route('dashboard') }}"
+        class="flex flex-col items-center gap-1.5 {{ request()->routeIs('dashboard') ? 'text-[#B71C1C]' : 'text-white' }}">
         <i class="bi bi-house-door-fill text-3xl"></i>
+        <span class="text-[10px] font-semibold uppercase tracking-wide">Dashboard</span>
     </a>
-    <a href="{{ route('dashboard.clothes') }}" class="flex items-center text-white">
+    <a href="{{ route('dashboard.clothes') }}"
+        class="flex flex-col items-center gap-1.5 {{ request()->routeIs('dashboard.clothes') ? 'text-[#B71C1C]' : 'text-white' }}">
         <i class="bi bi-bag-fill text-3xl"></i>
+        <span class="text-[10px] font-semibold uppercase tracking-wide">Clothes</span>
     </a>
-    <a href="{{ route('dashboard') }}" class="flex items-center text-white">
-        <i class="bi bi-smartwatch text-3xl"></i>
+    <a href="{{ route('dashboard') }}"
+        class="flex flex-col items-center gap-1.5 {{ request()->routeIs('dashboard.accessories') ? 'text-[#B71C1C]' : 'text-white' }}">
+        <i class="bi bi-gem text-3xl"></i>
+        <span class="text-[10px] font-semibold uppercase tracking-wide">Accessories</span>
     </a>
-    <a href="{{ route('dashboard') }}" class="flex items-center text-white">
+    <a href="{{ route('dashboard') }}"
+        class="flex flex-col items-center gap-1.5 {{ request()->routeIs('dashboard.albums') ? 'text-[#B71C1C]' : 'text-white' }}">
         <i class="bi bi-disc-fill text-3xl"></i>
+        <span class="text-[10px] font-semibold uppercase tracking-wide">Albums</span>
     </a>
-    <a href="{{ route('logout') }}" class="flex items-center text-[#B71C1C] hover:text-[#891212]">
-        <i class="bi bi-box-arrow-right font-bold text-3xl"></i>
+    <a href="{{ route('logout') }}" class="flex flex-col items-center gap-1.5 text-[#B71C1C] hover:text-[#891212]">
+        <i class="bi bi-box-arrow-right text-3xl"></i>
+        <span class="text-[10px] font-semibold uppercase tracking-wide">Logout</span>
     </a>
 
     <button id="dashCloseBtn"
