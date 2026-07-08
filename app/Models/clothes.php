@@ -8,9 +8,7 @@ class clothes extends Model
 {
     //
     protected $table = 'clothes';
-
     protected $primaryKey = 'id_clothes';
-
     protected $fillable = [
         'product_id',
         'color',

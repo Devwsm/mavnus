@@ -8,7 +8,6 @@ class ClothesVariant extends Model
 {
     //
     protected $primaryKey = 'id_clothes_variant';
-
     protected $fillable = [
         'clothes_id',
         'size',

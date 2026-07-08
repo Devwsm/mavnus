@@ -38,16 +38,17 @@ class product extends Model
         return $this->hasOne(Clothes::class, 'product_id', 'id_product');
     }
 
+    // Relasi: satu produk (kategori accessoris) punya satu detail warna/material
     public function accessories()
     {
         return $this->hasOne(Accessoris::class, 'product_id', 'id_product');
     }
 
+    // Relasi: satu produk (kategori albums) punya satu detail warna/material
     public function albums()
     {
         return $this->hasOne(Albums::class, 'product_id', 'id_product');
     }
-
 
 
     // Sync status
@@ -72,11 +73,13 @@ class product extends Model
         return $query->where('category', 'clothes');
     }
 
+    // Scope: filter produk yang kategorinya "accessoris" saja
     public function scopeAccessoriesCategory($query)
     {
         return $query->where('category', 'accessories');
     }
 
+    // Scope: filter produk yang kategorinya "albums" saja
     public function scopeAlbumsCategory($query)
     {
         return $query->where('category', 'album');
