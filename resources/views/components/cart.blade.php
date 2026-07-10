@@ -45,6 +45,8 @@
         const cartItemsWrapper = document.getElementById('cartItemsWrapper');
         const cartTotal = document.getElementById('cartTotal');
 
+        let cartRequestInProgress = false;
+
         function openCart() {
             fetchCart();
             cartDrawer.classList.remove('translate-x-full');
@@ -84,11 +86,11 @@
                         ${item.size ? `<span class="text-sm text-white/40">Size: ${item.size}</span>` : ''}
                         <div class="flex items-center justify-between mt-1">
                             <div class="flex items-center gap-3 border border-white/10 rounded-lg">
-                                <button onclick="changeQty(${item.id}, ${item.quantity - 1})" class="px-3 py-1.5 text-white/60 hover:text-white text-lg">-</button>
+                                <button onclick="changeQty(${item.id}, ${item.quantity - 1})" class="px-3 py-1.5 text-white/60 hover:text-white text-lg disabled:opacity-30">-</button>
                                 <span class="text-base">${item.quantity}</span>
                                 <button onclick="changeQty(${item.id}, ${item.quantity + 1})" ${item.quantity >= item.max ? 'disabled' : ''} class="px-3 py-1.5 text-white/60 hover:text-white text-lg disabled:opacity-30">+</button>
                             </div>
-                            <button onclick="removeCartItem(${item.id})" class="text-white/40 hover:text-[#B71C1C] text-base">
+                            <button onclick="removeCartItem(${item.id})" class="text-white/40 hover:text-[#B71C1C] text-base disabled:opacity-30">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </div>
@@ -99,10 +101,15 @@
         }
 
         function changeQty(id, quantity) {
+            if (cartRequestInProgress) return;
+
             if (quantity < 1) {
                 removeCartItem(id);
                 return;
             }
+
+            cartRequestInProgress = true;
+            setCartButtonsDisabled(true);
 
             fetch(`/cart/${id}`, {
                     method: 'PATCH',
@@ -115,10 +122,18 @@
                     }),
                 })
                 .then(res => res.json())
-                .then(renderCart);
+                .then(renderCart)
+                .finally(() => {
+                    cartRequestInProgress = false;
+                });
         }
 
         function removeCartItem(id) {
+            if (cartRequestInProgress) return;
+
+            cartRequestInProgress = true;
+            setCartButtonsDisabled(true);
+
             fetch(`/cart/${id}`, {
                     method: 'DELETE',
                     headers: {
@@ -126,7 +141,17 @@
                     },
                 })
                 .then(res => res.json())
-                .then(renderCart);
+                .then(renderCart)
+                .finally(() => {
+                    cartRequestInProgress = false;
+                });
+        }
+
+        function setCartButtonsDisabled(disabled) {
+            cartItemsWrapper.querySelectorAll('button').forEach(btn => {
+                btn.disabled = disabled;
+                btn.classList.toggle('opacity-40', disabled);
+            });
         }
 
         function updateCartBadge(count) {
