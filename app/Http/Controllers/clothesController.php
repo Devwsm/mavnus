@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CartItem;
 use App\Models\product;
 use App\Models\clothes;
 use App\Models\ClothesVariant;
@@ -123,12 +124,13 @@ class clothesController extends Controller
     public function destroy(Product $product)
     {
         DB::transaction(function () use ($product) {
-            // hapus file fisik tiap foto dari storage
             foreach ($product->images as $image) {
                 Storage::disk('public')->delete($image->image_path);
             }
-            // hapus produk — clothes, variants, dan product_images
-            // ikut terhapus otomatis lewat cascadeOnDelete() di migration
+
+            // Hapus cart_items terkait produk ini juga, bukan cuma andalkan cascade
+            CartItem::where('product_id', $product->id_product)->delete();
+
             $product->delete();
         });
 
@@ -182,8 +184,11 @@ class clothesController extends Controller
             ]);
 
             // 3. Ganti semua variant lama dengan yang baru
-            //    (lebih aman daripada update satu-satu, karena staff bisa saja
-            //    menghapus/menambah baris size di form)
+            // Hapus cart_items yang menunjuk ke variant lama SEBELUM variant-nya dihapus,
+            // karena stok/size yang lama sudah tidak valid lagi setelah update.
+            $oldVariantIds = $product->clothes->variants()->pluck('id_clothes_variant');
+            CartItem::whereIn('clothes_variant_id', $oldVariantIds)->delete();
+
             $product->clothes->variants()->delete();
 
             foreach ($validated['variants'] as $variant) {
@@ -203,11 +208,8 @@ class clothesController extends Controller
                     $folder   = 'products/clothes';
 
                     Storage::disk('public')->makeDirectory($folder);
-
                     $encoded = Image::decode($file)->encode(new WebpEncoder(quality: 80));
-
                     Storage::disk('public')->put("{$folder}/{$filename}", (string) $encoded);
-
                     ProductImage::create([
                         'product_id' => $product->id_product,
                         'image_path' => "{$folder}/{$filename}",
