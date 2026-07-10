@@ -22,7 +22,7 @@
                     <div class="flex gap-4">
                         @foreach ($product->images->skip(1) as $index => $image)
                             <button type="button"
-                                onclick="document.getElementById('mainImage').src = '{{ Storage::url($image->image_path) }}'; openGallery({{ $index }})"
+                                onclick="openGallery({{ $index }})"
                                 class="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden border border-transparent hover:border-gray-400">
                                 <img src="{{ Storage::url($image->image_path) }}" alt="{{ $product->name }}"
                                     class="absolute inset-0 w-full h-full object-contain" />
