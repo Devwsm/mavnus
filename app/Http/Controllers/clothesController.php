@@ -154,6 +154,9 @@ class clothesController extends Controller
 
             'images'               => 'nullable|array',
             'images.*'             => 'image|max:5120',
+
+            'delete_images'        => 'nullable|array',
+            'delete_images.*'      => 'integer|exists:product_images,id_product_image',
         ], [
             'name.required'         => 'Nama produk wajib diisi.',
             'price.required'        => 'Harga wajib diisi.',
@@ -184,8 +187,6 @@ class clothesController extends Controller
             ]);
 
             // 3. Ganti semua variant lama dengan yang baru
-            // Hapus cart_items yang menunjuk ke variant lama SEBELUM variant-nya dihapus,
-            // karena stok/size yang lama sudah tidak valid lagi setelah update.
             $oldVariantIds = $product->clothes->variants()->pluck('id_clothes_variant');
             CartItem::whereIn('clothes_variant_id', $oldVariantIds)->delete();
 
@@ -199,9 +200,21 @@ class clothesController extends Controller
                 ]);
             }
 
-            // 4. Kalau ada foto baru diupload, tambahkan (foto lama tetap ada)
+            // 4. Hapus foto yang ditandai untuk dihapus (file fisik + record database)
+            if (!empty($validated['delete_images'])) {
+                $imagesToDelete = ProductImage::whereIn('id_product_image', $validated['delete_images'])
+                    ->where('product_id', $product->id_product)
+                    ->get();
+
+                foreach ($imagesToDelete as $image) {
+                    Storage::disk('public')->delete($image->image_path);
+                    $image->delete();
+                }
+            }
+
+            // 5. Kalau ada foto baru diupload, tambahkan
             if ($request->hasFile('images')) {
-                $startOrder = $product->images()->max('sort_order') + 1;
+                $startOrder = ($product->images()->max('sort_order') ?? -1) + 1;
 
                 foreach ($request->file('images') as $index => $file) {
                     $filename = Str::uuid() . '.webp';
@@ -218,7 +231,7 @@ class clothesController extends Controller
                 }
             }
 
-            // 5. Hitung ulang status berdasarkan stok terbaru
+            // 6. Hitung ulang status berdasarkan stok terbaru
             $product->load('clothes.variants');
             $product->syncActiveStatus();
         });
@@ -227,7 +240,7 @@ class clothesController extends Controller
             ->route('dashboard')
             ->with('success', 'Produk berhasil diperbarui.');
     }
-
+    
     public function show(string $slug)
     {
         // Assume your table column for the slug is `slug`

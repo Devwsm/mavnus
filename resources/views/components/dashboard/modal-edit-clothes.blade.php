@@ -22,8 +22,8 @@
             </button>
         </div>
 
-        <form action="{{ route('clothes.update', $product) }}" method="POST" enctype="multipart/form-data"
-            class="flex flex-col gap-6 p-6">
+        <form id="editForm-{{ $editId }}" action="{{ route('clothes.update', $product) }}" method="POST"
+            enctype="multipart/form-data" class="flex flex-col gap-6 p-6">
             @csrf
             @method('PUT')
 
@@ -102,19 +102,29 @@
                 {{-- Foto --}}
                 <div class="flex flex-col gap-4">
                     <h3 class="text-xs font-semibold uppercase tracking-widest text-[#B71C1C]">Foto Saat Ini</h3>
-                    <div class="flex flex-wrap gap-2">
+                    <div id="existingImages-{{ $editId }}" class="flex flex-wrap gap-2">
                         @foreach ($product->images as $image)
-                            <div class="w-14 h-14 rounded-md overflow-hidden border border-white/10">
+                            <div class="existing-image-{{ $editId }} relative w-14 h-14 rounded-md overflow-hidden border border-white/10"
+                                data-image-id="{{ $image->id_product_image }}">
                                 <img src="{{ Storage::url($image->image_path) }}" alt="{{ $product->name }}"
                                     class="w-full h-full object-cover object-center">
+                                <button type="button"
+                                    onclick="removeExistingImage(this, '{{ $editId }}', {{ $image->id_product_image }})"
+                                    class="absolute -top-1 -right-1 bg-[#B71C1C] hover:bg-[#891212] text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
+                                    <i class="bi bi-x"></i>
+                                </button>
                             </div>
                         @endforeach
                     </div>
 
+                    <div id="deleteImagesInputs-{{ $editId }}"></div>
+
                     <div>
                         <label class="block text-sm font-semibold mb-1.5 text-white">Tambah Foto Baru (opsional)</label>
-                        <input type="file" name="images[]" multiple accept="image/*"
+                        <input type="file" id="editInputImages-{{ $editId }}" name="images[]" multiple
+                            accept="image/*"
                             class="w-full bg-black border border-white/10 rounded-lg px-4 py-2.5 text-white file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-[#B71C1C] file:text-white file:text-sm file:font-semibold">
+                        <div id="editImageThumbs-{{ $editId }}" class="flex gap-2 flex-wrap mt-2"></div>
                     </div>
                 </div>
             </div>
@@ -141,6 +151,7 @@
             modal.classList.toggle('flex', show);
         }
 
+        // ---- Ukuran & Stok ----
         function removeEditVariantRow(button, editId) {
             const rows = document.querySelectorAll('.variant-row-' + editId);
             if (rows.length <= 1) {
@@ -179,7 +190,6 @@
             if (rows.length > 0) {
                 newRow = rows[0].cloneNode(true);
             } else {
-                // Container kosong total (semua baris sempat dihapus) — bikin dari template.
                 newRow = document.createElement('div');
                 newRow.className = 'variant-row-' + editId + ' flex items-center gap-3';
                 newRow.innerHTML = `
@@ -225,5 +235,95 @@
                 });
             });
         }
+
+        // ---- Foto ----
+        const editSelectedFiles = {}; // { editId: [file, file, ...] }
+
+        function initEditImageHandlers(editId) {
+            editSelectedFiles[editId] = [];
+
+            const inputImages = document.getElementById('editInputImages-' + editId);
+            if (!inputImages) return;
+
+            inputImages.addEventListener('change', () => {
+                const newFiles = Array.from(inputImages.files);
+                editSelectedFiles[editId] = editSelectedFiles[editId].concat(newFiles);
+                syncEditInputFiles(editId);
+                renderEditImagePreview(editId);
+            });
+        }
+
+        function renderEditImagePreview(editId) {
+            const thumbsWrapper = document.getElementById('editImageThumbs-' + editId);
+            thumbsWrapper.innerHTML = '';
+
+            editSelectedFiles[editId].forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'relative';
+                    wrapper.innerHTML = `
+                        <img src="${e.target.result}" class="w-14 h-14 object-cover rounded-md border border-white/10">
+                        <button type="button"
+                            class="absolute -top-1 -right-1 bg-[#B71C1C] hover:bg-[#891212] text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    `;
+                    thumbsWrapper.appendChild(wrapper);
+
+                    wrapper.querySelector('button').addEventListener('click', () => {
+                        editSelectedFiles[editId].splice(index, 1);
+                        syncEditInputFiles(editId);
+                        renderEditImagePreview(editId);
+                    });
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function syncEditInputFiles(editId) {
+            const inputImages = document.getElementById('editInputImages-' + editId);
+            const dataTransfer = new DataTransfer();
+            editSelectedFiles[editId].forEach(file => dataTransfer.items.add(file));
+            inputImages.files = dataTransfer.files;
+        }
+
+        function removeExistingImage(button, editId, imageId) {
+            const wrapper = button.closest('.existing-image-' + editId);
+            wrapper.remove();
+
+            const hiddenInputsContainer = document.getElementById('deleteImagesInputs-' + editId);
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'delete_images[]';
+            hiddenInput.value = imageId;
+            hiddenInputsContainer.appendChild(hiddenInput);
+        }
+
+        function getRemainingImageCount(editId) {
+            const existingCount = document.querySelectorAll('.existing-image-' + editId).length;
+            const newCount = editSelectedFiles[editId] ? editSelectedFiles[editId].length : 0;
+            return existingCount + newCount;
+        }
+
+        // ---- Init semua modal edit yang ada di halaman ----
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[id^="editForm-editModal-"]').forEach(form => {
+                const editId = form.id.replace('editForm-', '');
+                initEditImageHandlers(editId);
+
+                form.addEventListener('submit', (e) => {
+                    if (getRemainingImageCount(editId) < 1) {
+                        e.preventDefault();
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Foto tidak boleh kosong',
+                            text: 'Produk harus punya minimal 1 foto. Tambahkan foto baru atau jangan hapus semua foto lama.',
+                            confirmButtonColor: '#B77B1C ',
+                        });
+                    }
+                });
+            });
+        });
     </script>
 @endonce
