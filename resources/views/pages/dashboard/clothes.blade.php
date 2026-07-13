@@ -14,8 +14,7 @@
                 <form action="{{ route('clothes.store') }}" method="POST" enctype="multipart/form-data"
                     class="flex flex-col gap-6">
                     @csrf
-                    @include('components/errors/errors')
-                    @include('components/errors/success')
+                    @include('components/errors/alerts')
                     {{-- Data Dasar --}}
                     <div class="flex flex-col gap-4 bg-[#0D0D0D] border border-white/10 rounded-xl p-6">
                         <h2 class="text-xs font-semibold uppercase tracking-widest text-[#B71C1C]">Data Dasar</h2>
@@ -238,7 +237,12 @@
             const nextSize = getNextAvailableSize(null);
 
             if (!nextSize) {
-                alert('Semua ukuran (S, M, L, XL) sudah dipilih. Tidak ada ukuran tersisa untuk ditambahkan.');
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Semua ukuran sudah dipilih',
+                    text: 'Ukuran S, M, L, XL sudah semuanya dipakai. Tidak ada ukuran tersisa untuk ditambahkan.',
+                    confirmButtonColor: '#1C1CB7 ',
+                });
                 return;
             }
 
@@ -256,7 +260,7 @@
             bindVariantRow(newRow);
             updateSizeAvailability();
         });
-        
+
         // ---- Image preview (akumulatif, bisa ditambah satu-satu) ----
         const inputImages = document.getElementById('inputImages');
         const previewImage = document.getElementById('previewImage');

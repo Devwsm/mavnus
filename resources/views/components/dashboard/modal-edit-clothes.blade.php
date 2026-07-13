@@ -144,7 +144,12 @@
         function removeEditVariantRow(button, editId) {
             const rows = document.querySelectorAll('.variant-row-' + editId);
             if (rows.length <= 1) {
-                alert('Minimal harus ada satu ukuran & stok.');
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Tidak bisa dihapus',
+                    text: 'Minimal harus ada satu ukuran & stok.',
+                    confirmButtonColor: '#1C1CB7',
+                });
                 return;
             }
             button.closest('.variant-row-' + editId).remove();
@@ -159,7 +164,12 @@
             const nextSize = allSizes.find(size => !usedSizes.includes(size));
 
             if (!nextSize) {
-                alert('Semua ukuran (S, M, L, XL) sudah dipilih.');
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Semua ukuran sudah dipilih',
+                    text: 'Ukuran S, M, L, XL sudah semuanya dipakai. Tidak ada ukuran tersisa untuk ditambahkan.',
+                    confirmButtonColor: '#1C1CB7',
+                });
                 return;
             }
 

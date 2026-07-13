@@ -19,8 +19,7 @@
                 </a>
             </div>
             <div class="flex flex-col w-full">
-                @include('components/errors/errors')
-                @include('components/errors/success')
+                @include('components/errors/alerts')
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">

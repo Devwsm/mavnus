@@ -19,8 +19,7 @@
             <div class="px-8 pt-6 pb-8">
                 <form action="#" method="POST" class="space-y-4">
                     @csrf
-                    @include('components/errors/errors')
-                    @include('components/errors/success')
+                    @include('components/errors/alerts')
                     <div>
                         <label for="username"
                             class="block text-[11px] font-semibold tracking-widest uppercase text-zinc-500 mb-1.5">
