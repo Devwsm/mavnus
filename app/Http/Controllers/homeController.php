@@ -72,4 +72,9 @@ class homeController extends Controller
             ->withQueryString();
         return view('pages.albums', compact('products'));
     }
+
+    public function footerInfo()
+    {
+        return view('pages.footer-info');
+    }
 }

@@ -4,14 +4,14 @@
         <div class="border-b border-white/10 px-6 py-6">
             <ul
                 class="flex flex-wrap justify-center lg:justify-start gap-x-8 gap-y-3 text-sm uppercase tracking-wide font-semibold">
-                <li><a href="{{ route('home') }}#store" class="hover:opacity-70 transition">Search</a></li>
-                <li><a href="{{ route('home') }}#returns" class="hover:opacity-70 transition">Returns &amp; Exchanges</a>
+                <li><a href="{{ route('footer') }}#store" class="hover:opacity-70 transition">Search</a></li>
+                <li><a href="{{ route('footer') }}#returns" class="hover:opacity-70 transition">Returns &amp; Exchanges</a>
                 </li>
-                <li><a href="{{ route('home') }}#contact" class="hover:opacity-70 transition">Contact Support</a></li>
-                <li><a href="{{ route('home') }}#terms" class="hover:opacity-70 transition">Terms &amp; Conditions</a>
+                <li><a href="{{ route('footer') }}#contact" class="hover:opacity-70 transition">Contact Support</a></li>
+                <li><a href="{{ route('footer') }}#terms" class="hover:opacity-70 transition">Terms &amp; Conditions</a>
                 </li>
-                <li><a href="{{ route('home') }}#privacy" class="hover:opacity-70 transition">Privacy Policy</a></li>
-                <li><a href="{{ route('home') }}#cookie" class="hover:opacity-70 transition">Cookie Policy</a></li>
+                <li><a href="{{ route('footer') }}#privacy" class="hover:opacity-70 transition">Privacy Policy</a></li>
+                <li><a href="{{ route('footer') }}#cookie" class="hover:opacity-70 transition">Cookie Policy</a></li>
             </ul>
         </div>
 

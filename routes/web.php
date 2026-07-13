@@ -46,4 +46,6 @@ Route::prefix('/')->group(function () {
     });
     Route::get('/accessoris', [homeController::class, 'accessoris'])->name('accessoris');
     Route::get('/albums', [homeController::class, 'albums'])->name('albums');
+
+    Route::get('/info', [homeController::class, 'footerInfo'])->name('footer');
 });
