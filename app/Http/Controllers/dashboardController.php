@@ -11,7 +11,7 @@ class dashboardController extends Controller
     public function dashboard()
     {
         $products = product::clothesCategory()
-            ->with(['images', 'clothes.variants'])
+            ->with(['images', 'clothes', 'variants'])
             ->latest()
             ->get();
         return view('pages.dashboard', compact('products'));

@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\CartItem;
 use App\Models\product;
 use App\Models\clothes;
-use App\Models\ClothesVariant;
 use App\Models\ProductImage;
+use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -14,10 +14,8 @@ use Illuminate\Support\Str;
 use Intervention\Image\Encoders\WebpEncoder;
 use Intervention\Image\Laravel\Facades\Image;
 
-
 class clothesController extends Controller
 {
-    //
     public function clothes()
     {
         return view('pages.dashboard.clothes');
@@ -73,14 +71,14 @@ class clothesController extends Controller
             $product = product::create([
                 'category'    => 'clothes',
                 'name'        => $validated['name'],
-                'slug'        => Str::slug($validated['name']) . '-' . uniqid(), // slug unik biar gak bentrok antar produk
+                'slug'        => Str::slug($validated['name']) . '-' . uniqid(),
                 'price'       => $validated['price'],
                 'description' => $validated['description'] ?? null,
-                'is_active'   => true, // sementara, akan disesuaikan di bawah
+                'is_active'   => true,
             ]);
 
             // 2. Simpan detail warna & material, terhubung ke product di atas
-            $clothes = clothes::create([
+            clothes::create([
                 'product_id' => $product->id_product,
                 'color'      => $validated['color'],
                 'material'   => $validated['material'],
@@ -88,9 +86,9 @@ class clothesController extends Controller
 
             // 3. Simpan tiap baris ukuran & stok yang diinput staff
             foreach ($validated['variants'] as $variant) {
-                ClothesVariant::create([
-                    'clothes_id' => $clothes->id_clothes,
-                    'size'       => $variant['size'],
+                ProductVariant::create([
+                    'product_id' => $product->id_product,
+                    'label'      => $variant['size'],
                     'stock'      => $variant['stock'],
                 ]);
             }
@@ -100,19 +98,19 @@ class clothesController extends Controller
                 foreach ($request->file('images') as $index => $file) {
                     $filename = Str::uuid() . '.webp';
                     $folder   = 'products/clothes';
-                    Storage::disk('public')->makeDirectory($folder); // pastikan folder tujuan ada
+                    Storage::disk('public')->makeDirectory($folder);
                     $encoded = Image::decode($file)->encode(new WebpEncoder(quality: 80));
                     Storage::disk('public')->put("{$folder}/{$filename}", (string) $encoded);
                     ProductImage::create([
                         'product_id' => $product->id_product,
                         'image_path' => "{$folder}/{$filename}",
-                        'sort_order' => $index, // urutan sesuai file yang dipilih staff
+                        'sort_order' => $index,
                     ]);
                 }
             }
 
             // 5. Hitung ulang status aktif/sold-out berdasarkan total stok yang baru diinput
-            $product->load('clothes.variants');
+            $product->load('variants');
             $product->syncActiveStatus();
         });
 
@@ -127,10 +125,7 @@ class clothesController extends Controller
             foreach ($product->images as $image) {
                 Storage::disk('public')->delete($image->image_path);
             }
-
-            // Hapus cart_items terkait produk ini juga, bukan cuma andalkan cascade
             CartItem::where('product_id', $product->id_product)->delete();
-
             $product->delete();
         });
 
@@ -172,7 +167,6 @@ class clothesController extends Controller
         ]);
 
         DB::transaction(function () use ($validated, $request, $product) {
-
             // 1. Update data dasar produk
             $product->update([
                 'name'        => $validated['name'],
@@ -187,15 +181,13 @@ class clothesController extends Controller
             ]);
 
             // 3. Ganti semua variant lama dengan yang baru
-            $oldVariantIds = $product->clothes->variants()->pluck('id_clothes_variant');
-            CartItem::whereIn('clothes_variant_id', $oldVariantIds)->delete();
-
-            $product->clothes->variants()->delete();
-
+            $oldVariantIds = $product->variants()->pluck('id_variant');
+            CartItem::whereIn('variant_id', $oldVariantIds)->delete();
+            $product->variants()->delete();
             foreach ($validated['variants'] as $variant) {
-                ClothesVariant::create([
-                    'clothes_id' => $product->clothes->id_clothes,
-                    'size'       => $variant['size'],
+                ProductVariant::create([
+                    'product_id' => $product->id_product,
+                    'label'      => $variant['size'],
                     'stock'      => $variant['stock'],
                 ]);
             }
@@ -205,7 +197,6 @@ class clothesController extends Controller
                 $imagesToDelete = ProductImage::whereIn('id_product_image', $validated['delete_images'])
                     ->where('product_id', $product->id_product)
                     ->get();
-
                 foreach ($imagesToDelete as $image) {
                     Storage::disk('public')->delete($image->image_path);
                     $image->delete();
@@ -215,11 +206,9 @@ class clothesController extends Controller
             // 5. Kalau ada foto baru diupload, tambahkan
             if ($request->hasFile('images')) {
                 $startOrder = ($product->images()->max('sort_order') ?? -1) + 1;
-
                 foreach ($request->file('images') as $index => $file) {
                     $filename = Str::uuid() . '.webp';
                     $folder   = 'products/clothes';
-
                     Storage::disk('public')->makeDirectory($folder);
                     $encoded = Image::decode($file)->encode(new WebpEncoder(quality: 80));
                     Storage::disk('public')->put("{$folder}/{$filename}", (string) $encoded);
@@ -232,7 +221,7 @@ class clothesController extends Controller
             }
 
             // 6. Hitung ulang status berdasarkan stok terbaru
-            $product->load('clothes.variants');
+            $product->load('variants');
             $product->syncActiveStatus();
         });
 
@@ -240,12 +229,11 @@ class clothesController extends Controller
             ->route('dashboard')
             ->with('success', 'Produk berhasil diperbarui.');
     }
-    
+
     public function show(string $slug)
     {
-        // Assume your table column for the slug is `slug`
-        $product = Product::where('slug', $slug)
-            ->with(['images', 'clothes.variants'])
+        $product = product::where('slug', $slug)
+            ->with(['images', 'clothes', 'variants'])
             ->firstOrFail();
 
         return view('pages.product_detail', compact('product'));
