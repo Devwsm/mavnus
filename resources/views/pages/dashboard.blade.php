@@ -25,7 +25,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 @forelse ($products as $product)
                     @php
-                        $totalStock = $product->clothes->variants->sum('stock');
+                        $totalStock = $product->variants->sum('stock');
                         $extraImages = $product->images->slice(1, 3);
                         $remainingCount = $product->images->count() - 4;
                     @endphp
@@ -111,7 +111,7 @@
                             </div>
 
                             <div class="flex flex-wrap gap-1.5">
-                                @foreach ($product->clothes->variants as $variant)
+                                @foreach ($product->variants as $variant)
                                     @php
                                         $stockColor =
                                             $variant->stock === 0
@@ -122,7 +122,7 @@
                                     @endphp
                                     <span
                                         class="flex items-center gap-1 border rounded-md px-2 py-1 text-[11px] {{ $stockColor }}">
-                                        <span class="font-medium opacity-70">{{ $variant->size }}</span>
+                                        <span class="font-medium opacity-70">{{ $variant->label }}</span>
                                         <span class="opacity-30">·</span>
                                         <span class="font-semibold">{{ $variant->stock }}</span>
                                     </span>
