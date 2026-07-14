@@ -21,8 +21,7 @@
                 @if ($product->images->count() > 1)
                     <div class="flex gap-4">
                         @foreach ($product->images->skip(1) as $index => $image)
-                            <button type="button"
-                                onclick="openGallery({{ $index }})"
+                            <button type="button" onclick="openGallery({{ $index }})"
                                 class="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden border border-transparent hover:border-gray-400">
                                 <img src="{{ Storage::url($image->image_path) }}" alt="{{ $product->name }}"
                                     class="absolute inset-0 w-full h-full object-contain" />
@@ -58,13 +57,13 @@
                 <div class="flex flex-col gap-3">
                     <span class="text-sm font-medium">Select Size</span>
                     <div class="flex flex-wrap gap-3">
-                        @foreach ($product->clothes->variants as $variant)
+                        @foreach ($product->variants as $variant)
                             <button type="button"
-                                onclick="toggleSize('{{ $variant->size }}', {{ $variant->stock }}, {{ $variant->id_clothes_variant }})"
-                                data-size="{{ $variant->size }}"
+                                onclick="toggleSize('{{ $variant->label }}', {{ $variant->stock }}, {{ $variant->id_variant }})"
+                                data-size="{{ $variant->label }}"
                                 class="size-btn px-4 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm hover:border-gray-500 {{ $variant->stock === 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
                                 @disabled($variant->stock === 0)>
-                                {{ $variant->size }}
+                                {{ $variant->label }}
                             </button>
                         @endforeach
                     </div>
@@ -135,7 +134,7 @@
 <script>
     let selectedSize = null; // size yang sedang aktif dipilih, null kalau belum ada
     let selectedStock = 0; // stok dari size yang aktif, jadi batas atas qty
-    let selectedVariantId = null; // id_clothes_variant dari size yang aktif, dikirim ke cart
+    let selectedVariantId = null; // id_variant dari size yang aktif, dikirim ke cart
 
     // Update tampilan visual tombol size (hitam = aktif, putih = tidak aktif)
     function updateSizeButtons() {
@@ -266,7 +265,7 @@
                 },
                 body: JSON.stringify({
                     product_id: {{ $product->id_product }},
-                    clothes_variant_id: selectedVariantId,
+                    variant_id: selectedVariantId,
                     quantity: parseInt(qtyInput.value, 10),
                 }),
             })

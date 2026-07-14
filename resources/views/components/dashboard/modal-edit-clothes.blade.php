@@ -72,13 +72,13 @@
                     <h3 class="text-xs font-semibold uppercase tracking-widest text-[#B71C1C]">Ukuran & Stok</h3>
 
                     <div id="variantRows-{{ $editId }}" class="flex flex-col gap-3">
-                        @foreach ($product->clothes->variants as $i => $variant)
+                        @foreach ($product->variants as $i => $variant)
                             <div class="variant-row-{{ $editId }} flex items-center gap-3">
                                 <select name="variants[{{ $i }}][size]"
                                     onchange="updateEditSizeAvailability('{{ $editId }}')"
                                     class="min-w-0 bg-black border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#B71C1C]">
                                     @foreach (['S', 'M', 'L', 'XL'] as $size)
-                                        <option value="{{ $size }}" @selected($variant->size === $size)>
+                                        <option value="{{ $size }}" @selected($variant->label === $size)>
                                             {{ $size }}</option>
                                     @endforeach
                                 </select>
@@ -319,7 +319,7 @@
                             icon: 'warning',
                             title: 'Foto tidak boleh kosong',
                             text: 'Produk harus punya minimal 1 foto. Tambahkan foto baru atau jangan hapus semua foto lama.',
-                            confirmButtonColor: '#B77B1C ',
+                            confirmButtonColor: '#B77B1C',
                         });
                     }
                 });
