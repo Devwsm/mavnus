@@ -195,7 +195,7 @@
         addToCartBtn.disabled = !enabled;
 
         qtyWrapper.classList.toggle('opacity-50', !enabled);
-        addToCartBtn.textContent = enabled ? 'Add to Cart' : 'Pilih ukuran dulu';
+        addToCartBtn.textContent = enabled ? 'Add to Cart' : 'Pilih ukuran';
 
         if (enabled) {
             qtyInput.max = selectedStock;
