@@ -19,9 +19,4 @@ class clothes extends Model
     {
         return $this->belongsTo(product::class, 'product_id', 'id_product');
     }
-
-    public function variants()
-    {
-        return $this->hasMany(ClothesVariant::class, 'clothes_id', 'id_clothes');
-    }
 }

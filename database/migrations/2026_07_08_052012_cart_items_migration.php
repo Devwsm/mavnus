@@ -16,8 +16,8 @@ return new class extends Migration
             $table->id('id_cart_item');
             $table->string('session_id');
             $table->foreignId('product_id')->constrained('products', 'id_product')->cascadeOnDelete();
-            $table->foreignId('clothes_variant_id')->nullable()
-                ->constrained('clothes_variants', 'id_clothes_variant')->nullOnDelete();
+            $table->foreignId('variant_id')->nullable()
+                ->constrained('product_variants', 'id_variant')->nullOnDelete();
             $table->unsignedInteger('quantity')->default(1);
             $table->timestamps();
         });

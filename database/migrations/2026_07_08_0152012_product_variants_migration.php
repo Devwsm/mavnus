@@ -12,14 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         //
-        Schema::create('clothes_variants', function (Blueprint $table) {
-            $table->id('id_clothes_variant');
-            $table->foreignId('clothes_id')->constrained('clothes', 'id_clothes')->cascadeOnDelete();
-            $table->enum('size', ['S', 'M', 'L', 'XL']);
+        Schema::create('product_variants', function (Blueprint $table) {
+            $table->id('id_variant');
+            $table->foreignId('product_id')->constrained('products', 'id_product')->cascadeOnDelete();
+            $table->string('label'); // "S"/"M"/"L"/"XL" untuk clothes, "CD"/"Vinyl" untuk album, dst — bebas per kategori
             $table->unsignedInteger('stock')->default(0);
             $table->timestamps();
 
-            $table->unique(['clothes_id', 'size']);
+            $table->unique(['product_id', 'label']);
         });
     }
 
@@ -29,5 +29,6 @@ return new class extends Migration
     public function down(): void
     {
         //
+        Schema::dropIfExists('product_variants');
     }
 };

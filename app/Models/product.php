@@ -50,11 +50,16 @@ class product extends Model
         return $this->hasOne(albums::class, 'product_id', 'id_product');
     }
 
+    public function variants()
+    {
+        return $this->hasMany(ProductVariant::class, 'product_id', 'id_product')
+            ->orderByRaw("FIELD(label, 'S', 'M', 'L', 'XL')");
+    }
 
     // Sync status
     public function syncActiveStatus(): void
     {
-        $totalStock = $this->clothes?->variants->sum('stock') ?? 0;
+        $totalStock = $this->variants()->sum('stock');
 
         $this->update([
             'is_active' => $totalStock > 0,

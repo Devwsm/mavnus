@@ -11,7 +11,7 @@ class CartItem extends Model
     protected $fillable = [
         'session_id',
         'product_id',
-        'clothes_variant_id',
+        'variant_id',
         'quantity',
     ];
 
@@ -22,7 +22,7 @@ class CartItem extends Model
 
     public function variant()
     {
-        return $this->belongsTo(ClothesVariant::class, 'clothes_variant_id', 'id_clothes_variant');
+        return $this->belongsTo(ProductVariant::class, 'variant_id', 'id_variant');
     }
 
     public function getSubtotalAttribute(): int
