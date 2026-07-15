@@ -10,6 +10,49 @@
             </p>
         </div>
 
+        <div class="flex flex-col w-full max-w-6xl gap-4 p-6 lg:p-14 pb-8">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-bold uppercase tracking-wide">Pesanan Terbaru</h2>
+                <a href="{{ route('dashboard.orders') }}"
+                    class="text-white/50 hover:text-white text-sm font-semibold uppercase tracking-wide transition">
+                    Lihat Semua →
+                </a>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                @forelse ($recentOrders as $order)
+                    @php
+                        $statusStyle = match ($order->status) {
+                            'pending' => ['bg-[#B77B1C]/10 text-[#B77B1C]', 'bi-hourglass-split'],
+                            'processing' => ['bg-[#1C1CB7]/10 text-[#1C1CB7]', 'bi-gear-fill'],
+                            'shipped' => ['bg-[#5E1C5E]/10 text-[#5E1C5E]', 'bi-truck'],
+                            'completed' => ['bg-[#1C7B1C]/10 text-[#1C7B1C]', 'bi-check-circle-fill'],
+                            'cancelled' => ['bg-[#B71C1C]/10 text-[#e05656]', 'bi-x-circle-fill'],
+                        };
+                    @endphp
+                    <a href="{{ route('dashboard.orders.show', $order) }}"
+                        class="flex items-center justify-between bg-[#0D0D0D] border border-white/10 hover:border-white/20 rounded-xl px-5 py-4 transition">
+                        <div class="flex items-center gap-4">
+                            <span class="inline-flex items-center justify-center w-9 h-9 rounded-lg {{ $statusStyle[0] }}">
+                                <i class="bi {{ $statusStyle[1] }}"></i>
+                            </span>
+                            <div class="flex flex-col">
+                                <span class="text-sm font-semibold text-white">{{ $order->order_number }}</span>
+                                <span class="text-white/40 text-xs">{{ $order->customer_name }} ·
+                                    {{ $order->created_at->diffForHumans() }}</span>
+                            </div>
+                        </div>
+                        <span class="text-white font-bold text-sm">Rp{{ number_format($order->total, 0, ',', '.') }}</span>
+                    </a>
+                @empty
+                    <div class="flex flex-col items-center gap-2 py-10 bg-[#0D0D0D] border border-white/10 rounded-xl">
+                        <i class="bi bi-receipt text-white/15 text-3xl"></i>
+                        <p class="text-white/30 text-sm">Belum ada pesanan masuk.</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+
         <div class="flex flex-col w-full max-w-6xl gap-4 p-6 lg:p-14">
             <div class="flex items-center justify-between">
                 <h2 class="text-xl font-bold uppercase tracking-wide">Clothes</h2>
@@ -137,7 +180,8 @@
                         </div>
                     </div>
                 @empty
-                    <div class="col-span-full flex flex-col items-center gap-2 py-20">
+                    <div
+                        class="col-span-full flex flex-col items-center gap-2 py-20 bg-[#0D0D0D] border border-white/10 rounded-xl">
                         <i class="bi bi-inbox text-white/15 text-4xl"></i>
                         <p class="text-white/30 text-sm">Belum ada produk clothes.</p>
                         <p class="text-white/20 text-xs">Klik "Tambah Clothes" untuk mulai menambahkan.</p>
