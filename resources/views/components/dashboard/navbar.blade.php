@@ -11,6 +11,14 @@
         </a>
     </div>
     <div class="flex justify-center items-center gap-4 p-6 rounded-lg bg-[#0D0D0D] shrink-0">
+        <a href="{{ route('dashboard.orders') }}"
+            class="group relative text-white/70 hover:text-white text-[2rem] transition {{ request()->routeIs('dashboard.orders') ? 'text-[#B71C1C]' : '' }}">
+            <i class="bi bi-box-seam"></i>
+            <span
+                class="absolute -top-9 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition">
+                Orders
+            </span>
+        </a>
         <a href="{{ route('dashboard.clothes') }}"
             class="group relative text-white/70 hover:text-white text-[2rem] transition {{ request()->routeIs('dashboard.clothes') ? 'text-[#B71C1C]' : '' }}">
             <i class="bi bi-bag-fill"></i>
@@ -72,6 +80,11 @@
         class="flex flex-col items-center gap-1.5 {{ request()->routeIs('dashboard') ? 'text-[#B71C1C]' : 'text-white' }}">
         <i class="bi bi-house-door-fill text-3xl"></i>
         <span class="text-[10px] font-semibold uppercase tracking-wide">Dashboard</span>
+    </a>
+    <a href="{{ route('dashboard.orders') }}"
+        class="flex flex-col items-center gap-1.5 {{ request()->routeIs('dashboard.orders') ? 'text-[#B71C1C]' : 'text-white' }}">
+        <i class="bi bi-box-seam text-3xl"></i>
+        <span class="text-[10px] font-semibold uppercase tracking-wide">Orders</span>
     </a>
     <a href="{{ route('dashboard.clothes') }}"
         class="flex flex-col items-center gap-1.5 {{ request()->routeIs('dashboard.clothes') ? 'text-[#B71C1C]' : 'text-white' }}">
