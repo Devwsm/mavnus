@@ -5,12 +5,9 @@ use App\Http\Controllers\clothesController;
 use App\Http\Controllers\dashboardController;
 use App\Http\Controllers\homeController;
 use App\Http\Controllers\loginController;
+use App\Http\Controllers\orderController;
 use App\Http\Controllers\searchController;
 use Illuminate\Support\Facades\Route;
-
-Route::get('/', function () {
-    return view('welcome');
-});
 
 Route::prefix('/')->group(function () {
     Route::get('/login', [loginController::class, 'login'])->name('login');
@@ -21,7 +18,13 @@ Route::prefix('/')->group(function () {
 Route::prefix('/dashboard')->middleware('cekLogin')->group(function () {
     Route::get('/', [dashboardController::class, 'dashboard'])->name('dashboard');
 
-    Route::prefix('/clothes')->middleware('cekLogin')->group(function () {
+    Route::prefix('/orders')->group(function () {
+        Route::get('/', [orderController::class, 'dashboardIndex'])->name('dashboard.orders');
+        Route::get('/{order}', [orderController::class, 'dashboardShow'])->name('dashboard.orders.show');
+        Route::patch('/{order}/status', [orderController::class, 'updateStatus'])->name('dashboard.orders.updateStatus');
+    });
+
+    Route::prefix('/clothes')->group(function () {
         Route::get('/', [clothesController::class, 'clothes'])->name('dashboard.clothes');
         Route::post('/store', [clothesController::class, 'store'])->name('clothes.store');
         Route::delete('/{product}', [clothesController::class, 'destroy'])->name('clothes.destroy');
@@ -40,10 +43,17 @@ Route::prefix('/')->group(function () {
         Route::delete('/{cartItem}', [cartController::class, 'destroy'])->name('cart.destroy');
     });
 
+    Route::prefix('/order')->group(function () {
+        Route::get('/checkout', [orderController::class, 'checkout'])->name('order.checkout');
+        Route::post('/', [orderController::class, 'store'])->name('order.store');
+        Route::get('/{order}/success', [orderController::class, 'success'])->name('order.success');
+    });
+
     Route::prefix('/clothes')->group(function () {
         Route::get('/', [homeController::class, 'clothes'])->name('clothes');
         Route::get('/{slug}', [clothesController::class, 'show'])->name('product_detail.clothes');
     });
+
     Route::get('/accessoris', [homeController::class, 'accessoris'])->name('accessoris');
     Route::get('/albums', [homeController::class, 'albums'])->name('albums');
 
