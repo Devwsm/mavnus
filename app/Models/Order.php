@@ -33,7 +33,7 @@ class Order extends Model
 
     public function getRouteKeyName()
     {
-        return 'id_order';
+        return 'order_number';
     }
 
     public function items()
