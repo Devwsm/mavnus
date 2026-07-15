@@ -30,10 +30,10 @@
             <span class="text-white/60 text-sm">Total</span>
             <span id="cartTotal" class="text-lg font-bold">Rp0</span>
         </div>
-        <button
-            class="bg-[#B71C1C] hover:bg-[#891212] text-white uppercase font-bold tracking-widest py-3 rounded-lg transition">
+        <a href="{{ route('order.checkout') }}"
+            class="bg-[#B71C1C] hover:bg-[#891212] text-white uppercase font-bold tracking-widest py-3 rounded-lg transition text-center">
             Checkout
-        </button>
+        </a>
     </div>
 </div>
 
