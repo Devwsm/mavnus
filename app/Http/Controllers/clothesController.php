@@ -121,13 +121,15 @@ class clothesController extends Controller
 
     public function destroy(Product $product)
     {
+        $imagePaths = $product->images->pluck('image_path');
         DB::transaction(function () use ($product) {
-            foreach ($product->images as $image) {
-                Storage::disk('public')->delete($image->image_path);
-            }
             CartItem::where('product_id', $product->id_product)->delete();
             $product->delete();
         });
+        // Baru hapus file fisik setelah transaksi database beneran sukses
+        foreach ($imagePaths as $path) {
+            Storage::disk('public')->delete($path);
+        }
 
         return redirect()
             ->route('dashboard')

@@ -38,7 +38,10 @@
                                 <div class="flex items-center gap-3 py-3 first:pt-0">
                                     <div
                                         class="w-14 h-14 rounded-lg overflow-hidden bg-black shrink-0 flex items-center justify-center">
-                                        @if ($item->product && $item->product->images->first())
+                                        @if ($item->product_image)
+                                            <img src="{{ Storage::url($item->product_image) }}"
+                                                class="w-full h-full object-cover object-center">
+                                        @elseif ($item->product && $item->product->images->first())
                                             <img src="{{ Storage::url($item->product->images->first()->image_path) }}"
                                                 class="w-full h-full object-cover object-center">
                                         @else

@@ -13,7 +13,7 @@ class orderController extends Controller
     //
     public function dashboardIndex()
     {
-        $orders = Order::with('items')
+        $orders = Order::with(['items.product.images'])
             ->latest()
             ->paginate(15);
         return view('pages.dashboard.orders', compact('orders'));
@@ -99,6 +99,7 @@ class orderController extends Controller
                     'product_id'    => $item->product_id,
                     'variant_id'    => $item->variant_id,
                     'product_name'  => $item->product->name,
+                    'product_image' => $item->product->images->first()?->image_path,
                     'variant_label' => $item->variant->label ?? null,
                     'price'         => $item->product->price,
                     'quantity'      => $item->quantity,
