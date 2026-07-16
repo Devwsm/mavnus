@@ -17,6 +17,7 @@ class Order extends Model
         'shipping_courier',
         'shipping_service',
         'shipping_cost',
+        'total_weight',
         'subtotal',
         'total',
         'status',

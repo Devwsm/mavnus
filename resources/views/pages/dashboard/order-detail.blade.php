@@ -76,6 +76,10 @@
                     <div class="bg-[#0D0D0D] border border-white/10 rounded-xl p-6 flex flex-col gap-2">
                         <h2 class="text-xs font-semibold uppercase tracking-widest text-[#B71C1C] mb-2">Ringkasan</h2>
                         <div class="flex items-center justify-between text-sm">
+                            <span class="text-white/40">Total Berat</span>
+                            <span>{{ $order->total_weight }} gram</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
                             <span class="text-white/40">Subtotal</span>
                             <span>Rp{{ number_format($order->subtotal, 0, ',', '.') }}</span>
                         </div>

@@ -15,6 +15,7 @@ class OrderItem extends Model
         'product_name',
         'product_image',
         'variant_label',
+        'weight',
         'price',
         'quantity',
         'subtotal',

@@ -44,6 +44,11 @@
 
                     <div class="flex flex-col gap-2 pt-4 border-t border-black/10">
                         <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-500">Total Berat</span>
+                            <span class="text-gray-600">{{ $cartItems->sum(fn($i) => $i->product->weight * $i->quantity) }}
+                                gram</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
                             <span class="text-gray-500">Subtotal</span>
                             <span
                                 class="font-semibold">Rp{{ number_format($cartItems->sum(fn($i) => $i->product->price * $i->quantity), 0, ',', '.') }}</span>

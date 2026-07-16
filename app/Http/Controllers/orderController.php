@@ -101,6 +101,7 @@ class orderController extends Controller
                     'product_name'  => $item->product->name,
                     'product_image' => $item->product->images->first()?->image_path,
                     'variant_label' => $item->variant->label ?? null,
+                    'weight'        => $item->product->weight,
                     'price'         => $item->product->price,
                     'quantity'      => $item->quantity,
                     'subtotal'      => $item->product->price * $item->quantity,

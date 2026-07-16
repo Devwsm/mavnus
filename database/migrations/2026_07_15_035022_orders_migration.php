@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('shipping_courier')->nullable();
             $table->string('shipping_service')->nullable();
             $table->unsignedBigInteger('shipping_cost')->default(0);
+            $table->unsignedInteger('total_weight')->default(0);
 
             // Ringkasan biaya
             $table->unsignedBigInteger('subtotal');

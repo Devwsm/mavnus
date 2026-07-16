@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('product_name');
             $table->string('product_image')->nullable();
             $table->string('variant_label')->nullable();
+            $table->unsignedInteger('weight')->default(0);
             $table->unsignedBigInteger('price');
             $table->unsignedInteger('quantity');
             $table->unsignedBigInteger('subtotal');
