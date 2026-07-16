@@ -153,6 +153,11 @@
                                 <span class="text-white text-sm font-semibold">{{ $totalStock }} pcs</span>
                             </div>
 
+                            <div class="flex items-center justify-between">
+                                <span class="text-white/40 text-xs">Berat</span>
+                                <span class="text-white text-sm">{{ $product->weight }} gram</span>
+                            </div>
+
                             <div class="flex flex-wrap gap-1.5">
                                 @foreach ($product->variants as $variant)
                                     @php

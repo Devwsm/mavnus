@@ -17,6 +17,7 @@ class product extends Model
         'name',
         'slug',
         'price',
+        'weight',
         'description',
         'is_active',
     ];

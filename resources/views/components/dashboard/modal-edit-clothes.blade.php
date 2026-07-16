@@ -43,6 +43,11 @@
                             class="w-full bg-black border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#B71C1C]">
                     </div>
                     <div>
+                        <label class="block text-sm font-semibold mb-1.5 text-white">Berat (gram)</label>
+                        <input type="number" name="weight" value="{{ $product->weight }}"
+                            class="w-full bg-black border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#B71C1C]">
+                    </div>
+                    <div>
                         <label class="block text-sm font-semibold mb-1.5 text-white">Deskripsi</label>
                         <input type="text" name="description" value="{{ $product->description }}"
                             class="w-full bg-black border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#B71C1C]">

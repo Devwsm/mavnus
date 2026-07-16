@@ -31,6 +31,12 @@
                                 placeholder="250000">
                         </div>
                         <div>
+                            <label class="block text-sm font-semibold mb-1.5">Berat (gram)</label>
+                            <input type="number" id="inputWeight" name="weight"
+                                class="w-full bg-black border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-white/30 focus:outline-none focus:border-[#B71C1C]"
+                                placeholder="200">
+                        </div>
+                        <div>
                             <label class="block text-sm font-semibold mb-1.5">Deskripsi</label>
                             <input type="text" id="inputDescription" name="description"
                                 class="w-full bg-black border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-white/30 focus:outline-none focus:border-[#B71C1C]"
@@ -114,6 +120,10 @@
                     </div>
                     <div class="bg-[#0D0D0D] border border-white/10 rounded-xl p-6 mt-4 flex flex-col gap-2 text-sm">
                         <div class="flex justify-between">
+                            <span class="text-white/40">Berat (gram)</span>
+                            <span id="previewWeight" class="text-white">-</span>
+                        </div>
+                        <div class="flex justify-between">
                             <span class="text-white/40">Warna</span>
                             <span id="previewColor" class="text-white">-</span>
                         </div>
@@ -138,11 +148,13 @@
         const inputName = document.getElementById('inputName');
         const inputPrice = document.getElementById('inputPrice');
         const inputColor = document.getElementById('inputColor');
+        const inputWeight = document.getElementById('inputWeight');
         const inputMaterial = document.getElementById('inputMaterial');
 
         const previewName = document.getElementById('previewName');
         const previewPrice = document.getElementById('previewPrice');
         const previewColor = document.getElementById('previewColor');
+        const previewWeight = document.getElementById('previewWeight');
         const previewMaterial = document.getElementById('previewMaterial');
 
         inputName.addEventListener('input', () => {
@@ -154,6 +166,10 @@
             previewPrice.textContent = 'Rp.' + value.toLocaleString('id-ID');
         });
 
+        inputWeight.addEventListener('input', () => {
+            previewWeight.textContent = inputWeight.value || '-';
+        });
+        
         inputColor.addEventListener('input', () => {
             previewColor.textContent = inputColor.value || '-';
         });
