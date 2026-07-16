@@ -26,6 +26,7 @@ class clothesController extends Controller
         $validated = $request->validate([
             'name'                 => 'required|string|max:255',
             'price'                => 'required|integer|min:0',
+            'weight'               => 'required|integer|min:1',
             'description'          => 'nullable|string',
             'color'                => 'required|string|max:100',
             'material'             => 'required|string|max:100',
@@ -43,6 +44,10 @@ class clothesController extends Controller
             'price.required'        => 'Harga wajib diisi.',
             'price.integer'         => 'Harga harus berupa angka.',
             'price.min'             => 'Harga tidak boleh kurang dari 0.',
+
+            'weight.required' => 'Berat produk wajib diisi.',
+            'weight.integer'  => 'Berat harus berupa angka.',
+            'weight.min'      => 'Berat minimal 1 gram.',
 
             'color.required'        => 'Warna wajib diisi.',
             'color.max'             => 'Warna maksimal 100 karakter.',
@@ -73,6 +78,7 @@ class clothesController extends Controller
                 'name'        => $validated['name'],
                 'slug'        => Str::slug($validated['name']) . '-' . uniqid(),
                 'price'       => $validated['price'],
+                'weight'      => $validated['weight'],
                 'description' => $validated['description'] ?? null,
                 'is_active'   => true,
             ]);
@@ -141,6 +147,7 @@ class clothesController extends Controller
         $validated = $request->validate([
             'name'                 => 'required|string|max:255',
             'price'                => 'required|integer|min:0',
+            'weight'               => 'required|integer|min:1',
             'description'          => 'nullable|string',
             'color'                => 'required|string|max:100',
             'material'             => 'required|string|max:100',
@@ -158,6 +165,9 @@ class clothesController extends Controller
             'name.required'         => 'Nama produk wajib diisi.',
             'price.required'        => 'Harga wajib diisi.',
             'price.integer'         => 'Harga harus berupa angka.',
+            'weight.required' => 'Berat produk wajib diisi.',
+            'weight.integer'  => 'Berat harus berupa angka.',
+            'weight.min'      => 'Berat minimal 1 gram.',
             'color.required'        => 'Warna wajib diisi.',
             'material.required'     => 'Material wajib diisi.',
             'variants.required'     => 'Minimal isi satu ukuran & stok.',
@@ -173,6 +183,7 @@ class clothesController extends Controller
             $product->update([
                 'name'        => $validated['name'],
                 'price'       => $validated['price'],
+                'weight'      => $validated['weight'],
                 'description' => $validated['description'] ?? null,
             ]);
 
