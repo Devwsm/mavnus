@@ -49,13 +49,31 @@
                     <a href="{{ route('export.database') }}"
                         class="flex-1 flex items-center justify-center gap-2 bg-[#B71C1C] hover:bg-[#891212] text-white text-sm font-semibold uppercase tracking-wide py-3 rounded-lg transition">
                         <i class="bi bi-database-down"></i>
-                        Download Database (.sql)
+                        Database Lengkap (.sql)
                     </a>
                     <a href="{{ route('export.storage') }}"
                         class="flex-1 flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-white text-sm font-semibold uppercase tracking-wide py-3 rounded-lg transition">
                         <i class="bi bi-images"></i>
-                        Download Foto (.zip)
+                        Foto (.zip)
                     </a>
+                </div>
+                <div class="border-t border-white/10 pt-4 mt-1">
+                    <p class="text-white/40 text-xs mb-3">
+                        Atau export data spesifik saja (dipakai setelah <code class="text-white/60">migrate:fresh
+                            --seed</code> di local):
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <a href="{{ route('export.products.sql') }}"
+                            class="flex-1 flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-white text-sm font-semibold uppercase tracking-wide py-3 rounded-lg transition">
+                            <i class="bi bi-box-seam"></i>
+                            Data Produk (.sql)
+                        </a>
+                        <a href="{{ route('export.orders.sql') }}"
+                            class="flex-1 flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-white text-sm font-semibold uppercase tracking-wide py-3 rounded-lg transition">
+                            <i class="bi bi-receipt"></i>
+                            Data Order (.sql)
+                        </a>
+                    </div>
                 </div>
             </div>
 

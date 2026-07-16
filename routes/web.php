@@ -34,10 +34,14 @@ Route::prefix('/dashboard')->middleware('cekLogin')->group(function () {
 
     Route::prefix('/import-export')->middleware('cekLogin')->group(function () {
         Route::get('/', [importExportController::class, 'index'])->name('dashboard.import-export');
-        Route::get('/database/export', [importExportController::class, 'exportDatabase'])->name('export.database');
-        Route::get('/storage/export', [importExportController::class, 'exportStorage'])->name('export.storage');
+        
         Route::get('/products/export', [importExportController::class, 'exportProducts'])->name('export.products');
         Route::get('/orders/export', [importExportController::class, 'exportOrders'])->name('export.orders');
+        Route::get('/products/export-sql', [importExportController::class, 'exportProductsSql'])->name('export.products.sql');
+        Route::get('/orders/export-sql', [importExportController::class, 'exportOrdersSql'])->name('export.orders.sql');
+        
+        Route::get('/database/export', [importExportController::class, 'exportDatabase'])->name('export.database');
+        Route::get('/storage/export', [importExportController::class, 'exportStorage'])->name('export.storage');
     });
 });
 

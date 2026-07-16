@@ -51,6 +51,82 @@ class importExportController extends Controller
         }
     }
 
+    /**
+     * Export data produk (products, clothes, accessories, albums, product_variants,
+     * product_images) sebagai SQL — hanya INSERT, tanpa DROP/CREATE TABLE.
+     * Dipakai setelah migrate:fresh + db:seed di local, supaya data real production
+     * bisa dimasukkan ke struktur tabel yang sudah bersih tanpa konflik.
+     */
+    public function exportProductsSql()
+    {
+        try {
+            $tables = ['products', 'clothes', 'accessories', 'albums', 'product_variants', 'product_images'];
+            $sql = $this->generateInsertOnlySql($tables, 'Produk');
+            $filename = 'mavnus-produk-' . now()->format('Y-m-d_His') . '.sql';
+            return response($sql)
+                ->header('Content-Type', 'application/sql')
+                ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('dashboard.import-export')
+                ->with('error', 'Gagal export SQL produk: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Export data order (orders, order_items) sebagai SQL — hanya INSERT.
+     */
+    public function exportOrdersSql()
+    {
+        try {
+            $tables = ['orders', 'order_items'];
+            $sql = $this->generateInsertOnlySql($tables, 'Order');
+            $filename = 'mavnus-order-' . now()->format('Y-m-d_His') . '.sql';
+            return response($sql)
+                ->header('Content-Type', 'application/sql')
+                ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('dashboard.import-export')
+                ->with('error', 'Gagal export SQL order: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Helper: generate SQL berisi INSERT statement saja (tanpa struktur tabel)
+     * untuk daftar tabel yang diberikan, sesuai urutan yang dikasih (penting untuk
+     * menjaga foreign key, misal 'products' harus diinsert sebelum 'clothes').
+     */
+    private function generateInsertOnlySql(array $tables, string $label): string
+    {
+        $sql = "-- Mavnus {$label} Data Export\n-- Generated: " . now() . "\n\n";
+        $sql .= "SET FOREIGN_KEY_CHECKS=0;\n\n";
+
+        foreach ($tables as $tableName) {
+            $rows = DB::table($tableName)->get();
+            if ($rows->isEmpty()) {
+                $sql .= "-- Tabel `{$tableName}` kosong, tidak ada data.\n\n";
+                continue;
+            }
+
+            foreach ($rows as $row) {
+                $rowArray = (array) $row;
+                $columns = array_map(fn($col) => "`{$col}`", array_keys($rowArray));
+                $values = array_map(function ($value) {
+                    if (is_null($value)) {
+                        return 'NULL';
+                    }
+                    return DB::getPdo()->quote($value);
+                }, array_values($rowArray));
+                $sql .= "INSERT INTO `{$tableName}` (" . implode(', ', $columns) . ") VALUES (" . implode(', ', $values) . ");\n";
+            }
+            $sql .= "\n";
+        }
+
+        $sql .= "SET FOREIGN_KEY_CHECKS=1;\n";
+        return $sql;
+    }
+
     // ================= Export Database & Storage (buat migrasi/backup) =================
 
     /**
