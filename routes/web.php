@@ -4,6 +4,7 @@ use App\Http\Controllers\cartController;
 use App\Http\Controllers\clothesController;
 use App\Http\Controllers\dashboardController;
 use App\Http\Controllers\homeController;
+use App\Http\Controllers\importExportController;
 use App\Http\Controllers\loginController;
 use App\Http\Controllers\orderController;
 use App\Http\Controllers\searchController;
@@ -29,6 +30,14 @@ Route::prefix('/dashboard')->middleware('cekLogin')->group(function () {
         Route::post('/store', [clothesController::class, 'store'])->name('clothes.store');
         Route::delete('/{product}', [clothesController::class, 'destroy'])->name('clothes.destroy');
         Route::put('/{product}', [clothesController::class, 'update'])->name('clothes.update');
+    });
+
+    Route::prefix('/import-export')->middleware('cekLogin')->group(function () {
+        Route::get('/', [importExportController::class, 'index'])->name('dashboard.import-export');
+        Route::get('/database/export', [importExportController::class, 'exportDatabase'])->name('export.database');
+        Route::get('/storage/export', [importExportController::class, 'exportStorage'])->name('export.storage');
+        Route::get('/products/export', [importExportController::class, 'exportProducts'])->name('export.products');
+        Route::get('/orders/export', [importExportController::class, 'exportOrders'])->name('export.orders');
     });
 });
 
