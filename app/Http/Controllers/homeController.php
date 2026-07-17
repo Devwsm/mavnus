@@ -38,7 +38,7 @@ class homeController extends Controller
     {
         $products = product::clothesCategory()
             ->active()
-            ->with(['images', 'clothes.variants'])
+            ->with(['images', 'clothes','variants'])
             ->when(request('price_min'), fn($query, $min) => $query->where('price', '>=', $min))
             ->when(request('price_max'), fn($query, $max) => $query->where('price', '<=', $max))
             ->latest()
