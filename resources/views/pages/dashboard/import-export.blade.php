@@ -15,24 +15,29 @@
         </div>
 
         <div class="flex flex-col w-full max-w-4xl gap-6 p-6 lg:p-14">
-            {{-- Laporan Excel --}}
+            {{-- Invoice & Laporan Order --}}
             <div class="bg-[#0D0D0D] border border-white/10 rounded-2xl p-6 flex flex-col gap-4">
                 <div>
-                    <h2 class="text-lg font-bold uppercase tracking-wide">Laporan Excel</h2>
+                    <h2 class="text-lg font-bold uppercase tracking-wide">Invoice & Laporan Order</h2>
                     <p class="text-white/40 text-sm mt-1">
-                        Untuk dilihat/dibagikan sebagai laporan, bukan untuk migrasi data.
+                        Preview dulu untuk lihat tampilan invoice, atau langsung download sesuai kebutuhan.
                     </p>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-3">
-                    <a href="{{ route('export.products') }}"
+                    <a href="{{ route('export.orders.preview') }}" target="_blank"
                         class="flex-1 flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-white text-sm font-semibold uppercase tracking-wide py-3 rounded-lg transition">
-                        <i class="bi bi-file-earmark-spreadsheet"></i>
-                        Export Produk
+                        <i class="bi bi-eye"></i>
+                        Preview Invoice
+                    </a>
+                    <a href="{{ route('export.orders.pdf') }}"
+                        class="flex-1 flex items-center justify-center gap-2 bg-[#B71C1C] hover:bg-[#891212] text-white text-sm font-semibold uppercase tracking-wide py-3 rounded-lg transition">
+                        <i class="bi bi-file-earmark-pdf"></i>
+                        Download PDF
                     </a>
                     <a href="{{ route('export.orders') }}"
                         class="flex-1 flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-white text-sm font-semibold uppercase tracking-wide py-3 rounded-lg transition">
-                        <i class="bi bi-file-earmark-spreadsheet"></i>
-                        Export Order
+                        <i class="bi bi-file-earmark-excel"></i>
+                        Download Excel
                     </a>
                 </div>
             </div>

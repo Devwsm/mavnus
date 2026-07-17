@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Exports\OrdersExport;
-use App\Exports\ProductsExport;
+use App\Models\Order;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
@@ -21,23 +22,8 @@ class importExportController extends Controller
     // ================= Export Excel (laporan, buat staff) =================
 
     /**
-     * Export daftar produk (clothes) ke Excel — untuk dilihat/dibagikan sebagai laporan,
-     * bukan untuk migrasi data.
-     */
-    public function exportProducts()
-    {
-        try {
-            $filename = 'mavnus-produk-' . now()->format('Y-m-d_His') . '.xlsx';
-            return Excel::download(new ProductsExport, $filename);
-        } catch (\Throwable $e) {
-            return redirect()
-                ->route('dashboard.import-export')
-                ->with('error', 'Gagal export produk: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Export daftar order + rincian barangnya ke Excel — untuk laporan penjualan.
+     * Download data order sebagai Excel — format tabular sederhana untuk diolah,
+     * bukan tampilan invoice.
      */
     public function exportOrders()
     {
@@ -47,7 +33,36 @@ class importExportController extends Controller
         } catch (\Throwable $e) {
             return redirect()
                 ->route('dashboard.import-export')
-                ->with('error', 'Gagal export order: ' . $e->getMessage());
+                ->with('error', 'Gagal export data order: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Preview invoice semua order dalam bentuk HTML, dibuka di tab baru
+     * sebelum staff memutuskan untuk download versi Excel-nya.
+     */
+    public function ordersInvoicePreview()
+    {
+        $orders = Order::with('items')->latest()->get();
+        return view('exports.orders-invoice', compact('orders'));
+    }
+
+    /**
+     * Download invoice semua order sebagai PDF — hasilnya identik dengan preview,
+     * karena sama-sama merender HTML/CSS yang sama.
+     */
+    public function exportOrdersPdf()
+    {
+        try {
+            $orders = Order::with('items')->latest()->get();
+            $pdf = Pdf::loadView('exports.orders-invoice', compact('orders'))
+                ->setPaper('a4', 'portrait');
+            $filename = 'mavnus-invoice-order-' . now()->format('Y-m-d_His') . '.pdf';
+            return $pdf->download($filename);
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('dashboard.import-export')
+                ->with('error', 'Gagal export invoice PDF: ' . $e->getMessage());
         }
     }
 
