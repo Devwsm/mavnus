@@ -57,13 +57,20 @@
             {{-- Ringkasan biaya --}}
             <div class="flex flex-col gap-2 pt-4 border-t border-black/10">
                 <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-500">Total Berat</span>
+                    <span class="text-gray-600">{{ $order->total_weight }} gram</span>
+                </div>
+                <div class="flex items-center justify-between text-sm">
                     <span class="text-gray-500">Subtotal</span>
                     <span class="font-semibold">Rp{{ number_format($order->subtotal, 0, ',', '.') }}</span>
                 </div>
                 <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-500">Kurir</span>
+                    <span class="text-gray-600">{{ $order->shipping_courier }} - {{ $order->shipping_service }}</span>
+                </div>
+                <div class="flex items-center justify-between text-sm">
                     <span class="text-gray-500">Ongkir</span>
-                    <span
-                        class="text-gray-400">{{ $order->shipping_cost > 0 ? 'Rp' . number_format($order->shipping_cost, 0, ',', '.') : 'Belum dihitung' }}</span>
+                    <span class="font-semibold">Rp{{ number_format($order->shipping_cost, 0, ',', '.') }}</span>
                 </div>
                 <div class="flex items-center justify-between text-base font-bold pt-2 border-t border-black/10">
                     <span>Total</span>

@@ -84,9 +84,12 @@
                             <span>Rp{{ number_format($order->subtotal, 0, ',', '.') }}</span>
                         </div>
                         <div class="flex items-center justify-between text-sm">
+                            <span class="text-white/40">Kurir</span>
+                            <span>{{ $order->shipping_courier }} - {{ $order->shipping_service }}</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
                             <span class="text-white/40">Ongkir</span>
-                            <span
-                                class="text-white/40">{{ $order->shipping_cost > 0 ? 'Rp' . number_format($order->shipping_cost, 0, ',', '.') : 'Belum dihitung' }}</span>
+                            <span>Rp{{ number_format($order->shipping_cost, 0, ',', '.') }}</span>
                         </div>
                         <div
                             class="flex items-center justify-between text-base font-bold pt-2 mt-1 border-t border-white/10">
@@ -95,12 +98,12 @@
                         </div>
                         <div class="flex items-center justify-between text-sm pt-2 mt-1 border-t border-white/10">
                             <span class="text-white/40">Pembayaran</span>
-                            <span class="{{ $order->payment_status === 'paid' ? 'text-green-400' : 'text-amber-400' }}">
+                            <span class="{{ $order->payment_status === 'paid' ? 'text-[#1C7B1C]' : 'text-[#B77B1C]' }}">
                                 {{ ucfirst($order->payment_status) }}
                             </span>
                         </div>
                     </div>
-
+                    
                     <div class="bg-[#0D0D0D] border border-white/10 rounded-xl p-6 flex flex-col gap-3">
                         <h2 class="text-xs font-semibold uppercase tracking-widest text-[#B71C1C]">Update Status</h2>
                         <form action="{{ route('dashboard.orders.updateStatus', $order) }}" method="POST"
