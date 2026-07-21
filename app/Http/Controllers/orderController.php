@@ -7,6 +7,8 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class orderController extends Controller
 {
@@ -52,13 +54,20 @@ class orderController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'customer_name'    => 'required|string|max:255',
-            'customer_phone'   => 'required|string|max:20',
-            'customer_address' => 'required|string',
+            'customer_name'      => 'required|string|max:255',
+            'customer_phone'     => 'required|string|max:20',
+            'customer_address'   => 'required|string',
+            'destination_id'     => 'required|integer',
+            'destination_label'  => 'required|string',
+            'shipping_courier'   => 'required|string',
+            'shipping_service'   => 'required|string',
+            'shipping_cost'      => 'required|integer|min:0',
         ], [
             'customer_name.required'    => 'Nama wajib diisi.',
             'customer_phone.required'   => 'Nomor HP wajib diisi.',
             'customer_address.required' => 'Alamat wajib diisi.',
+            'destination_id.required'   => 'Silakan pilih kecamatan/kota tujuan.',
+            'shipping_courier.required' => 'Silakan pilih kurir pengiriman.',
         ]);
 
         $cartItems = CartItem::where('session_id', session()->getId())
@@ -69,7 +78,7 @@ class orderController extends Controller
             return redirect()->route('home')->with('error', 'Keranjang kamu masih kosong.');
         }
 
-        // Validasi ulang stok sebelum diproses — jaga-jaga stok berubah sejak terakhir cek cart
+        // Validasi ulang stok sebelum diproses
         foreach ($cartItems as $item) {
             $availableStock = $item->variant ? $item->variant->stock : 99;
             if ($item->quantity > $availableStock) {
@@ -80,26 +89,40 @@ class orderController extends Controller
 
         $order = DB::transaction(function () use ($validated, $cartItems) {
             $subtotal = $cartItems->sum(fn($item) => $item->product->price * $item->quantity);
+            $totalWeight = $cartItems->sum(fn($item) => $item->product->weight * $item->quantity);
+
             // 1. Buat order (header)
             $order = Order::create([
                 'order_number'      => Order::generateOrderNumber(),
                 'customer_name'     => $validated['customer_name'],
                 'customer_phone'    => $validated['customer_phone'],
-                'customer_address'  => $validated['customer_address'],
+                'customer_address'  => $validated['customer_address'] . ', ' . $validated['destination_label'],
+                'shipping_courier'  => $validated['shipping_courier'],
+                'shipping_service'  => $validated['shipping_service'],
+                'shipping_cost'     => $validated['shipping_cost'],
                 'subtotal'          => $subtotal,
-                'total'             => $subtotal, // ongkir belum dihitung, disusulkan nanti via RajaOngkir
+                'total'             => $subtotal + $validated['shipping_cost'],
+                'total_weight'      => $totalWeight,
                 'status'            => 'pending',
                 'payment_status'    => 'unpaid',
             ]);
 
             // 2. Pindahkan tiap item cart jadi order_items (snapshot data produk)
             foreach ($cartItems as $item) {
+                $snapshotImagePath = null;
+                $originalImage = $item->product->images->first();
+                if ($originalImage && Storage::disk('public')->exists($originalImage->image_path)) {
+                    $snapshotImagePath = 'orders/' . $order->order_number . '/' . Str::uuid() . '.webp';
+                    Storage::disk('public')->makeDirectory('orders/' . $order->order_number);
+                    Storage::disk('public')->copy($originalImage->image_path, $snapshotImagePath);
+                }
+
                 OrderItem::create([
                     'order_id'      => $order->id_order,
                     'product_id'    => $item->product_id,
                     'variant_id'    => $item->variant_id,
                     'product_name'  => $item->product->name,
-                    'product_image' => $item->product->images->first()?->image_path,
+                    'product_image' => $snapshotImagePath,
                     'variant_label' => $item->variant->label ?? null,
                     'weight'        => $item->product->weight,
                     'price'         => $item->product->price,
