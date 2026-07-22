@@ -1,6 +1,6 @@
 @extends('template.dashboard.layout')
 @section('content')
-    <div class="flex flex-col items-center bg-black text-white w-full min-h-screen mb-24">
+    <main class="flex flex-col items-center bg-black text-white w-full min-h-screen mb-24">
         @include('components/dashboard/navbar')
 
         <div class="flex flex-col items-center justify-center p-8 text-center">

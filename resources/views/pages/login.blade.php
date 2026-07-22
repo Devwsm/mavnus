@@ -1,6 +1,6 @@
 @extends('template.layout')
 @section('content')
-    <div class="flex flex-col justify-center items-center bg-black w-full min-h-screen px-4 py-12">
+    <main class="flex flex-col justify-center items-center bg-black w-full min-h-screen px-4 py-12">
         <div class="relative w-full max-w-sm bg-zinc-950 border border-zinc-800 rounded-2xl
                 overflow-hidden">
             {{-- Header --}}
@@ -83,5 +83,5 @@
         <p class="text-zinc-500 text-xs text-center mt-6">
             Belum punya akun? <a href="#" class="text-[#B71C1C] hover:underline">Hubungi staff</a>
         </p>
-    </div>
+    </main>
 @endsection
