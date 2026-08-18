@@ -1,5 +1,5 @@
-<button type="button" onclick="openCart()" class="relative inline-flex text-lg">
-    <i class="bi bi-bag"></i>
+<button type="button" onclick="openCart()" aria-label="Buka keranjang belanja" class="relative inline-flex text-lg">
+    <i class="bi bi-bag" aria-hidden="true"></i>
     <span
         class="cart-badge hidden absolute -top-2 -right-2 bg-[#B71C1C] text-white text-[10px] font-bold w-4 h-4 rounded-full items-center justify-center"></span>
 </button>
@@ -16,13 +16,13 @@
 
     <div class="flex items-center justify-between p-6 border-b border-white/10">
         <h2 class="text-xl font-bold uppercase tracking-wide">Cart</h2>
-        <button id="cartCloseBtn" class="text-3xl">
-            <i class="bi bi-x"></i>
+        <button id="cartCloseBtn" type="button" aria-label="Tutup keranjang belanja" class="text-3xl">
+            <i class="bi bi-x" aria-hidden="true"></i>
         </button>
     </div>
 
     <div id="cartItemsWrapper" class="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
-        <p class="text-white/40 text-sm text-center py-10">Keranjang masih kosong.</p>
+        <p class="text-white/60 text-sm text-center py-10">Keranjang masih kosong.</p>
     </div>
 
     <div class="border-t border-white/10 p-6 flex flex-col gap-4">
@@ -72,29 +72,29 @@
 
             if (data.items.length === 0) {
                 cartItemsWrapper.innerHTML =
-                    '<p class="text-white/40 text-sm text-center py-10">Keranjang masih kosong.</p>';
+                    '<p class="text-white/60 text-sm text-center py-10">Keranjang masih kosong.</p>';
                 return;
             }
 
             cartItemsWrapper.innerHTML = data.items.map(item => `
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="w-20 h-20 rounded-lg overflow-hidden bg-[#0D0D0D] shrink-0 flex items-center justify-center">
-                        ${item.image ? `<img src="${item.image}" class="w-full h-full object-cover object-center">` : `<i class="bi bi-image text-white/20 text-xl"></i>`}
+                        ${item.image ? `<img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover object-center">` : `<i class="bi bi-image text-white/20 text-xl" aria-hidden="true"></i>`}
                     </div>
                     <div class="flex flex-col flex-1 gap-1.5">
                         <span class="text-base font-semibold">${item.name}</span>
-                        ${item.size ? `<span class="text-sm text-white/40">Size: ${item.size}</span>` : ''}
+                        ${item.size ? `<span class="text-sm text-white/60">Size: ${item.size}</span>` : ''}
                         <div class="flex items-center justify-between mt-1">
                             <div class="flex items-center gap-3 border border-white/10 rounded-lg">
-                                <button onclick="changeQty(${item.id}, ${item.quantity - 1})" class="px-3 py-1.5 text-white/60 hover:text-white text-lg disabled:opacity-30">-</button>
-                                <span class="text-base">${item.quantity}</span>
-                                <button onclick="changeQty(${item.id}, ${item.quantity + 1})" ${item.quantity >= item.max ? 'disabled' : ''} class="px-3 py-1.5 text-white/60 hover:text-white text-lg disabled:opacity-30">+</button>
+                                <button type="button" onclick="changeQty(${item.id}, ${item.quantity - 1})" aria-label="Kurangi jumlah ${item.name}" class="px-3 py-1.5 text-white/60 hover:text-white text-lg disabled:opacity-30">-</button>
+                                <span class="text-base" aria-live="polite">${item.quantity}</span>
+                                <button type="button" onclick="changeQty(${item.id}, ${item.quantity + 1})" ${item.quantity >= item.max ? 'disabled' : ''} aria-label="Tambah jumlah ${item.name}" class="px-3 py-1.5 text-white/60 hover:text-white text-lg disabled:opacity-30">+</button>
                             </div>
-                            <button onclick="removeCartItem(${item.id})" class="text-white/40 hover:text-[#B71C1C] text-base disabled:opacity-30">
-                                <i class="bi bi-trash"></i>
+                            <button type="button" onclick="removeCartItem(${item.id})" aria-label="Hapus ${item.name} dari keranjang" class="text-white/60 hover:text-[#B71C1C] text-base disabled:opacity-30">
+                                <i class="bi bi-trash" aria-hidden="true"></i>
                             </button>
                         </div>
-                        <span class="text-sm text-white/50">${item.subtotal}</span>
+                        <span class="text-sm text-white/60">${item.subtotal}</span>
                     </div>
                 </div>
             `).join('');

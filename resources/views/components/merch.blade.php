@@ -4,9 +4,9 @@
     <div class="flex flex-col gap-6">
         <!-- ===================== Section Header ===================== -->
         <div class="flex items-end text-black justify-between border-b border-black/10 pb-4">
-            <h1 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">
+            <h2 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">
                 Clothes
-            </h1>
+            </h2>
             <a href="{{ route('clothes') }}"
                 class="text-sm font-semibold uppercase tracking-wide underline underline-offset-4 decoration-black/30 hover:decoration-black transition">
                 Shop All
@@ -38,7 +38,7 @@
                     </div>
                 </a>
             @empty
-                <p class="col-span-full text-center text-black/40 text-sm py-10">
+                <p class="col-span-full text-center text-black/60 text-sm py-10">
                     Belum ada produk clothes tersedia.
                 </p>
             @endforelse
@@ -50,9 +50,9 @@
     <div class="flex flex-col gap-6">
         <!-- ===================== Section Header ===================== -->
         <div class="flex items-end text-black justify-between border-b border-black/10 pb-4">
-            <h1 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">
+            <h2 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">
                 Accessoris
-            </h1>
+            </h2>
             <a href="{{ route('accessoris') }}"
                 class="text-sm font-semibold uppercase tracking-wide underline underline-offset-4 decoration-black/30 hover:decoration-black transition">
                 Shop All
@@ -84,7 +84,7 @@
                     </div>
                 </a>
             @empty
-                <p class="col-span-full text-center text-black/40 text-sm py-10">
+                <p class="col-span-full text-center text-black/60 text-sm py-10">
                     Belum ada produk accessories tersedia.
                 </p>
             @endforelse
@@ -96,9 +96,9 @@
     <div class="flex flex-col gap-6">
         <!-- ===================== Section Header ===================== -->
         <div class="flex items-end text-black justify-between border-b border-black/10 pb-4">
-            <h1 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">
+            <h2 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">
                 Albums
-            </h1>
+            </h2>
             <a href="{{ route('albums') }}"
                 class="text-sm font-semibold uppercase tracking-wide underline underline-offset-4 decoration-black/30 hover:decoration-black transition">
                 Shop All
@@ -130,7 +130,7 @@
                     </div>
                 </a>
             @empty
-                <p class="col-span-full text-center text-black/40 text-sm py-10">
+                <p class="col-span-full text-center text-black/60 text-sm py-10">
                     Belum ada produk albums tersedia.
                 </p>
             @endforelse

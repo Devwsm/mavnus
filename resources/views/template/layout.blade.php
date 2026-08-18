@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
@@ -12,6 +12,10 @@
 </head>
 
 <body class="bg-black flex flex-col w-full">
+    <a href="#main-content"
+        class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-100 focus:bg-white focus:text-black focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-semibold">
+        Lewati ke konten utama
+    </a>
     <div class="flex flex-col justify-center items-center">
         @yield('content')
     </div>

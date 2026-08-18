@@ -1,13 +1,18 @@
 <form method="GET" action="{{ route(request()->route()->getName()) }}" class="flex flex-col gap-4">
     <div class="flex items-center gap-3">
+        @php($idPrefix = $idPrefix ?? 'default')
         <div class="flex flex-col gap-1 flex-1">
-            <label class="text-xs font-semibold uppercase tracking-wide text-black/50">Min</label>
-            <input type="number" name="price_min" value="{{ request('price_min') }}" placeholder="0"
+            <label for="{{ $idPrefix }}_price_min"
+                class="text-xs font-semibold uppercase tracking-wide text-black/50">Min</label>
+            <input type="number" id="{{ $idPrefix }}_price_min" name="price_min" value="{{ request('price_min') }}"
+                placeholder="0"
                 class="w-full border border-black/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-black">
         </div>
         <div class="flex flex-col gap-1 flex-1">
-            <label class="text-xs font-semibold uppercase tracking-wide text-black/50">Max</label>
-            <input type="number" name="price_max" value="{{ request('price_max') }}" placeholder="1000000"
+            <label for="{{ $idPrefix }}_price_max"
+                class="text-xs font-semibold uppercase tracking-wide text-black/50">Max</label>
+            <input type="number" id="{{ $idPrefix }}_price_max" name="price_max" value="{{ request('price_max') }}"
+                placeholder="1000000"
                 class="w-full border border-black/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-black">
         </div>
     </div>

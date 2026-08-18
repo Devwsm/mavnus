@@ -5,7 +5,8 @@
             <ul
                 class="flex flex-wrap justify-center lg:justify-start gap-x-8 gap-y-3 text-sm uppercase tracking-wide font-semibold">
                 <li><a href="{{ route('footer') }}#store" class="hover:opacity-70 transition">Search</a></li>
-                <li><a href="{{ route('footer') }}#returns" class="hover:opacity-70 transition">Returns &amp; Exchanges</a>
+                <li><a href="{{ route('footer') }}#returns" class="hover:opacity-70 transition">Returns &amp;
+                        Exchanges</a>
                 </li>
                 <li><a href="{{ route('footer') }}#contact" class="hover:opacity-70 transition">Contact Support</a></li>
                 <li><a href="{{ route('footer') }}#terms" class="hover:opacity-70 transition">Terms &amp; Conditions</a>
@@ -22,10 +23,11 @@
                 <h2 class="font-bold uppercase tracking-wide mb-4">Subscribe To Our Emails</h2>
 
                 <form class="flex items-center border-b border-white/50 pb-2">
-                    <input type="email" placeholder="Email"
+                    <label for="newsletterEmail" class="sr-only">Alamat email</label>
+                    <input type="email" id="newsletterEmail" name="email" placeholder="Email"
                         class="bg-transparent outline-none placeholder-white/60 text-white w-full text-sm">
-                    <button type="submit" class="text-xl shrink-0">
-                        <i class="bi bi-arrow-right"></i>
+                    <button type="submit" aria-label="Berlangganan newsletter" class="text-xl shrink-0">
+                        <i class="bi bi-arrow-right" aria-hidden="true"></i>
                     </button>
                 </form>
 
@@ -64,9 +66,12 @@
             </p>
 
             <div class="flex items-center gap-5 text-lg">
-                <a href="https://www.instagram.com/whisnusantika/" class="hover:opacity-70 transition"><i class="bi bi-instagram"></i></a>
-                <a href="https://www.youtube.com/@WhisnuSantika" class="hover:opacity-70 transition"><i class="bi bi-youtube"></i></a>
-                <a href="https://open.spotify.com/artist/6gvsmDZKW5wRvjKCPnbHDh" class="hover:opacity-70 transition"><i class="bi bi-spotify"></i></a>
+                <a href="https://www.instagram.com/whisnusantika/" aria-label="Instagram Whisnu Santika"
+                    class="hover:opacity-70 transition"><i class="bi bi-instagram" aria-hidden="true"></i></a>
+                <a href="https://www.youtube.com/@WhisnuSantika" aria-label="YouTube Whisnu Santika"
+                    class="hover:opacity-70 transition"><i class="bi bi-youtube" aria-hidden="true"></i></a>
+                <a href="https://open.spotify.com/artist/6gvsmDZKW5wRvjKCPnbHDh" aria-label="Spotify Whisnu Santika"
+                    class="hover:opacity-70 transition"><i class="bi bi-spotify" aria-hidden="true"></i></a>
             </div>
         </div>
     </div>

@@ -6,11 +6,12 @@
             <!-- Left -->
             <div class="w-1/3 flex items-center">
                 <!-- Burger (mobile/tablet only) -->
-                <button id="menuBtn" class="text-3xl lg:hidden">
+                <button id="menuBtn" type="button" aria-label="Buka menu navigasi" class="text-3xl lg:hidden">
                     <i class="bi bi-list"></i>
                 </button>
                 <!-- Search (desktop only) -->
-                <button id="searchBtnDesktop" class="hidden lg:flex items-center gap-2 text-lg search-toggle-btn">
+                <button id="searchBtnDesktop" type="button"
+                    class="hidden lg:flex items-center gap-2 text-lg search-toggle-btn">
                     <i class="bi bi-search"></i>
                     <span class="uppercase text-sm font-semibold tracking-wide">Search</span>
                 </button>
@@ -29,11 +30,12 @@
             <!-- Right -->
             <div class="w-1/3 flex items-center justify-end gap-2 md:gap-4">
                 <!-- Account & Cart (selalu tampil) -->
-                <a href="{{ route('dashboard') }}" class="hidden lg:inline-flex text-lg">
-                    <i class="bi bi-person"></i>
+                <a href="{{ route('dashboard') }}" aria-label="Akun / Dashboard" class="hidden lg:inline-flex text-lg">
+                    <i class="bi bi-person" aria-hidden="true"></i>
                 </a>
                 <!-- Search (mobile/tablet saja, desktop pakai tombol di kiri) -->
-                <button id="searchBtnMobile" class="text-lg lg:hidden search-toggle-btn">
+                <button id="searchBtnMobile" type="button" aria-label="Buka pencarian"
+                    class="text-lg lg:hidden search-toggle-btn">
                     <i class="bi bi-search"></i>
                 </button>
                 @include('components/cart')
@@ -43,16 +45,16 @@
         <!-- ===================== SECTION 2: clothes | Accessories | Albums | Tour (desktop only) ===================== -->
         <div class="hidden lg:flex items-center justify-center gap-10 py-3 border-t border-white/10">
             <a href="{{ route('clothes') }}">
-                <h1 class="font-bold uppercase text-sm tracking-wide">clothes</h1>
+                <span class="font-bold uppercase text-sm tracking-wide">clothes</span>
             </a>
             <a href="{{ route('accessoris') }}">
-                <h1 class="font-bold uppercase text-sm tracking-wide">Accessories</h1>
+                <span class="font-bold uppercase text-sm tracking-wide">Accessories</span>
             </a>
             <a href="{{ route('albums') }}">
-                <h1 class="font-bold uppercase text-sm tracking-wide">Albums</h1>
+                <span class="font-bold uppercase text-sm tracking-wide">Albums</span>
             </a>
             <a href="{{ route('home') }}">
-                <h1 class="font-bold uppercase text-sm tracking-wide">Tour</h1>
+                <span class="font-bold uppercase text-sm tracking-wide">Tour</span>
             </a>
         </div>
     </div>
@@ -62,7 +64,8 @@
         class="fixed left-0 w-full bg-black text-white z-40 px-4 py-3
         -translate-y-full opacity-0 transition-all duration-300">
         <div class="flex items-center gap-3 bg-white/10 rounded-full px-4 py-2 lg:max-w-md lg:mx-auto">
-            <i class="bi bi-search text-lg"></i>
+            <i class="bi bi-search text-lg" aria-hidden="true"></i>
+            <label for="searchInput" class="sr-only">Cari produk</label>
             <input id="searchInput" type="text" placeholder="Clothes, Accessoris, albums....."
                 class="bg-transparent outline-none placeholder-white/70 text-white w-full text-sm" autocomplete="off">
         </div>
@@ -83,25 +86,26 @@
         class="fixed top-0 left-0 h-full w-3/4 md:w-1/2 sm:w-2/5 bg-black text-white z-60
         flex flex-col items-start justify-center gap-7 px-8
         -translate-x-full transition-transform duration-300">
-        <button id="closeBtn" class="absolute top-5 right-5 text-3xl">
+        <button id="closeBtn" type="button" aria-label="Tutup menu navigasi" class="absolute top-5 right-5 text-3xl">
             <i class="bi bi-x"></i>
         </button>
 
         <a href="{{ route('clothes') }}" class="menu-link">
-            <h1 class="text-xl font-bold uppercase">clothes</h1>
+            <span class="text-xl font-bold uppercase">clothes</span>
         </a>
         <a href="{{ route('accessoris') }}" class="menu-link">
-            <h1 class="text-xl font-bold uppercase">Accessories</h1>
+            <span class="text-xl font-bold uppercase">Accessories</span>
         </a>
         <a href="{{ route('albums') }}" class="menu-link">
-            <h1 class="text-xl font-bold uppercase">Albums</h1>
+            <span class="text-xl font-bold uppercase">Albums</span>
         </a>
         <a href="{{ route('home') }}" class="menu-link">
-            <h1 class="text-xl font-bold uppercase">Tour</h1>
+            <span class="text-xl font-bold uppercase">Tour</span>
         </a>
         <!-- Account & Cart (selalu tampil) -->
-        <a href="{{ route('dashboard') }}" class="menu-link inline-flex lg:hidden text-lg">
-            <i class="bi bi-person"></i>
+        <a href="{{ route('dashboard') }}" aria-label="Akun / Dashboard"
+            class="menu-link inline-flex lg:hidden text-lg">
+            <i class="bi bi-person" aria-hidden="true"></i>
         </a>
     </div>
 </div>
@@ -206,7 +210,7 @@
                 .then(data => renderSearchResults(data.results))
                 .catch(() => {
                     searchResults.innerHTML =
-                        `<p class="text-white/40 text-sm p-4">Terjadi kesalahan, coba lagi.</p>`;
+                        `<p class="text-white/60 text-sm p-4">Terjadi kesalahan, coba lagi.</p>`;
                     searchResults.classList.remove("hidden");
                 });
         }, 300);
@@ -214,7 +218,7 @@
 
     function renderSearchResults(results) {
         if (results.length === 0) {
-            searchResults.innerHTML = `<p class="text-white/40 text-sm p-4">Produk tidak ditemukan.</p>`;
+            searchResults.innerHTML = `<p class="text-white/60 text-sm p-4">Produk tidak ditemukan.</p>`;
             searchResults.classList.remove("hidden");
             return;
         }
@@ -229,7 +233,7 @@
                 </div>
                 <div class="flex flex-col">
                     <span class="text-sm font-semibold text-white">${item.name}</span>
-                    <span class="text-xs text-white/40">${item.category} · ${item.price}</span>
+                    <span class="text-xs text-white/60">${item.category} · ${item.price}</span>
                 </div>
             </a>
         `).join('');

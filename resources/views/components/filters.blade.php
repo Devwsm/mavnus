@@ -1,26 +1,26 @@
 <div class="flex items-center justify-between border-b border-black/10 pb-4">
     <div class="relative flex items-center gap-4">
-        <h1 class="text-sm font-semibold uppercase tracking-wide">
+        <p class="text-sm font-semibold uppercase tracking-wide">
             Filter:
-        </h1>
+        </p>
 
-        <button type="button" onclick="togglePriceFilter()"
+        <button type="button" onclick="togglePriceFilter()" aria-expanded="false" aria-controls="priceFilterDropdown"
             class="flex items-center gap-1.5 text-sm font-semibold uppercase underline tracking-wide">
             Price
-            <i class="bi bi-chevron-down text-xs"></i>
+            <i class="bi bi-chevron-down text-xs" aria-hidden="true"></i>
         </button>
 
         {{-- Dropdown (tablet & desktop) --}}
         <div id="priceFilterDropdown"
             class="hidden absolute top-full left-0 mt-2 w-72 bg-white border border-black/10 rounded-lg shadow-lg p-4 z-20">
-            @include('components/price-filter-form')
+            @include('components/price-filter-form', ['idPrefix' => 'desktop'])
         </div>
     </div>
 
     <div class="flex">
-        <h1 class="text-sm font-semibold uppercase tracking-wide">
+        <p class="text-sm font-semibold uppercase tracking-wide">
             {{ $products->total() }} products
-        </h1>
+        </p>
     </div>
 </div>
 
@@ -36,13 +36,13 @@
 
     <div class="flex items-center justify-between p-6 border-b border-black/10">
         <h2 class="text-lg font-bold uppercase tracking-wide">Filter Harga</h2>
-        <button type="button" onclick="closePriceFilterMobile()" class="text-2xl">
-            <i class="bi bi-x"></i>
+        <button type="button" onclick="closePriceFilterMobile()" aria-label="Tutup filter harga" class="text-2xl">
+            <i class="bi bi-x" aria-hidden="true"></i>
         </button>
     </div>
 
     <div class="p-6">
-        @include('components/price-filter-form')
+        @include('components/price-filter-form', ['idPrefix' => 'mobile'])
     </div>
 </div>
 
@@ -57,6 +57,8 @@
                 openPriceFilterMobile();
             } else {
                 priceFilterDropdown.classList.toggle('hidden');
+                const priceToggleBtn = document.querySelector('[onclick="togglePriceFilter()"]');
+                priceToggleBtn?.setAttribute('aria-expanded', !priceFilterDropdown.classList.contains('hidden'));
             }
         }
 

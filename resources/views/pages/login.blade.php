@@ -1,6 +1,6 @@
 @extends('template.layout')
 @section('content')
-    <main class="flex flex-col justify-center items-center bg-black w-full min-h-screen px-4 py-12">
+    <main id="main-content" class="flex flex-col justify-center items-center bg-black w-full min-h-screen px-4 py-12">
         <div class="relative w-full max-w-sm bg-zinc-950 border border-zinc-800 rounded-2xl
                 overflow-hidden">
             {{-- Header --}}
@@ -43,7 +43,7 @@
                             placeholder="••••••••">
                     </div>
                     <button type="submit"
-                        class="w-full bg-[#B71C1C] hover:bg-[#891212] text-black font-bold uppercase tracking-widest text-sm py-3 rounded-lg transition mt-2">
+                        class="w-full bg-[#B71C1C] hover:bg-[#891212] text-white font-bold uppercase tracking-widest text-sm py-3 rounded-lg transition mt-2">
                         Masuk
                     </button>
                 </form>
