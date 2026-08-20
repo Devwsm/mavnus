@@ -3,7 +3,7 @@
     <div class="relative flex">
         @include('components/navbar')
     </div>
-    <section class="flex flex-col w-full bg-white gap-10 p-6 lg:p-14 pt-28 md:pt-22 lg:pt-32">
+    <section id="main-content" class="flex flex-col w-full bg-white gap-10 p-6 lg:p-14 pt-28 md:pt-22 lg:pt-32">
         <div class="flex flex-col items-center text-center gap-3">
             <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
                 <i class="bi bi-check-lg text-green-600 text-3xl"></i>
