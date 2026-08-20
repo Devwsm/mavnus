@@ -3,7 +3,7 @@
     <div class="relative flex">
         @include('components/navbar')
     </div>
-    <section class="flex flex-col w-full bg-white gap-10 p-6 lg:p-14 pt-28 md:pt-22 lg:pt-32">
+    <section id="main-content" class="flex flex-col w-full bg-white gap-10 p-6 lg:p-14 pt-28 md:pt-22 lg:pt-32">
         <div>
             <h1 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">Checkout</h1>
             <p class="text-sm text-gray-500 mt-2">Lengkapi data pengiriman untuk menyelesaikan pesanan.</p>
@@ -67,19 +67,20 @@
                 <div class="flex flex-col gap-4 border border-black/10 rounded-xl p-6">
                     <h2 class="text-sm font-bold uppercase tracking-widest text-black/50">Data Penerima</h2>
                     <div>
-                        <label class="block text-sm font-semibold mb-1.5">Nama Lengkap</label>
-                        <input type="text" name="customer_name" value="{{ old('customer_name') }}"
+                        <label for="customer_name" class="block text-sm font-semibold mb-1.5">Nama Lengkap</label>
+                        <input type="text" id="customer_name" name="customer_name" value="{{ old('customer_name') }}"
                             class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black"
                             placeholder="Nama penerima">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold mb-1.5">Nomor HP</label>
-                        <input type="text" name="customer_phone" value="{{ old('customer_phone') }}"
+                        <label for="customer_phone" class="block text-sm font-semibold mb-1.5">Nomor HP</label>
+                        <input type="text" id="customer_phone" name="customer_phone" value="{{ old('customer_phone') }}"
                             class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black"
                             placeholder="08xxxxxxxxxx">
                     </div>
                     <div class="relative">
-                        <label class="block text-sm font-semibold mb-1.5">Kecamatan / Kota Tujuan</label>
+                        <label for="destinationSearch" class="block text-sm font-semibold mb-1.5">Kecamatan / Kota
+                            Tujuan</label>
                         <input type="text" id="destinationSearch" autocomplete="off"
                             class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black"
                             placeholder="Ketik nama kecamatan, kota, atau kode pos...">
@@ -92,8 +93,8 @@
                         <p id="destinationSelected" class="text-xs text-gray-500 mt-1.5"></p>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold mb-1.5">Alamat Detail</label>
-                        <textarea name="customer_address" rows="3"
+                        <label for="customer_address" class="block text-sm font-semibold mb-1.5">Alamat Detail</label>
+                        <textarea id="customer_address" name="customer_address" rows="3"
                             class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black"
                             placeholder="Nama jalan, nomor rumah, RT/RW, patokan">{{ old('customer_address') }}</textarea>
                     </div>
