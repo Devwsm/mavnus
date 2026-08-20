@@ -38,7 +38,7 @@
                             </span>
                             <div class="flex flex-col">
                                 <span class="text-sm font-semibold text-white">{{ $order->order_number }}</span>
-                                <span class="text-white/40 text-xs">{{ $order->customer_name }} ·
+                                <span class="text-white/60 text-xs">{{ $order->customer_name }} ·
                                     {{ $order->created_at->diffForHumans() }}</span>
                             </div>
                         </div>
@@ -134,7 +134,7 @@
                                 <h3 class="font-semibold text-white uppercase tracking-wide truncate">
                                     {{ $product->name }}
                                 </h3>
-                                <p class="text-white/40 text-xs mt-0.5 line-clamp-1">
+                                <p class="text-white/60 text-xs mt-0.5 line-clamp-1">
                                     {{ $product->description ?: 'Tidak ada deskripsi' }}
                                 </p>
                             </div>
@@ -149,12 +149,12 @@
                             </div>
 
                             <div class="flex items-center justify-between pt-3 border-t border-white/6">
-                                <span class="text-white/40 text-xs">Total Stok</span>
+                                <span class="text-white/60 text-xs">Total Stok</span>
                                 <span class="text-white text-sm font-semibold">{{ $totalStock }} pcs</span>
                             </div>
 
                             <div class="flex items-center justify-between">
-                                <span class="text-white/40 text-xs">Berat</span>
+                                <span class="text-white/60 text-xs">Berat</span>
                                 <span class="text-white text-sm">{{ $product->weight }} gram</span>
                             </div>
 
@@ -195,5 +195,5 @@
             </div>
         </div>
 
-    </div>
-@endsection
+        </div>
+    @endsection
