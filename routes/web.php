@@ -9,6 +9,7 @@ use App\Http\Controllers\loginController;
 use App\Http\Controllers\orderController;
 use App\Http\Controllers\searchController;
 use App\Http\Controllers\ShippingController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\visitorController;
 use Illuminate\Support\Facades\Route;
 
@@ -56,23 +57,26 @@ Route::prefix('/dashboard')->middleware('cekLogin')->group(function () {
 
 Route::prefix('/')->group(function () {
     Route::get('/', [homeController::class, 'home'])->name('home');
-    Route::get('/search', [searchController::class, 'search'])->name('search');
+
+    // Endpoint pencarian live suggestion - rawan disalahgunakan buat spam request
+    Route::get('/search', [searchController::class, 'search'])->name('search')->middleware('throttle:30,1');
 
     Route::prefix('/shipping')->group(function () {
-        Route::get('/search', [ShippingController::class, 'searchDestination'])->name('shipping.search');
-        Route::post('/cost', [ShippingController::class, 'calculateCost'])->name('shipping.cost');
+        Route::get('/search', [ShippingController::class, 'searchDestination'])->name('shipping.search')->middleware('throttle:30,1');
+        Route::post('/cost', [ShippingController::class, 'calculateCost'])->name('shipping.cost')->middleware('throttle:20,1');
     });
 
     Route::prefix('/cart')->group(function () {
-        Route::get('/', [cartController::class, 'index'])->name('cart.index');
-        Route::post('/add', [cartController::class, 'add'])->name('cart.add');
-        Route::patch('/{cartItem}', [cartController::class, 'update'])->name('cart.update');
-        Route::delete('/{cartItem}', [cartController::class, 'destroy'])->name('cart.destroy');
+        Route::get('/', [cartController::class, 'index'])->name('cart.index')->middleware('throttle:60,1');
+        Route::post('/add', [cartController::class, 'add'])->name('cart.add')->middleware('throttle:20,1');
+        Route::patch('/{cartItem}', [cartController::class, 'update'])->name('cart.update')->middleware('throttle:30,1');
+        Route::delete('/{cartItem}', [cartController::class, 'destroy'])->name('cart.destroy')->middleware('throttle:30,1');
     });
 
     Route::prefix('/order')->group(function () {
         Route::get('/checkout', [orderController::class, 'checkout'])->name('order.checkout');
-        Route::post('/', [orderController::class, 'store'])->name('order.store');
+        // Pembuatan order - paling sensitif, dibatasi ketat biar ga dipakai spam/bot checkout
+        Route::post('/', [orderController::class, 'store'])->name('order.store')->middleware('throttle:5,1');
         Route::get('/{order}/success', [orderController::class, 'success'])->name('order.success');
     });
 
@@ -85,4 +89,6 @@ Route::prefix('/')->group(function () {
     Route::get('/albums', [homeController::class, 'albums'])->name('albums');
 
     Route::get('/info', [homeController::class, 'footerInfo'])->name('footer');
+
+    // Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 });
