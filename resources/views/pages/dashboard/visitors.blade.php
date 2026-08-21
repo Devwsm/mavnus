@@ -105,7 +105,13 @@
 
             {{-- Halaman populer --}}
             <div class="bg-[#0D0D0D] border border-white/10 rounded-2xl p-5 flex flex-col gap-4">
-                <h2 class="text-sm font-bold uppercase tracking-wide">Halaman Populer</h2>
+                <div class="flex items-center justify-between">
+                    <h2 class="text-sm font-bold uppercase tracking-wide">Halaman Populer</h2>
+                    <a href="{{ route('dashboard.visitors.pages') }}"
+                        class="text-white/40 hover:text-white text-xs font-semibold uppercase tracking-wide transition">
+                        Lihat Lebih Banyak →
+                    </a>
+                </div>
 
                 <div class="flex flex-col gap-3">
                     @forelse ($topPages as $page)
@@ -131,7 +137,30 @@
 
             {{-- Riwayat kunjungan --}}
             <div class="flex flex-col gap-4">
-                <h2 class="text-xl font-bold uppercase tracking-wide">Riwayat Kunjungan</h2>
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div class="flex flex-col">
+                        <h2 class="text-xl font-bold uppercase tracking-wide">Riwayat Kunjungan</h2>
+                        <span class="text-white/30 text-xs mt-1">Menampilkan maksimal 100 kunjungan terakhir</span>
+                    </div>
+
+                    <form method="GET" action="{{ route('dashboard.visitors') }}" class="flex items-center gap-2">
+                        <select name="page_url" onchange="this.form.submit()"
+                            class="bg-[#0D0D0D] border border-white/10 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-white/30">
+                            <option value="">Semua Halaman</option>
+                            @foreach ($allPageUrls as $url)
+                                <option value="{{ $url }}" {{ $selectedUrl === $url ? 'selected' : '' }}>
+                                    {{ \App\Models\Visit::friendlyLabel($url) }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @if ($selectedUrl)
+                            <a href="{{ route('dashboard.visitors') }}"
+                                class="text-white/40 hover:text-white text-xs font-semibold uppercase tracking-wide transition whitespace-nowrap">
+                                Reset
+                            </a>
+                        @endif
+                    </form>
+                </div>
 
                 <div class="flex flex-col gap-2">
                     @forelse ($recentVisits as $visit)
