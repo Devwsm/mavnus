@@ -9,6 +9,7 @@ use App\Http\Controllers\loginController;
 use App\Http\Controllers\orderController;
 use App\Http\Controllers\searchController;
 use App\Http\Controllers\ShippingController;
+use App\Http\Controllers\visitorController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('/')->group(function () {
@@ -31,6 +32,10 @@ Route::prefix('/dashboard')->middleware('cekLogin')->group(function () {
         Route::post('/store', [clothesController::class, 'store'])->name('clothes.store');
         Route::delete('/{product}', [clothesController::class, 'destroy'])->name('clothes.destroy');
         Route::put('/{product}', [clothesController::class, 'update'])->name('clothes.update');
+    });
+
+    Route::prefix('/visitors')->group(function () {
+        Route::get('/', [visitorController::class, 'dashboardIndex'])->name('dashboard.visitors');
     });
 
     Route::prefix('/import-export')->middleware('cekLogin')->group(function () {

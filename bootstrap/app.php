@@ -16,6 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'cekLogin' => \App\Http\Middleware\cekLogin::class,
         ]);
+
+        $middleware->web(append: [
+            \App\Http\Middleware\TrackVisit::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

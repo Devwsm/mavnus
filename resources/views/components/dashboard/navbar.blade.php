@@ -22,6 +22,17 @@
         </span>
     </a>
 
+    <div class="w-px h-6 bg-white/10 mx-1"></div>
+
+    <a href="{{ route('dashboard.visitors') }}"
+        class="group relative flex items-center justify-center w-12 h-12 rounded-xl text-white/85 hover:text-white hover:bg-white/10 text-xl transition {{ request()->routeIs('dashboard.visitors') ? 'text-[#B71C1C] bg-[#B71C1C]/20' : '' }}">
+        <i class="bi bi-people-fill"></i>
+        <span
+            class="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition">
+            Pengunjung
+        </span>
+    </a>
+
     {{-- Produk (gabungan Clothes/Accessories/Albums) --}}
     <div class="relative">
         <button type="button" onclick="toggleProductMenu()" id="productMenuBtn"
@@ -103,6 +114,11 @@
         class="flex flex-col items-center gap-1.5 {{ request()->routeIs('dashboard.orders') ? 'text-[#B71C1C]' : 'text-white' }}">
         <i class="bi bi-box-seam text-3xl"></i>
         <span class="text-[10px] font-semibold uppercase tracking-wide">Orders</span>
+    </a>
+    <a href="{{ route('dashboard.visitors') }}"
+        class="flex flex-col items-center gap-1.5 {{ request()->routeIs('dashboard.visitors') ? 'text-[#B71C1C]' : 'text-white' }}">
+        <i class="bi bi-people-fill text-3xl"></i>
+        <span class="text-[10px] font-semibold uppercase tracking-wide">Pengunjung</span>
     </a>
 
     {{-- Produk (accordion) --}}
