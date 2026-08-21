@@ -36,6 +36,7 @@ Route::prefix('/dashboard')->middleware('cekLogin')->group(function () {
 
     Route::prefix('/visitors')->group(function () {
         Route::get('/', [visitorController::class, 'dashboardIndex'])->name('dashboard.visitors');
+        Route::get('/pages', [visitorController::class, 'pages'])->name('dashboard.visitors.pages');
     });
 
     Route::prefix('/import-export')->middleware('cekLogin')->group(function () {
