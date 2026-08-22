@@ -1,4 +1,8 @@
 @extends('template.layout')
+
+@section('title', 'Info - Mavnus')
+@section('meta_description', 'Informasi seputar Mavnus: kebijakan, kontak, dan bantuan.')
+
 @section('content')
     <div class="relative flex">
         @include('components/navbar')
@@ -170,5 +174,5 @@
             });
         </script>
     @endonce
-    
+
 @endsection
