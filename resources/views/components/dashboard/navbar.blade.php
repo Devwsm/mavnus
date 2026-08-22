@@ -1,10 +1,22 @@
 {{-- desktop --}}
+@php
+    $navLowStockCount = \App\Models\ProductVariant::where('stock', '>', 0)
+        ->where('stock', '<=', 3)
+        ->whereHas('product', fn($query) => $query->where('is_active', true))
+        ->count();
+@endphp
 <div
     class="nav z-50 fixed bottom-5 left-1/2 -translate-x-1/2 hidden lg:flex items-center gap-1 bg-[#0D0D0D] rounded-2xl px-2 py-2">
 
     <a href="{{ route('dashboard') }}"
         class="group relative flex items-center justify-center w-12 h-12 rounded-xl text-white/85 hover:text-white hover:bg-white/10 text-xl transition {{ request()->routeIs('dashboard') ? 'text-[#B71C1C] bg-[#B71C1C]/20' : '' }}">
         <i class="bi bi-house-door-fill"></i>
+        @if ($navLowStockCount > 0)
+            <span
+                class="absolute top-1.5 right-1.5 flex items-center justify-center min-w-4 h-4 px-1 rounded-full bg-amber-400 text-black text-[9px] font-bold">
+                {{ $navLowStockCount > 9 ? '9+' : $navLowStockCount }}
+            </span>
+        @endif
         <span
             class="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition">
             Dashboard
@@ -106,8 +118,16 @@
     translate-x-full transition-transform duration-300 lg:hidden overflow-y-auto py-10">
 
     <a href="{{ route('dashboard') }}"
-        class="flex flex-col items-center gap-1.5 {{ request()->routeIs('dashboard') ? 'text-[#B71C1C]' : 'text-white' }}">
-        <i class="bi bi-house-door-fill text-3xl"></i>
+        class="relative flex flex-col items-center gap-1.5 {{ request()->routeIs('dashboard') ? 'text-[#B71C1C]' : 'text-white' }}">
+        <span class="relative inline-block">
+            <i class="bi bi-house-door-fill text-3xl"></i>
+            @if ($navLowStockCount > 0)
+                <span
+                    class="absolute -top-1 -right-2 flex items-center justify-center min-w-4 h-4 px-1 rounded-full bg-amber-400 text-black text-[9px] font-bold">
+                    {{ $navLowStockCount > 9 ? '9+' : $navLowStockCount }}
+                </span>
+            @endif
+        </span>
         <span class="text-[10px] font-semibold uppercase tracking-wide">Dashboard</span>
     </a>
     <a href="{{ route('dashboard.orders') }}"

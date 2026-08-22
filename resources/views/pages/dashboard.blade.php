@@ -10,6 +10,41 @@
             </p>
         </div>
 
+        @if ($lowStockVariants->isNotEmpty())
+            <div class="flex flex-col w-full max-w-6xl gap-4 px-6 lg:px-14 pt-2">
+                <div class="bg-amber-400/5 border border-amber-400/20 rounded-2xl p-5 flex flex-col gap-4">
+                    <div class="flex items-center gap-2.5">
+                        <i class="bi bi-exclamation-triangle-fill text-amber-400"></i>
+                        <h2 class="text-amber-400 text-sm font-bold uppercase tracking-wide">
+                            Stok Menipis ({{ $lowStockVariants->count() }})
+                        </h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                        @foreach ($lowStockVariants as $variant)
+                            <a href="{{ route('dashboard', ['edit' => optional($variant->product)->id_product]) }}#product-{{ optional($variant->product)->id_product }}"
+                                class="flex items-center gap-3 bg-black/40 hover:bg-black/60 border border-white/5 rounded-xl px-3.5 py-2.5 transition">
+                                <div class="w-9 h-9 rounded-lg bg-white/5 overflow-hidden shrink-0">
+                                    @if (optional($variant->product)->images && $variant->product->images->first())
+                                        <img src="{{ Storage::url($variant->product->images->first()->image_path) }}"
+                                            alt="{{ $variant->product->name }}" class="w-full h-full object-cover">
+                                    @endif
+                                </div>
+                                <div class="flex flex-col min-w-0">
+                                    <span class="text-white text-xs font-semibold truncate">
+                                        {{ $variant->product->name ?? 'Produk tidak ditemukan' }}
+                                    </span>
+                                    <span class="text-white/40 text-[11px]">
+                                        Ukuran {{ $variant->label }} · tersisa {{ $variant->stock }} pcs
+                                    </span>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <div class="flex flex-col w-full max-w-6xl gap-4 p-6 lg:p-14 pb-8">
             <div class="flex items-center justify-between">
                 <h2 class="text-xl font-bold uppercase tracking-wide">Pesanan Terbaru</h2>
@@ -38,7 +73,7 @@
                             </span>
                             <div class="flex flex-col">
                                 <span class="text-sm font-semibold text-white">{{ $order->order_number }}</span>
-                                <span class="text-white/60 text-xs">{{ $order->customer_name }} ·
+                                <span class="text-white/40 text-xs">{{ $order->customer_name }} ·
                                     {{ $order->created_at->diffForHumans() }}</span>
                             </div>
                         </div>
@@ -72,8 +107,8 @@
                         $extraImages = $product->images->slice(1, 3);
                         $remainingCount = $product->images->count() - 4;
                     @endphp
-                    <div
-                        class="group bg-[#0D0D0D] border border-white/10 rounded-2xl overflow-hidden hover:border-white/20 transition-all duration-300">
+                    <div id="product-{{ $product->id_product }}"
+                        class="group bg-[#0D0D0D] border border-white/10 rounded-2xl overflow-hidden hover:border-white/20 transition-all duration-300 scroll-mt-24">
 
                         {{-- Foto --}}
                         <div class="relative w-full aspect-square bg-black overflow-hidden">
@@ -134,7 +169,7 @@
                                 <h3 class="font-semibold text-white uppercase tracking-wide truncate">
                                     {{ $product->name }}
                                 </h3>
-                                <p class="text-white/60 text-xs mt-0.5 line-clamp-1">
+                                <p class="text-white/40 text-xs mt-0.5 line-clamp-1">
                                     {{ $product->description ?: 'Tidak ada deskripsi' }}
                                 </p>
                             </div>
@@ -149,12 +184,12 @@
                             </div>
 
                             <div class="flex items-center justify-between pt-3 border-t border-white/6">
-                                <span class="text-white/60 text-xs">Total Stok</span>
+                                <span class="text-white/40 text-xs">Total Stok</span>
                                 <span class="text-white text-sm font-semibold">{{ $totalStock }} pcs</span>
                             </div>
 
                             <div class="flex items-center justify-between">
-                                <span class="text-white/60 text-xs">Berat</span>
+                                <span class="text-white/40 text-xs">Berat</span>
                                 <span class="text-white text-sm">{{ $product->weight }} gram</span>
                             </div>
 
@@ -196,4 +231,25 @@
         </div>
 
         </div>
+
+        <script>
+            // Kalau datang dari klik "Stok Menipis" (?edit=ID), otomatis buka modal edit produk itu
+            document.addEventListener('DOMContentLoaded', () => {
+                const editId = new URLSearchParams(window.location.search).get('edit');
+                if (!editId) return;
+
+                const card = document.getElementById('product-' + editId);
+                if (card) {
+                    card.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }
+
+                const modal = document.getElementById('editModal-' + editId);
+                if (modal && typeof toggleEditModal === 'function') {
+                    toggleEditModal('editModal-' + editId, true);
+                }
+            });
+        </script>
     @endsection
