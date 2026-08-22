@@ -90,5 +90,5 @@ Route::prefix('/')->group(function () {
 
     Route::get('/info', [homeController::class, 'footerInfo'])->name('footer');
 
-    // Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+    Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 });

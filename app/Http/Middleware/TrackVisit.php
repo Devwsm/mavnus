@@ -25,6 +25,7 @@ class TrackVisit
         'cart',
         'search',
         'shipping',
+        'sitemap.xml',
     ];
 
     public function handle(Request $request, Closure $next): Response
