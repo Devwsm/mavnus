@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(append: [
             \App\Http\Middleware\TrackVisit::class,
+            \App\Http\Middleware\AutoCancelExpiredOrders::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
