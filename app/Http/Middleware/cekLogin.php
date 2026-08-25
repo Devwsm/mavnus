@@ -11,7 +11,7 @@ class cekLogin
     public function handle(Request $request, Closure $next)
     {
         if (!$request->session()->get('login')) {
-            return redirect()->route('login');
+            return redirect()->route('crew.login');
         }
         return $next($request);
     }

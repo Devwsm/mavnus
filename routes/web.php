@@ -14,8 +14,14 @@ use App\Http\Controllers\visitorController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('/')->group(function () {
+    // Login customer - UI aja dulu, backend belum ada (checkout tetep bisa guest)
     Route::get('/login', [loginController::class, 'login'])->name('login');
-    Route::post('/login', [loginController::class, 'prosesLogin'])->name('login.proses')->middleware('throttle:5,1');
+    Route::post('/login', [loginController::class, 'customerLoginPlaceholder'])->name('login.proses')->middleware('throttle:5,1');
+
+    // Login staff/crew - fungsional, otentikasi ke tabel accounts. Gak dilink di halaman customer.
+    Route::get('/crew-portal', [loginController::class, 'crewLogin'])->name('crew.login');
+    Route::post('/crew-portal', [loginController::class, 'prosesLogin'])->name('crew.login.proses')->middleware('throttle:5,1');
+
     Route::get('/logout', [loginController::class, 'logout'])->name('logout');
 });
 
