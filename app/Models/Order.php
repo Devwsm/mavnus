@@ -11,6 +11,7 @@ class Order extends Model
     protected $primaryKey = 'id_order';
     protected $fillable = [
         'order_number',
+        'user_id',
         'customer_name',
         'customer_phone',
         'customer_address',
@@ -40,6 +41,12 @@ class Order extends Model
     public function items()
     {
         return $this->hasMany(OrderItem::class, 'order_id', 'id_order');
+    }
+
+    // Relasi ke akun customer - nullable, order guest gak punya user_id
+    public function user()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'user_id');
     }
 
     public static function generateOrderNumber(): string

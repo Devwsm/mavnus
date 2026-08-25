@@ -6,6 +6,7 @@ use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -94,6 +95,9 @@ class orderController extends Controller
             // 1. Buat order (header)
             $order = Order::create([
                 'order_number'      => Order::generateOrderNumber(),
+                // Kalau lagi login, order otomatis kesambung ke akun & muncul di riwayat pesanan.
+                // Kalau checkout sebagai guest, tetep null - gak masalah, order tetep kebuat normal.
+                'user_id'           => Auth::id(),
                 'customer_name'     => $validated['customer_name'],
                 'customer_phone'    => $validated['customer_phone'],
                 'customer_address'  => $validated['customer_address'] . ', ' . $validated['destination_label'],
@@ -147,6 +151,13 @@ class orderController extends Controller
 
     public function success(Order $order)
     {
+        // Order yang kesambung ke akun cuma boleh diliat pemiliknya sendiri.
+        // Order guest (user_id null) tetep bisa diakses siapa aja yang punya link-nya,
+        // soalnya emang gak ada akun yang bisa dicocokin.
+        if ($order->user_id && $order->user_id !== Auth::id()) {
+            abort(403);
+        }
+
         $order->load('items');
         return view('pages.order-success', compact('order'));
     }

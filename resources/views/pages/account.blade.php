@@ -34,7 +34,7 @@
                             class="flex items-center gap-3 px-5 py-3.5 text-sm font-semibold uppercase tracking-wide bg-black text-white">
                             <i class="bi bi-person-fill"></i> Akun Saya
                         </a>
-                        <a href="#"
+                        <a href="{{ route('account.orders') }}"
                             class="flex items-center gap-3 px-5 py-3.5 text-sm font-semibold uppercase tracking-wide border-t border-black/10 hover:bg-gray-50 transition">
                             <i class="bi bi-bag-fill"></i> Riwayat Pesanan
                         </a>
@@ -69,7 +69,9 @@
                     <div class="mt-8 pt-6 border-t border-black/10">
                         <p class="text-sm text-gray-500">
                             <i class="bi bi-info-circle mr-1.5"></i>
-                            Riwayat pesanan bakal muncul di sini begitu fiturnya udah nyambung ke akunmu.
+                            Mau lihat pesanan kamu? Buka <a href="{{ route('account.orders') }}"
+                                class="font-semibold underline underline-offset-4 decoration-black/30 hover:decoration-black transition">Riwayat
+                                Pesanan</a>.
                         </p>
                     </div>
                 </div>
