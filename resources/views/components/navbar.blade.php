@@ -30,7 +30,7 @@
             <!-- Right -->
             <div class="w-1/3 flex items-center justify-end gap-2 md:gap-4">
                 <!-- Account & Cart (selalu tampil) -->
-                <a href="{{ route('dashboard') }}" aria-label="Akun / Dashboard" class="hidden lg:inline-flex text-lg">
+                <a href="{{ route('account') }}" aria-label="Akun Saya" class="hidden lg:inline-flex text-lg">
                     <i class="bi bi-person" aria-hidden="true"></i>
                 </a>
                 <!-- Search (mobile/tablet saja, desktop pakai tombol di kiri) -->
@@ -103,8 +103,7 @@
             <span class="text-xl font-bold uppercase">Tour</span>
         </a>
         <!-- Account & Cart (selalu tampil) -->
-        <a href="{{ route('dashboard') }}" aria-label="Akun / Dashboard"
-            class="menu-link inline-flex lg:hidden text-lg">
+        <a href="{{ route('account') }}" aria-label="Akun Saya" class="menu-link inline-flex lg:hidden text-lg">
             <i class="bi bi-person" aria-hidden="true"></i>
         </a>
     </div>

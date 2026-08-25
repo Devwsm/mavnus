@@ -1,62 +1,53 @@
-{{--
-    Halaman login CUSTOMER/pembeli.
-    Catatan: backend login customer belum dibangun (masih rencana Fase 1),
-    form di bawah ini baru UI shell dulu - action="#" belum diproses ke mana-mana.
---}}
+{{-- Halaman login CUSTOMER, tema disamain sama halaman publik lain (checkout, dll) --}}
 @extends('template.layout')
 @section('content')
-    <main id="main-content" class="flex flex-col justify-center items-center bg-black w-full min-h-screen px-4 py-12">
-        <div class="relative w-full max-w-sm bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden">
-            {{-- Header --}}
-            <div class="px-8 pt-8 pb-6 text-center">
-                <p class="text-[#B71C1C] text-[10px] font-semibold tracking-[0.3em] uppercase">Selamat Datang</p>
-                <h1 class="text-white text-4xl font-black uppercase tracking-tight leading-none mt-2">Mavnus</h1>
-                <p class="text-zinc-500 text-sm mt-1">Masuk ke akunmu</p>
+    <div class="relative flex">
+        @include('components/navbar')
+    </div>
+    <section id="main-content"
+        class="flex flex-col items-center w-full bg-white gap-10 p-6 lg:p-14 pt-28 md:pt-22 lg:pt-32 min-h-screen">
+        <div class="w-full max-w-md">
+            <div class="text-center mb-8">
+                <h1 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">Masuk</h1>
+                <p class="text-sm text-gray-500 mt-2">Masuk ke akun Mavnus kamu</p>
             </div>
 
-            {{-- Form --}}
-            <div class="px-8 pt-2 pb-8">
-                <form action="#" method="POST" class="space-y-4">
+            <div class="border border-black/10 rounded-xl p-6">
+                <form action="{{ route('login.proses') }}" method="POST" class="flex flex-col gap-4">
                     @csrf
                     @include('components/errors/alerts')
+
                     <div>
-                        <label for="email"
-                            class="block text-[11px] font-semibold tracking-widest uppercase text-zinc-500 mb-1.5">
-                            Email
-                        </label>
-                        <input type="email" id="email" name="email"
-                            class="w-full bg-black/60 border border-zinc-800 rounded-lg px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-[#B71C1C] focus:ring-1 focus:ring-[#B71C1C] transition"
+                        <label for="email" class="block text-sm font-semibold mb-1.5">Email</label>
+                        <input type="email" id="email" name="email" value="{{ old('email') }}"
+                            class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black"
                             placeholder="nama@email.com">
                     </div>
+
                     <div>
                         <div class="flex items-center justify-between mb-1.5">
-                            <label for="password"
-                                class="block text-[11px] font-semibold tracking-widest uppercase text-zinc-500">
-                                Password
-                            </label>
-                            <a href="#" class="text-[#B71C1C] hover:text-[#891212] text-xs transition">
-                                Lupa password?</a>
+                            <label for="password" class="block text-sm font-semibold">Password</label>
+                            <a href="#" class="text-xs text-gray-500 hover:text-black transition">Lupa password?</a>
                         </div>
                         <input type="password" id="password" name="password"
-                            class="w-full bg-black/60 border border-zinc-800 rounded-lg px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-[#B71C1C] focus:ring-1 focus:ring-[#B71C1C] transition"
+                            class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black"
                             placeholder="••••••••">
                     </div>
+
                     <button type="submit"
-                        class="w-full bg-[#B71C1C] hover:bg-[#891212] text-white font-bold uppercase tracking-widest text-sm py-3 rounded-lg transition mt-2">
+                        class="bg-black hover:bg-black/80 text-white uppercase font-bold tracking-widest text-sm py-3.5 rounded-lg transition mt-2">
                         Masuk
                     </button>
                 </form>
 
-                {{-- Divider --}}
                 <div class="flex items-center gap-3 my-6">
-                    <div class="flex-1 border-t border-zinc-800"></div>
-                    <span class="text-zinc-600 text-xs uppercase tracking-widest">atau</span>
-                    <div class="flex-1 border-t border-zinc-800"></div>
+                    <div class="flex-1 border-t border-black/10"></div>
+                    <span class="text-gray-400 text-xs uppercase tracking-widest">atau</span>
+                    <div class="flex-1 border-t border-black/10"></div>
                 </div>
 
-                {{-- Google login --}}
                 <a href="#"
-                    class="w-full flex items-center justify-center gap-3 border border-zinc-700 hover:border-zinc-500 bg-white/5 hover:bg-white/10 text-white font-medium text-sm py-3 rounded-lg transition">
+                    class="w-full flex items-center justify-center gap-3 border border-black/10 hover:border-black/30 text-sm font-medium py-3 rounded-lg transition">
                     <svg width="18" height="18" viewBox="0 0 48 48">
                         <path fill="#FFC107"
                             d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.4-.4-3.5z" />
@@ -70,10 +61,13 @@
                     Masuk dengan Google
                 </a>
             </div>
-        </div>
 
-        <p class="text-zinc-500 text-xs text-center mt-6">
-            Belum punya akun? <a href="#" class="text-[#B71C1C] hover:underline">Daftar di sini</a>
-        </p>
-    </main>
+            <p class="text-gray-500 text-sm text-center mt-6">
+                Belum punya akun? <a href="{{ route('register') }}"
+                    class="text-black font-semibold underline underline-offset-4 decoration-black/30 hover:decoration-black transition">Daftar
+                    di sini</a>
+            </p>
+        </div>
+    </section>
+    @include('components/footer')
 @endsection

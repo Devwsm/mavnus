@@ -9,17 +9,12 @@ use Illuminate\Support\Facades\Hash;
 class loginController extends Controller
 {
     //
-    // Login CUSTOMER - UI shell dulu, backend belum dibangun (Fase 1, belum dieksekusi)
+    // Method login() customer dipindah ke authController.
+    // View 'pages.login' sekarang di-render lewat authController context
+    // (route GET /login masih nunjuk ke sini cuma buat nampilin view-nya doang).
     public function login()
     {
         return view('pages.login');
-    }
-
-    // Placeholder proses login customer - belum ada tabel/logic auth customer sama sekali,
-    // sengaja dipisah dari prosesLogin() staff biar gak ketuker otentikasi ke tabel accounts
-    public function customerLoginPlaceholder(Request $request)
-    {
-        return back()->with('info', 'Login akun customer segera hadir, untuk saat ini checkout masih bisa sebagai guest.');
     }
 
     // Login STAFF/crew - halaman terpisah, gak dilink di mana pun di sisi customer

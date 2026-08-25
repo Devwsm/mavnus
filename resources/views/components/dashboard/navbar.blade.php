@@ -87,7 +87,7 @@
 
     <div class="w-px h-6 bg-white/10 mx-1"></div>
 
-    <a href="{{ route('logout') }}"
+    <a href="{{ route('crew.logout') }}"
         class="group relative flex items-center justify-center w-12 h-12 rounded-xl text-[#B71C1C] hover:text-[#891212] hover:bg-[#B71C1C]/5 text-xl transition">
         <i class="bi bi-box-arrow-right"></i>
         <span
@@ -172,7 +172,8 @@
         <i class="bi bi-file-earmark-excel text-3xl"></i>
         <span class="text-[10px] font-semibold uppercase tracking-wide">Import & Export</span>
     </a>
-    <a href="{{ route('logout') }}" class="flex flex-col items-center gap-1.5 text-[#B71C1C] hover:text-[#891212]">
+    <a href="{{ route('crew.logout') }}"
+        class="flex flex-col items-center gap-1.5 text-[#B71C1C] hover:text-[#891212]">
         <i class="bi bi-box-arrow-right text-3xl"></i>
         <span class="text-[10px] font-semibold uppercase tracking-wide">Logout</span>
     </a>

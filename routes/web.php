@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\accountController;
+use App\Http\Controllers\authController;
 use App\Http\Controllers\cartController;
 use App\Http\Controllers\clothesController;
 use App\Http\Controllers\dashboardController;
@@ -14,15 +16,23 @@ use App\Http\Controllers\visitorController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('/')->group(function () {
-    // Login customer - UI aja dulu, backend belum ada (checkout tetep bisa guest)
+    // Login & daftar CUSTOMER - pakai Laravel Auth bawaan (tabel users)
     Route::get('/login', [loginController::class, 'login'])->name('login');
-    Route::post('/login', [loginController::class, 'customerLoginPlaceholder'])->name('login.proses')->middleware('throttle:5,1');
+    Route::post('/login', [authController::class, 'processLogin'])->name('login.proses')->middleware('throttle:5,1');
 
-    // Login staff/crew - fungsional, otentikasi ke tabel accounts. Gak dilink di halaman customer.
+    Route::get('/register', [authController::class, 'register'])->name('register');
+    Route::post('/register', [authController::class, 'processRegister'])->name('register.proses')->middleware('throttle:5,1');
+
+    Route::get('/logout', [authController::class, 'logout'])->name('logout');
+
+    // Halaman akun customer - kalau belum login otomatis dilempar ke /login,
+    // abis berhasil login balik lagi ke sini (bawaan Laravel, gak perlu logic tambahan)
+    Route::get('/account', [accountController::class, 'index'])->name('account')->middleware('auth');
+
+    // Login STAFF/crew - fungsional, otentikasi ke tabel accounts. Gak dilink di halaman customer.
     Route::get('/crew-portal', [loginController::class, 'crewLogin'])->name('crew.login');
     Route::post('/crew-portal', [loginController::class, 'prosesLogin'])->name('crew.login.proses')->middleware('throttle:5,1');
-
-    Route::get('/logout', [loginController::class, 'logout'])->name('logout');
+    Route::get('/crew-portal/logout', [loginController::class, 'logout'])->name('crew.logout');
 });
 
 Route::prefix('/dashboard')->middleware('cekLogin')->group(function () {
