@@ -20,11 +20,13 @@ class product extends Model
         'weight',
         'description',
         'is_active',
+        'published_at',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'price' => 'integer',
+        'published_at' => 'datetime',
     ];
 
     // Relasi: satu produk bisa punya banyak foto, diurutkan sesuai sort_order
@@ -67,10 +69,20 @@ class product extends Model
         ]);
     }
 
-    // Scope: filter produk yang statusnya aktif (stok tersedia)
+    // Scope: filter produk yang statusnya aktif (stok tersedia) DAN udah lewat waktu rilisnya
+    // (dipakai di semua query storefront - home, listing, search, sitemap - jadi produk
+    // yang masih dijadwalkan otomatis kesembunyi tanpa perlu ubah tiap controller)
     public function scopeActive($query)
     {
-        return $query->where('is_active', true);
+        return $query->where('is_active', true)
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now());
+    }
+
+    // Accessor: true kalau produk masih dijadwalkan (belum waktunya tayang)
+    public function getIsScheduledAttribute(): bool
+    {
+        return $this->published_at && $this->published_at->isFuture();
     }
 
     // Scope: filter produk yang kategorinya "clothes" saja

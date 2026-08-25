@@ -12,7 +12,8 @@
     <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="toggleEditModal('{{ $editId }}', false)">
     </div>
 
-    <div class="relative bg-[#0D0D0D] border border-white/10 rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+    <div
+        class="relative bg-[#0D0D0D] border border-white/10 rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto no-scrollbar">
 
         <div class="flex items-center justify-between p-6 border-b border-white/10 sticky top-0 bg-[#0D0D0D] z-10">
             <h2 class="text-lg font-bold text-white uppercase tracking-wide">Edit {{ $product->name }}</h2>
@@ -67,6 +68,40 @@
                         <input type="text" name="material" value="{{ $product->clothes->material }}"
                             class="w-full bg-black border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#B71C1C]">
                     </div>
+                </div>
+            </div>
+
+            {{-- Jadwal Rilis --}}
+            <div class="flex flex-col gap-4">
+                <h3 class="text-xs font-semibold uppercase tracking-widest text-[#B71C1C]">Jadwal Rilis</h3>
+                <div class="flex gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="release_mode" value="now"
+                            id="releaseModeNow-{{ $editId }}"
+                            onchange="toggleEditScheduledField('{{ $editId }}')" class="accent-[#B71C1C]"
+                            @checked(!$product->is_scheduled)>
+                        <span class="text-sm text-white">Publish Sekarang</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="release_mode" value="scheduled"
+                            id="releaseModeScheduled-{{ $editId }}"
+                            onchange="toggleEditScheduledField('{{ $editId }}')" class="accent-[#B71C1C]"
+                            @checked($product->is_scheduled)>
+                        <span class="text-sm text-white">Jadwalkan</span>
+                    </label>
+                </div>
+                <div id="scheduledAtWrapper-{{ $editId }}"
+                    style="display: {{ $product->is_scheduled ? 'block' : 'none' }};"
+                    data-default-hour="{{ $product->is_scheduled ? (int) $product->published_at->format('H') : now()->format('H') }}"
+                    data-default-minute="{{ $product->is_scheduled ? (int) (round($product->published_at->format('i') / 5) * 5) % 60 : (int) (round(now()->format('i') / 5) * 5) % 60 }}">
+                    @include('components.dashboard.release-schedule-picker', [
+                        'id' => $editId,
+                        'date' => $product->is_scheduled ? $product->published_at->format('Y-m-d') : null,
+                        'hour' => $product->is_scheduled ? (int) $product->published_at->format('H') : null,
+                        'minute' => $product->is_scheduled
+                            ? (int) (round($product->published_at->format('i') / 5) * 5) % 60
+                            : null,
+                    ])
                 </div>
             </div>
 
@@ -125,7 +160,8 @@
                     <div id="deleteImagesInputs-{{ $editId }}"></div>
 
                     <div>
-                        <label class="block text-sm font-semibold mb-1.5 text-white">Tambah Foto Baru (opsional)</label>
+                        <label class="block text-sm font-semibold mb-1.5 text-white">Tambah Foto Baru
+                            (opsional)</label>
                         <input type="file" id="editInputImages-{{ $editId }}" name="images[]" multiple
                             accept="image/*"
                             class="w-full bg-black border border-white/10 rounded-lg px-4 py-2.5 text-white file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-[#B71C1C] file:text-white file:text-sm file:font-semibold">
@@ -154,6 +190,27 @@
             const modal = document.getElementById(editId);
             modal.classList.toggle('hidden', !show);
             modal.classList.toggle('flex', show);
+
+            // Kalau produk ini emang udah dijadwalkan, init wheel picker pas modal
+            // beneran kebuka (gak bisa init pas modal masih display:none)
+            if (show) {
+                const scheduledRadio = document.getElementById('releaseModeScheduled-' + editId);
+                if (scheduledRadio?.checked) {
+                    const wrapper = document.getElementById('scheduledAtWrapper-' + editId);
+                    mavnusInitReleasePicker(editId, Number(wrapper.dataset.defaultHour), Number(wrapper.dataset
+                        .defaultMinute));
+                }
+            }
+        }
+
+        // ---- Jadwal Rilis ----
+        function toggleEditScheduledField(editId) {
+            const isScheduled = document.getElementById('releaseModeScheduled-' + editId).checked;
+            const wrapper = document.getElementById('scheduledAtWrapper-' + editId);
+            wrapper.style.display = isScheduled ? 'block' : 'none';
+            if (isScheduled) {
+                mavnusInitReleasePicker(editId, Number(wrapper.dataset.defaultHour), Number(wrapper.dataset.defaultMinute));
+            }
         }
 
         // ---- Ukuran & Stok ----

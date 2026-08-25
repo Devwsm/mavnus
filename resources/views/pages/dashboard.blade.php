@@ -128,8 +128,14 @@
                             </div>
 
                             {{-- Status badge --}}
-                            <div class="absolute top-3 right-3">
-                                @if ($product->is_active)
+                            <div class="absolute top-3 right-3 flex flex-col items-end gap-1.5">
+                                @if ($product->is_scheduled)
+                                    <span
+                                        class="inline-flex items-center gap-1.5 bg-black/70 backdrop-blur text-amber-400 text-[10px] font-semibold px-2 py-1 rounded-md">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                                        Terjadwal {{ $product->published_at->translatedFormat('d M, H:i') }}
+                                    </span>
+                                @elseif ($product->is_active)
                                     <span
                                         class="inline-flex items-center gap-1.5 bg-black/70 backdrop-blur text-green-400 text-[10px] font-semibold px-2 py-1 rounded-md">
                                         <span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>

@@ -28,6 +28,14 @@ class cartController extends Controller
             'quantity'   => 'required|integer|min:1',
         ]);
 
+        // Produk yang masih dijadwalkan gak boleh masuk cart walau product_id-nya ketebak
+        $product = \App\Models\product::find($validated['product_id']);
+        if ($product && $product->is_scheduled) {
+            return response()->json([
+                'message' => 'Produk ini belum resmi rilis.',
+            ], 422);
+        }
+
         $existing = CartItem::where('session_id', session()->getId())
             ->where('product_id', $validated['product_id'])
             ->where('variant_id', $validated['variant_id'] ?? null)

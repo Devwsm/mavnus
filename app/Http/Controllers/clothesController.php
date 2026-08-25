@@ -31,6 +31,15 @@ class clothesController extends Controller
             'color'                => 'required|string|max:100',
             'material'             => 'required|string|max:100',
 
+            'release_mode'         => 'required|in:now,scheduled',
+            'published_at'         => [
+                'required_if:release_mode,scheduled',
+                'nullable',
+                'date',
+                'after:now',
+                'before_or_equal:' . now()->addDays(7)->endOfDay(),
+            ],
+
             'variants'             => 'required|array|min:1',
             'variants.*.size'      => 'required|in:S,M,L,XL',
             'variants.*.stock'     => 'required|integer|min:0',
@@ -55,6 +64,13 @@ class clothesController extends Controller
             'material.required'     => 'Material wajib diisi.',
             'material.max'          => 'Material maksimal 100 karakter.',
 
+            'release_mode.required'    => 'Pilih mau publish sekarang atau dijadwalkan.',
+            'release_mode.in'          => 'Pilihan rilis tidak valid.',
+            'published_at.required_if' => 'Tanggal & jam rilis wajib diisi kalau memilih jadwalkan.',
+            'published_at.date'        => 'Format tanggal & jam tidak valid.',
+            'published_at.after'       => 'Waktu rilis harus di masa depan.',
+            'published_at.before_or_equal' => 'Waktu rilis maksimal 7 hari dari sekarang.',
+
             'variants.required'     => 'Minimal isi satu ukuran & stok.',
             'variants.array'        => 'Format ukuran & stok tidak valid.',
             'variants.min'          => 'Minimal isi satu ukuran & stok.',
@@ -74,13 +90,17 @@ class clothesController extends Controller
         DB::transaction(function () use ($validated, $request) {
             // 1. Simpan data dasar produk ke tabel products
             $product = product::create([
-                'category'    => 'clothes',
-                'name'        => $validated['name'],
-                'slug'        => Str::slug($validated['name']) . '-' . uniqid(),
-                'price'       => $validated['price'],
-                'weight'      => $validated['weight'],
-                'description' => $validated['description'] ?? null,
-                'is_active'   => true,
+                'category'     => 'clothes',
+                'name'         => $validated['name'],
+                'slug'         => Str::slug($validated['name']) . '-' . uniqid(),
+                'price'        => $validated['price'],
+                'weight'       => $validated['weight'],
+                'description'  => $validated['description'] ?? null,
+                'is_active'    => true,
+                // "now" -> langsung tayang, "scheduled" -> baru tayang pas waktunya lewat
+                'published_at' => $validated['release_mode'] === 'scheduled'
+                    ? $validated['published_at']
+                    : now(),
             ]);
 
             // 2. Simpan detail warna & material, terhubung ke product di atas
@@ -152,6 +172,14 @@ class clothesController extends Controller
             'color'                => 'required|string|max:100',
             'material'             => 'required|string|max:100',
 
+            'release_mode'         => 'required|in:now,scheduled',
+            'published_at'         => [
+                'required_if:release_mode,scheduled',
+                'nullable',
+                'date',
+                'before_or_equal:' . now()->addDays(7)->endOfDay(),
+            ],
+
             'variants'             => 'required|array|min:1',
             'variants.*.size'      => 'required|in:S,M,L,XL',
             'variants.*.stock'     => 'required|integer|min:0',
@@ -170,6 +198,10 @@ class clothesController extends Controller
             'weight.min'      => 'Berat minimal 1 gram.',
             'color.required'        => 'Warna wajib diisi.',
             'material.required'     => 'Material wajib diisi.',
+            'release_mode.required'    => 'Pilih mau publish sekarang atau dijadwalkan.',
+            'published_at.required_if' => 'Tanggal & jam rilis wajib diisi kalau memilih jadwalkan.',
+            'published_at.date'        => 'Format tanggal & jam tidak valid.',
+            'published_at.before_or_equal' => 'Waktu rilis maksimal 7 hari dari sekarang.',
             'variants.required'     => 'Minimal isi satu ukuran & stok.',
             'variants.*.size.required' => 'Ukuran wajib dipilih.',
             'variants.*.size.in'       => 'Ukuran harus salah satu dari S, M, L, atau XL.',
@@ -181,10 +213,13 @@ class clothesController extends Controller
         DB::transaction(function () use ($validated, $request, $product) {
             // 1. Update data dasar produk
             $product->update([
-                'name'        => $validated['name'],
-                'price'       => $validated['price'],
-                'weight'      => $validated['weight'],
-                'description' => $validated['description'] ?? null,
+                'name'         => $validated['name'],
+                'price'        => $validated['price'],
+                'weight'       => $validated['weight'],
+                'description'  => $validated['description'] ?? null,
+                'published_at' => $validated['release_mode'] === 'scheduled'
+                    ? $validated['published_at']
+                    : now(),
             ]);
 
             // 2. Update detail warna & material
@@ -248,6 +283,12 @@ class clothesController extends Controller
         $product = product::where('slug', $slug)
             ->with(['images', 'clothes', 'variants'])
             ->firstOrFail();
+
+        // Produk yang masih dijadwalkan (belum waktunya tayang) gak boleh
+        // diakses langsung lewat URL walau slug-nya udah ketebak
+        if ($product->is_scheduled) {
+            abort(404);
+        }
 
         return view('pages.product_detail', compact('product'));
     }

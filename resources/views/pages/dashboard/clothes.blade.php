@@ -43,6 +43,27 @@
                                 placeholder="Deskripsi singkat produk"></input>
                         </div>
                     </div>
+                    {{-- Jadwal Rilis --}}
+                    <div class="flex flex-col gap-4 bg-[#0D0D0D] border border-white/10 rounded-xl p-6">
+                        <h2 class="text-xs font-semibold uppercase tracking-widest text-[#B71C1C]">Jadwal Rilis</h2>
+
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="release_mode" value="now" id="releaseModeNow" checked
+                                    class="accent-[#B71C1C]">
+                                <span class="text-sm text-white">Publish Sekarang</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="release_mode" value="scheduled" id="releaseModeScheduled"
+                                    class="accent-[#B71C1C]">
+                                <span class="text-sm text-white">Jadwalkan</span>
+                            </label>
+                        </div>
+
+                        <div id="scheduledAtWrapper" style="display: none;">
+                            @include('components.dashboard.release-schedule-picker', ['id' => 'create'])
+                        </div>
+                    </div>
                     {{-- Detail Clothes --}}
                     <div class="flex flex-col gap-4 bg-[#0D0D0D] border border-white/10 rounded-xl p-6">
                         <h2 class="text-xs font-semibold uppercase tracking-widest text-[#B71C1C]">Detail Clothes</h2>
@@ -144,6 +165,23 @@
     </div>
 
     <script>
+        // ---- Toggle field jadwal rilis ----
+        const releaseModeNow = document.getElementById('releaseModeNow');
+        const releaseModeScheduled = document.getElementById('releaseModeScheduled');
+        const scheduledAtWrapper = document.getElementById('scheduledAtWrapper');
+
+        function toggleScheduledField() {
+            const isScheduled = releaseModeScheduled.checked;
+            scheduledAtWrapper.style.display = isScheduled ? 'block' : 'none';
+            if (isScheduled) {
+                mavnusInitReleasePicker('create', {{ now()->format('H') }},
+                    {{ (int) (round(now()->format('i') / 5) * 5) % 60 }});
+            }
+        }
+
+        releaseModeNow.addEventListener('change', toggleScheduledField);
+        releaseModeScheduled.addEventListener('change', toggleScheduledField);
+
         // ---- Live text preview ----
         const inputName = document.getElementById('inputName');
         const inputPrice = document.getElementById('inputPrice');
@@ -169,7 +207,7 @@
         inputWeight.addEventListener('input', () => {
             previewWeight.textContent = inputWeight.value || '-';
         });
-        
+
         inputColor.addEventListener('input', () => {
             previewColor.textContent = inputColor.value || '-';
         });
