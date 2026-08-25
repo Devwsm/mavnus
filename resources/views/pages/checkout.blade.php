@@ -68,9 +68,13 @@
                     <h2 class="text-sm font-bold uppercase tracking-widest text-black/50">Data Penerima</h2>
                     <div>
                         <label for="customer_name" class="block text-sm font-semibold mb-1.5">Nama Lengkap</label>
-                        <input type="text" id="customer_name" name="customer_name" value="{{ old('customer_name') }}"
+                        <input type="text" id="customer_name" name="customer_name"
+                            value="{{ old('customer_name', auth()->user()->name ?? '') }}"
                             class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black"
                             placeholder="Nama penerima">
+                        @auth
+                            <p class="text-xs text-gray-400 mt-1.5">Bisa diganti kalau pesenan ini buat orang lain.</p>
+                        @endauth
                     </div>
                     <div>
                         <label for="customer_phone" class="block text-sm font-semibold mb-1.5">Nomor HP</label>
