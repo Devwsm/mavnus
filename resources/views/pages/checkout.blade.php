@@ -78,7 +78,8 @@
                     </div>
                     <div>
                         <label for="customer_phone" class="block text-sm font-semibold mb-1.5">Nomor HP</label>
-                        <input type="text" id="customer_phone" name="customer_phone" value="{{ old('customer_phone') }}"
+                        <input type="text" id="customer_phone" name="customer_phone"
+                            value="{{ old('customer_phone', auth()->user()->phone ?? '') }}"
                             class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black"
                             placeholder="08xxxxxxxxxx">
                     </div>
@@ -100,7 +101,7 @@
                         <label for="customer_address" class="block text-sm font-semibold mb-1.5">Alamat Detail</label>
                         <textarea id="customer_address" name="customer_address" rows="3"
                             class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black"
-                            placeholder="Nama jalan, nomor rumah, RT/RW, patokan">{{ old('customer_address') }}</textarea>
+                            placeholder="Nama jalan, nomor rumah, RT/RW, patokan">{{ old('customer_address', auth()->user()->address ?? '') }}</textarea>
                     </div>
                 </div>
 

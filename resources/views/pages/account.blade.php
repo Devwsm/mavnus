@@ -51,20 +51,51 @@
                 <div class="border border-black/10 rounded-xl p-6">
                     <h2 class="text-sm font-bold uppercase tracking-widest text-black/50 mb-5">Informasi Akun</h2>
 
-                    <div class="flex flex-col gap-4">
+                    <form action="{{ route('account.update') }}" method="POST" class="flex flex-col gap-4">
+                        @csrf
+                        @include('components/errors/alerts')
+
                         <div>
-                            <p class="text-xs text-gray-500 uppercase tracking-widest mb-1">Nama</p>
-                            <p class="text-sm">{{ $user->name }}</p>
+                            <label for="name" class="block text-sm font-semibold mb-1.5">Nama</label>
+                            <input type="text" id="name" name="name" value="{{ old('name', $user->name) }}"
+                                class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black">
                         </div>
+
                         <div>
-                            <p class="text-xs text-gray-500 uppercase tracking-widest mb-1">Email</p>
-                            <p class="text-sm">{{ $user->email }}</p>
+                            <label for="email" class="block text-sm font-semibold mb-1.5">Email</label>
+                            <input type="email" id="email" name="email" value="{{ old('email', $user->email) }}"
+                                class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black">
                         </div>
+
                         <div>
-                            <p class="text-xs text-gray-500 uppercase tracking-widest mb-1">Member Sejak</p>
-                            <p class="text-sm">{{ $user->created_at->translatedFormat('F Y') }}</p>
+                            <label for="phone" class="block text-sm font-semibold mb-1.5">Nomor HP</label>
+                            <input type="text" id="phone" name="phone" value="{{ old('phone', $user->phone) }}"
+                                class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black"
+                                placeholder="08xxxxxxxxxx">
                         </div>
-                    </div>
+
+                        <div>
+                            <label for="address" class="block text-sm font-semibold mb-1.5">Alamat</label>
+                            <textarea id="address" name="address" rows="3"
+                                class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black resize-none"
+                                placeholder="Alamat lengkap buat pengiriman">{{ old('address', $user->address) }}</textarea>
+                        </div>
+
+                        <div class="pt-4 mt-2 border-t border-black/10">
+                            <label for="current_password" class="block text-sm font-semibold mb-1.5">Password Saat
+                                Ini</label>
+                            <input type="password" id="current_password" name="current_password"
+                                class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black"
+                                placeholder="Konfirmasi buat simpan perubahan">
+                            <p class="text-xs text-gray-400 mt-1.5">Demi keamanan, masukin password kamu tiap mau nyimpen
+                                perubahan.</p>
+                        </div>
+
+                        <button type="submit"
+                            class="bg-black hover:bg-black/80 text-white uppercase font-bold tracking-widest text-sm py-3.5 rounded-lg transition mt-2">
+                            Simpan Perubahan
+                        </button>
+                    </form>
 
                     <div class="mt-8 pt-6 border-t border-black/10">
                         <p class="text-sm text-gray-500">
