@@ -66,11 +66,11 @@
             </p>
 
             <div class="flex items-center gap-5 text-lg">
-                <a href="https://www.instagram.com/whisnusantika/" aria-label="Instagram Whisnu Santika"
+                <a href="https://www.instagram.com/whisnusantika/" target="_blank" aria-label="Instagram Whisnu Santika"
                     class="hover:opacity-70 transition"><i class="bi bi-instagram" aria-hidden="true"></i></a>
-                <a href="https://www.youtube.com/@WhisnuSantika" aria-label="YouTube Whisnu Santika"
+                <a href="https://www.youtube.com/@WhisnuSantika" target="_blank" aria-label="YouTube Whisnu Santika"
                     class="hover:opacity-70 transition"><i class="bi bi-youtube" aria-hidden="true"></i></a>
-                <a href="https://open.spotify.com/artist/6gvsmDZKW5wRvjKCPnbHDh" aria-label="Spotify Whisnu Santika"
+                <a href="https://open.spotify.com/artist/6gvsmDZKW5wRvjKCPnbHDh?si=7jt9_kpmTsCcL-pVJYnblQ" target="_blank" aria-label="Spotify Whisnu Santika"
                     class="hover:opacity-70 transition"><i class="bi bi-spotify" aria-hidden="true"></i></a>
             </div>
         </div>
