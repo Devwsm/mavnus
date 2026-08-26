@@ -18,22 +18,22 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('/')->group(function () {
     // Login & daftar CUSTOMER - pakai Laravel Auth bawaan (tabel users)
     Route::get('/login', [loginController::class, 'login'])->name('login');
-    Route::post('/login', [authController::class, 'processLogin'])->name('login.proses')->middleware('throttle:5,1');
+    Route::post('/login', [authController::class, 'processLogin'])->name('login.proses')->middleware('throttle:5,1,login');
 
     Route::get('/register', [authController::class, 'register'])->name('register');
-    Route::post('/register', [authController::class, 'processRegister'])->name('register.proses')->middleware('throttle:5,1');
+    Route::post('/register', [authController::class, 'processRegister'])->name('register.proses')->middleware('throttle:5,1,register');
 
     Route::get('/logout', [authController::class, 'logout'])->name('logout');
 
     // Halaman akun customer - kalau belum login otomatis dilempar ke /login,
     // abis berhasil login balik lagi ke sini (bawaan Laravel, gak perlu logic tambahan)
     Route::get('/account', [accountController::class, 'index'])->name('account')->middleware('auth');
-    Route::post('/account', [accountController::class, 'update'])->name('account.update')->middleware(['auth', 'throttle:10,1']);
+    Route::post('/account', [accountController::class, 'update'])->name('account.update')->middleware(['auth', 'throttle:10,1,account-update']);
     Route::get('/account/orders', [accountController::class, 'orders'])->name('account.orders')->middleware('auth');
 
     // Login STAFF/crew - fungsional, otentikasi ke tabel accounts. Gak dilink di halaman customer.
     Route::get('/crew-portal', [loginController::class, 'crewLogin'])->name('crew.login');
-    Route::post('/crew-portal', [loginController::class, 'prosesLogin'])->name('crew.login.proses')->middleware('throttle:5,1');
+    Route::post('/crew-portal', [loginController::class, 'prosesLogin'])->name('crew.login.proses')->middleware('throttle:5,1,crew-login');
     Route::get('/crew-portal/logout', [loginController::class, 'logout'])->name('crew.logout');
 });
 
@@ -77,24 +77,24 @@ Route::prefix('/')->group(function () {
     Route::get('/', [homeController::class, 'home'])->name('home');
 
     // Endpoint pencarian live suggestion - rawan disalahgunakan buat spam request
-    Route::get('/search', [searchController::class, 'search'])->name('search')->middleware('throttle:30,1');
+    Route::get('/search', [searchController::class, 'search'])->name('search')->middleware('throttle:30,1,search');
 
     Route::prefix('/shipping')->group(function () {
-        Route::get('/search', [ShippingController::class, 'searchDestination'])->name('shipping.search')->middleware('throttle:30,1');
-        Route::post('/cost', [ShippingController::class, 'calculateCost'])->name('shipping.cost')->middleware('throttle:20,1');
+        Route::get('/search', [ShippingController::class, 'searchDestination'])->name('shipping.search')->middleware('throttle:30,1,shipping-search');
+        Route::post('/cost', [ShippingController::class, 'calculateCost'])->name('shipping.cost')->middleware('throttle:20,1,shipping-cost');
     });
 
     Route::prefix('/cart')->group(function () {
-        Route::get('/', [cartController::class, 'index'])->name('cart.index')->middleware('throttle:60,1');
-        Route::post('/add', [cartController::class, 'add'])->name('cart.add')->middleware('throttle:20,1');
-        Route::patch('/{cartItem}', [cartController::class, 'update'])->name('cart.update')->middleware('throttle:30,1');
-        Route::delete('/{cartItem}', [cartController::class, 'destroy'])->name('cart.destroy')->middleware('throttle:30,1');
+        Route::get('/', [cartController::class, 'index'])->name('cart.index')->middleware('throttle:60,1,cart-index');
+        Route::post('/add', [cartController::class, 'add'])->name('cart.add')->middleware('throttle:20,1,cart-add');
+        Route::patch('/{cartItem}', [cartController::class, 'update'])->name('cart.update')->middleware('throttle:30,1,cart-update');
+        Route::delete('/{cartItem}', [cartController::class, 'destroy'])->name('cart.destroy')->middleware('throttle:30,1,cart-destroy');
     });
 
     Route::prefix('/order')->group(function () {
         Route::get('/checkout', [orderController::class, 'checkout'])->name('order.checkout');
         // Pembuatan order - paling sensitif, dibatasi ketat biar ga dipakai spam/bot checkout
-        Route::post('/', [orderController::class, 'store'])->name('order.store')->middleware('throttle:5,1');
+        Route::post('/', [orderController::class, 'store'])->name('order.store')->middleware('throttle:5,1,checkout');
         Route::get('/{order}/success', [orderController::class, 'success'])->name('order.success');
     });
 
