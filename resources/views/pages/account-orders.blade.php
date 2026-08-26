@@ -1,50 +1,55 @@
-{{-- Halaman "Riwayat Pesanan" customer, sidebar sama persis kayak account.blade.php --}}
+{{--
+    Halaman "Riwayat Pesanan" - gaya "app shell" sama kayak account.blade.php.
+    Ada chip filter status (Semua/Menunggu/Diproses/Dikirim/Selesai/Dibatalkan)
+    yang nyambung ke query ?status= di accountController::orders().
+--}}
 @extends('template.layout')
 @section('content')
-    <section id="main-content" class="flex flex-col w-full bg-white gap-10 p-6 lg:p-14 pt-28 md:pt-22 lg:pt-32">
-        <div>
-            <h1 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">Akun Saya</h1>
-            <p class="text-sm text-gray-500 mt-2">Kelola informasi & pesanan kamu di sini.</p>
+    <section id="main-content"
+        class="flex flex-col w-full bg-[#F5F6F8] gap-4 lg:gap-10 p-3 sm:p-6 lg:p-14 pt-24 md:pt-22 lg:pt-32 min-h-screen">
+        @include('components/errors/alerts')
+
+        <div class="hidden lg:block">
+            <h1 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">Riwayat Pesanan</h1>
+            <p class="text-sm text-gray-500 mt-1">Kelola informasi & pesanan kamu di sini.</p>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {{-- Sidebar menu --}}
-            <div class="lg:col-span-1">
-                <div class="lg:sticky lg:top-28 flex flex-col gap-4">
-                    <div class="flex items-center gap-4 border border-black/10 rounded-xl p-6">
-                        <div
-                            class="w-14 h-14 rounded-full bg-black text-white flex items-center justify-center text-xl font-black uppercase shrink-0">
-                            {{ Str::substr($user->name, 0, 1) }}
-                        </div>
-                        <div class="min-w-0">
-                            <p class="font-semibold truncate">{{ $user->name }}</p>
-                            <p class="text-xs text-gray-500 truncate">{{ $user->email }}</p>
-                        </div>
-                    </div>
-
-                    <nav class="flex flex-col border border-black/10 rounded-xl overflow-hidden">
-                        <a href="{{ route('account') }}"
-                            class="flex items-center gap-3 px-5 py-3.5 text-sm font-semibold uppercase tracking-wide hover:bg-gray-50 transition">
-                            <i class="bi bi-person-fill"></i> Akun Saya
-                        </a>
-                        <a href="{{ route('account.orders') }}"
-                            class="flex items-center gap-3 px-5 py-3.5 text-sm font-semibold uppercase tracking-wide border-t border-black/10 bg-black text-white">
-                            <i class="bi bi-bag-fill"></i> Riwayat Pesanan
-                        </a>
-                        <a href="{{ route('logout') }}"
-                            class="flex items-center gap-3 px-5 py-3.5 text-sm font-semibold uppercase tracking-wide border-t border-black/10 hover:bg-gray-50 transition text-gray-500">
-                            <i class="bi bi-box-arrow-right"></i> Keluar
-                        </a>
-                    </nav>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
+            {{-- Menu / sidebar --}}
+            <div class="lg:col-span-1 order-1">
+                <div class="lg:sticky lg:top-28">
+                    @include('components.account.menu', ['active' => 'orders'])
                 </div>
             </div>
 
-            {{-- Konten: list order --}}
-            <div class="lg:col-span-2 flex flex-col gap-4">
+            {{-- Konten: filter chip + list order --}}
+            <div class="lg:col-span-2 order-2 flex flex-col gap-4">
+                {{-- Chip filter status --}}
+                @php
+                    $filters = [
+                        'all' => 'Semua',
+                        'pending' => 'Menunggu',
+                        'processing' => 'Diproses',
+                        'shipped' => 'Dikirim',
+                        'completed' => 'Selesai',
+                        'cancelled' => 'Dibatalkan',
+                    ];
+                    $activeFilter = $statusFilter ?? 'all';
+                @endphp
+                <div class="flex gap-2 overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0 no-scrollbar">
+                    @foreach ($filters as $value => $label)
+                        <a href="{{ route('account.orders', $value === 'all' ? [] : ['status' => $value]) }}"
+                            class="shrink-0 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition
+                                {{ $activeFilter === $value ? 'bg-black text-white' : 'bg-white text-gray-500 shadow-sm shadow-black/5 hover:text-black' }}">
+                            {{ $label }}
+                        </a>
+                    @endforeach
+                </div>
+
                 @forelse ($orders as $order)
                     <a href="{{ route('order.success', $order) }}"
-                        class="flex flex-col gap-4 border border-black/10 rounded-xl p-6 hover:border-black/30 transition">
-                        <div class="flex items-center justify-between pb-4 border-b border-black/10">
+                        class="flex flex-col gap-4 bg-white rounded-2xl shadow-sm shadow-black/5 p-4 sm:p-6 hover:shadow-md active:scale-[0.99] transition">
+                        <div class="flex items-center justify-between gap-2 flex-wrap pb-4 border-b border-gray-100">
                             <div>
                                 <p class="text-sm font-semibold">{{ $order->order_number }}</p>
                                 <p class="text-xs text-gray-500 mt-0.5">
@@ -59,7 +64,7 @@
                                 };
                             @endphp
                             <span
-                                class="inline-flex items-center gap-1.5 {{ $statusStyle[0] }} {{ $statusStyle[1] }} text-xs font-semibold uppercase tracking-wide px-3 py-1.5 rounded-full shrink-0">
+                                class="inline-flex items-center gap-1.5 {{ $statusStyle[0] }} {{ $statusStyle[1] }} text-xs font-semibold px-3 py-1.5 rounded-full shrink-0">
                                 <span class="w-1.5 h-1.5 rounded-full {{ $statusStyle[2] }}"></span>
                                 {{ ucfirst($order->status) }}
                             </span>
@@ -77,15 +82,25 @@
                             @endif
                         </div>
 
-                        <div class="flex items-center justify-between pt-4 border-t border-black/10">
+                        <div class="flex items-center justify-between pt-4 border-t border-gray-100">
                             <span class="text-sm text-gray-500">Total Pesanan</span>
                             <span class="text-base font-bold">Rp{{ number_format($order->total, 0, ',', '.') }}</span>
                         </div>
                     </a>
                 @empty
-                    <div class="flex flex-col items-center text-center gap-3 border border-black/10 rounded-xl p-10">
-                        <i class="bi bi-bag text-3xl text-gray-300"></i>
-                        <p class="text-sm text-gray-500">Kamu belum punya pesanan apa pun.</p>
+                    <div
+                        class="flex flex-col items-center text-center gap-3 bg-white rounded-2xl shadow-sm shadow-black/5 p-8 sm:p-10">
+                        <span
+                            class="w-14 h-14 rounded-full bg-gray-50 flex items-center justify-center text-2xl text-gray-300">
+                            <i class="bi bi-bag"></i>
+                        </span>
+                        <p class="text-sm text-gray-500">
+                            @if ($statusFilter)
+                                Belum ada pesanan dengan status "{{ $filters[$statusFilter] ?? ucfirst($statusFilter) }}".
+                            @else
+                                Kamu belum punya pesanan apa pun.
+                            @endif
+                        </p>
                         <a href="{{ route('home') }}"
                             class="text-sm font-semibold underline underline-offset-4 decoration-black/30 hover:decoration-black transition">
                             Mulai belanja

@@ -9,10 +9,27 @@ use Illuminate\Support\Facades\Hash;
 
 class accountController extends Controller
 {
-    // Halaman akun customer - cuma bisa diakses kalau udah login (middleware 'auth' bawaan Laravel)
+    // Halaman akun customer (read-only overview) - cuma bisa diakses kalau udah login
     public function index()
     {
+        $userId = Auth::id();
+
         return view('pages.account', [
+            'user' => Auth::user(),
+            // Ringkasan status pesanan buat quick-access di halaman profil
+            'orderCounts' => [
+                'pending'    => Order::where('user_id', $userId)->where('status', 'pending')->count(),
+                'processing' => Order::where('user_id', $userId)->where('status', 'processing')->count(),
+                'shipped'    => Order::where('user_id', $userId)->where('status', 'shipped')->count(),
+                'completed'  => Order::where('user_id', $userId)->where('status', 'completed')->count(),
+            ],
+        ]);
+    }
+
+    // Halaman edit profil - terpisah dari halaman overview, diakses lewat ikon pensil
+    public function edit()
+    {
+        return view('pages.account-edit', [
             'user' => Auth::user(),
         ]);
     }
@@ -51,20 +68,30 @@ class accountController extends Controller
             'address' => $validated['address'],
         ]);
 
-        return back()->with('success', 'Profil berhasil diperbarui.');
+        // Balik ke halaman overview (bukan back(), biar konsisten abis simpan
+        // selalu mendarat di halaman profil, bukan nyangkut di form edit)
+        return redirect()->route('account')->with('success', 'Profil berhasil diperbarui.');
     }
 
-    // Riwayat pesanan - cuma nampilin order milik akun yang lagi login
-    public function orders()
+    // Riwayat pesanan - cuma nampilin order milik akun yang lagi login.
+    // Bisa difilter per status lewat query ?status= (dipakai chip filter di halaman).
+    public function orders(Request $request)
     {
+        $validStatuses = ['pending', 'processing', 'shipped', 'completed', 'cancelled'];
+        $status = $request->query('status');
+        $status = in_array($status, $validStatuses, true) ? $status : null;
+
         $orders = Order::where('user_id', Auth::id())
+            ->when($status, fn($query) => $query->where('status', $status))
             ->with('items')
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         return view('pages.account-orders', [
-            'user'   => Auth::user(),
-            'orders' => $orders,
+            'user'         => Auth::user(),
+            'orders'       => $orders,
+            'statusFilter' => $status,
         ]);
     }
 }

@@ -28,6 +28,7 @@ Route::prefix('/')->group(function () {
     // Halaman akun customer - kalau belum login otomatis dilempar ke /login,
     // abis berhasil login balik lagi ke sini (bawaan Laravel, gak perlu logic tambahan)
     Route::get('/account', [accountController::class, 'index'])->name('account')->middleware('auth');
+    Route::get('/account/edit', [accountController::class, 'edit'])->name('account.edit')->middleware('auth');
     Route::post('/account', [accountController::class, 'update'])->name('account.update')->middleware(['auth', 'throttle:10,1,account-update']);
     Route::get('/account/orders', [accountController::class, 'orders'])->name('account.orders')->middleware('auth');
 

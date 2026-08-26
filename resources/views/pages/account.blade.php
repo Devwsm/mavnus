@@ -1,106 +1,159 @@
 {{--
-    Halaman "Akun Saya" customer, tema disamain sama halaman publik lain (checkout, dll).
-    Riwayat order belum kesambung ke sini (order belum punya kolom user_id),
-    jadi bagian itu masih placeholder dulu.
+    Halaman "Akun Saya" (overview, read-only). Edit data dipisah ke halaman
+    tersendiri (pages.account-edit), diakses lewat pensil di avatar / header.
+    Gaya "app shell": background abu-abu muda, card putih shadow lembut,
+    quick-access status pesanan dengan angka real — mirip Shopee/Tokopedia.
 --}}
 @extends('template.layout')
 @section('content')
-    <section id="main-content" class="flex flex-col w-full bg-white gap-10 p-6 lg:p-14 pt-28 md:pt-22 lg:pt-32">
-        <div>
+    <section id="main-content"
+        class="flex flex-col w-full bg-[#F5F6F8] gap-4 lg:gap-10 p-3 sm:p-6 lg:p-14 pt-24 md:pt-22 lg:pt-32 min-h-screen">
+        @include('components/errors/alerts')
+
+        <div class="hidden lg:block">
             <h1 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">Akun Saya</h1>
-            <p class="text-sm text-gray-500 mt-2">Kelola informasi & pesanan kamu di sini.</p>
+            <p class="text-sm text-gray-500 mt-1">Kelola informasi & pesanan kamu di sini.</p>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {{-- Sidebar menu --}}
-            <div class="lg:col-span-1">
-                <div class="lg:sticky lg:top-28 flex flex-col gap-4">
-                    <div class="flex items-center gap-4 border border-black/10 rounded-xl p-6">
-                        <div
-                            class="w-14 h-14 rounded-full bg-black text-white flex items-center justify-center text-xl font-black uppercase shrink-0">
-                            {{ Str::substr($user->name, 0, 1) }}
-                        </div>
-                        <div class="min-w-0">
-                            <p class="font-semibold truncate">{{ $user->name }}</p>
-                            <p class="text-xs text-gray-500 truncate">{{ $user->email }}</p>
-                        </div>
-                    </div>
-
-                    <nav class="flex flex-col border border-black/10 rounded-xl overflow-hidden">
-                        <a href="{{ route('account') }}"
-                            class="flex items-center gap-3 px-5 py-3.5 text-sm font-semibold uppercase tracking-wide bg-black text-white">
-                            <i class="bi bi-person-fill"></i> Akun Saya
-                        </a>
-                        <a href="{{ route('account.orders') }}"
-                            class="flex items-center gap-3 px-5 py-3.5 text-sm font-semibold uppercase tracking-wide border-t border-black/10 hover:bg-gray-50 transition">
-                            <i class="bi bi-bag-fill"></i> Riwayat Pesanan
-                        </a>
-                        <a href="{{ route('logout') }}"
-                            class="flex items-center gap-3 px-5 py-3.5 text-sm font-semibold uppercase tracking-wide border-t border-black/10 hover:bg-gray-50 transition text-gray-500">
-                            <i class="bi bi-box-arrow-right"></i> Keluar
-                        </a>
-                    </nav>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
+            {{-- Menu / sidebar --}}
+            <div class="lg:col-span-1 order-1">
+                <div class="lg:sticky lg:top-28">
+                    @include('components.account.menu', ['active' => 'account'])
                 </div>
             </div>
 
             {{-- Konten --}}
-            <div class="lg:col-span-2">
-                <div class="border border-black/10 rounded-xl p-6">
-                    <h2 class="text-sm font-bold uppercase tracking-widest text-black/50 mb-5">Informasi Akun</h2>
+            <div class="lg:col-span-2 order-2 flex flex-col gap-4">
+                {{-- Quick-access status pesanan --}}
+                <div class="bg-white rounded-2xl shadow-sm shadow-black/5 p-4 sm:p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-sm font-bold">Pesanan Saya</h2>
+                        <a href="{{ route('account.orders') }}"
+                            class="text-xs font-semibold text-gray-400 hover:text-black transition flex items-center gap-1">
+                            Lihat Semua <i class="bi bi-chevron-right text-[10px]"></i>
+                        </a>
+                    </div>
+                    <div class="grid grid-cols-4 gap-2 sm:gap-3">
+                        <a href="{{ route('account.orders', ['status' => 'pending']) }}"
+                            class="relative flex flex-col items-center gap-2 py-2 rounded-xl hover:bg-gray-50 active:scale-95 transition">
+                            @if ($orderCounts['pending'] > 0)
+                                <span
+                                    class="absolute top-0 right-1/2 translate-x-4 -translate-y-1 min-w-4.5 h-4.5 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                                    {{ $orderCounts['pending'] }}
+                                </span>
+                            @endif
+                            <span
+                                class="w-11 h-11 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center text-lg">
+                                <i class="bi bi-hourglass-split"></i>
+                            </span>
+                            <span
+                                class="text-[11px] sm:text-xs font-medium text-gray-600 text-center leading-tight">Menunggu</span>
+                        </a>
+                        <a href="{{ route('account.orders', ['status' => 'processing']) }}"
+                            class="relative flex flex-col items-center gap-2 py-2 rounded-xl hover:bg-gray-50 active:scale-95 transition">
+                            @if ($orderCounts['processing'] > 0)
+                                <span
+                                    class="absolute top-0 right-1/2 translate-x-4 -translate-y-1 min-w-4.5 h-4.5 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                                    {{ $orderCounts['processing'] }}
+                                </span>
+                            @endif
+                            <span
+                                class="w-11 h-11 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center text-lg">
+                                <i class="bi bi-box-seam"></i>
+                            </span>
+                            <span
+                                class="text-[11px] sm:text-xs font-medium text-gray-600 text-center leading-tight">Diproses</span>
+                        </a>
+                        <a href="{{ route('account.orders', ['status' => 'shipped']) }}"
+                            class="relative flex flex-col items-center gap-2 py-2 rounded-xl hover:bg-gray-50 active:scale-95 transition">
+                            @if ($orderCounts['shipped'] > 0)
+                                <span
+                                    class="absolute top-0 right-1/2 translate-x-4 -translate-y-1 min-w-4.5 h-4.5 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                                    {{ $orderCounts['shipped'] }}
+                                </span>
+                            @endif
+                            <span
+                                class="w-11 h-11 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center text-lg">
+                                <i class="bi bi-truck"></i>
+                            </span>
+                            <span
+                                class="text-[11px] sm:text-xs font-medium text-gray-600 text-center leading-tight">Dikirim</span>
+                        </a>
+                        <a href="{{ route('account.orders', ['status' => 'completed']) }}"
+                            class="relative flex flex-col items-center gap-2 py-2 rounded-xl hover:bg-gray-50 active:scale-95 transition">
+                            <span
+                                class="w-11 h-11 rounded-full bg-green-50 text-green-500 flex items-center justify-center text-lg">
+                                <i class="bi bi-check-circle"></i>
+                            </span>
+                            <span
+                                class="text-[11px] sm:text-xs font-medium text-gray-600 text-center leading-tight">Selesai</span>
+                        </a>
+                    </div>
+                </div>
 
-                    <form action="{{ route('account.update') }}" method="POST" class="flex flex-col gap-4">
-                        @csrf
-                        @include('components/errors/alerts')
+                {{-- Informasi Akun --}}
+                <div class="bg-white rounded-2xl shadow-sm shadow-black/5 overflow-hidden">
+                    <div class="flex items-center justify-between px-4 sm:px-5 py-4">
+                        <h2 class="text-sm font-bold">Informasi Akun</h2>
+                        <a href="{{ route('account.edit') }}" aria-label="Edit Profil"
+                            class="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-black flex items-center justify-center shrink-0 active:scale-90 transition">
+                            <i class="bi bi-pencil-fill text-sm"></i>
+                        </a>
+                    </div>
 
-                        <div>
-                            <label for="name" class="block text-sm font-semibold mb-1.5">Nama</label>
-                            <input type="text" id="name" name="name" value="{{ old('name', $user->name) }}"
-                                class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black">
+                    {{-- List info read-only --}}
+                    <div class="flex flex-col divide-y divide-gray-100 px-4 sm:px-5">
+                        <div class="flex items-center gap-4 py-3.5">
+                            <span
+                                class="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 shrink-0">
+                                <i class="bi bi-person"></i>
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-[11px] text-gray-400 uppercase tracking-wide">Nama</p>
+                                <p class="text-sm font-semibold truncate">{{ $user->name }}</p>
+                            </div>
                         </div>
 
-                        <div>
-                            <label for="email" class="block text-sm font-semibold mb-1.5">Email</label>
-                            <input type="email" id="email" name="email" value="{{ old('email', $user->email) }}"
-                                class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black">
+                        <div class="flex items-center gap-4 py-3.5">
+                            <span
+                                class="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 shrink-0">
+                                <i class="bi bi-envelope"></i>
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-[11px] text-gray-400 uppercase tracking-wide">Email</p>
+                                <p class="text-sm font-semibold truncate">{{ $user->email }}</p>
+                            </div>
                         </div>
 
-                        <div>
-                            <label for="phone" class="block text-sm font-semibold mb-1.5">Nomor HP</label>
-                            <input type="text" id="phone" name="phone" value="{{ old('phone', $user->phone) }}"
-                                class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black"
-                                placeholder="08xxxxxxxxxx">
+                        <div class="flex items-center gap-4 py-3.5">
+                            <span
+                                class="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 shrink-0">
+                                <i class="bi bi-telephone"></i>
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-[11px] text-gray-400 uppercase tracking-wide">Nomor HP</p>
+                                <p class="text-sm font-semibold truncate">{{ $user->phone ?: '—' }}</p>
+                            </div>
                         </div>
 
-                        <div>
-                            <label for="address" class="block text-sm font-semibold mb-1.5">Alamat</label>
-                            <textarea id="address" name="address" rows="3"
-                                class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black resize-none"
-                                placeholder="Alamat lengkap buat pengiriman">{{ old('address', $user->address) }}</textarea>
+                        <div class="flex items-start gap-4 py-3.5">
+                            <span
+                                class="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 shrink-0">
+                                <i class="bi bi-geo-alt"></i>
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-[11px] text-gray-400 uppercase tracking-wide">Alamat</p>
+                                <p class="text-sm font-semibold wrap-break-word">{{ $user->address ?: '—' }}</p>
+                            </div>
                         </div>
+                    </div>
 
-                        <div class="pt-4 mt-2 border-t border-black/10">
-                            <label for="current_password" class="block text-sm font-semibold mb-1.5">Password Saat
-                                Ini</label>
-                            <input type="password" id="current_password" name="current_password"
-                                class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black"
-                                placeholder="Konfirmasi buat simpan perubahan">
-                            <p class="text-xs text-gray-400 mt-1.5">Demi keamanan, masukin password kamu tiap mau nyimpen
-                                perubahan.</p>
-                        </div>
-
-                        <button type="submit"
-                            class="bg-black hover:bg-black/80 text-white uppercase font-bold tracking-widest text-sm py-3.5 rounded-lg transition mt-2">
-                            Simpan Perubahan
-                        </button>
-                    </form>
-
-                    <div class="mt-8 pt-6 border-t border-black/10">
-                        <p class="text-sm text-gray-500">
-                            <i class="bi bi-info-circle mr-1.5"></i>
-                            Mau lihat pesanan kamu? Buka <a href="{{ route('account.orders') }}"
-                                class="font-semibold underline underline-offset-4 decoration-black/30 hover:decoration-black transition">Riwayat
-                                Pesanan</a>.
-                        </p>
+                    <div class="px-4 sm:px-5 pb-4 pt-1">
+                        <a href="{{ route('account.edit') }}"
+                            class="flex items-center justify-center gap-2 w-full bg-black hover:bg-black/85 text-white text-sm font-bold py-3 rounded-xl transition active:scale-[0.99]">
+                            <i class="bi bi-pencil"></i> Ubah Data
+                        </a>
                     </div>
                 </div>
             </div>
