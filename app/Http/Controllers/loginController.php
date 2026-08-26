@@ -44,14 +44,24 @@ class loginController extends Controller
         $request->session()->regenerate();
         $request->session()->put('login', true);
         $request->session()->put('user', $user->username);
-        return redirect()->intended(route('dashboard'));
+
+        // Pakai key intended sendiri ('staff_intended_url'), JANGAN pakai
+        // redirect()->intended() bawaan Laravel — itu baca session('url.intended')
+        // yang juga dipakai flow auth customer (guard 'web'). Kalau dipakai bareng,
+        // staff bisa kelempar ke URL customer yang gak ada hubungannya (lalu balik
+        // ke halaman login customer karena belum login sebagai customer).
+        $intendedUrl = $request->session()->pull('staff_intended_url', route('dashboard'));
+        return redirect()->to($intendedUrl);
     }
 
     public function logout(Request $request)
     {
-        // Invalidate seluruh session + regenerate token — bukan hanya forget satu key
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        // Cuma bersihkan data punya sesi staff, JANGAN invalidate() seluruh session —
+        // itu juga bakal ngehapus status login customer (guard 'web') yang numpang
+        // di session yang sama, jadi customer ikut ke-logout.
+        $request->session()->forget(['login', 'user']);
+        // Tetap regenerate ID + token session buat keamanan, tanpa flush data lain.
+        $request->session()->regenerate();
         return redirect()->route('home');
     }
 }

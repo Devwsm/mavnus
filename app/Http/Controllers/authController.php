@@ -66,9 +66,14 @@ class authController extends Controller
 
     public function logout(Request $request)
     {
+        // Auth::logout() sendiri udah cuma bersihin data guard 'web' (customer).
+        // Sebelumnya dipanggil bareng session()->invalidate(), yang ngehapus SEMUA
+        // isi session — termasuk session('login')/session('user') milik staff yang
+        // numpang di session sama, jadi staff ikut ke-logout. Ganti ke regenerate()
+        // biasa: tetap ganti session ID + CSRF token (proteksi fixation), tapi
+        // gak flush data lain.
         Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $request->session()->regenerate();
 
         return redirect()->route('home');
     }
