@@ -1,4 +1,4 @@
-@extends('template.layout')
+@extends('template.bare-layout')
 @section('content')
     <main id="main-content" class="flex flex-col justify-center items-center bg-black w-full min-h-screen px-4 py-12">
         <div class="relative w-full max-w-sm bg-zinc-950 border border-zinc-800 rounded-2xl

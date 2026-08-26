@@ -1,11 +1,8 @@
 {{-- Halaman daftar akun CUSTOMER, tema disamain sama halaman publik lain (checkout, dll) --}}
-@extends('template.layout')
+@extends('template.bare-layout')
+@section('title', 'Daftar - Mavnus')
 @section('content')
-    <div class="relative flex">
-        @include('components/navbar')
-    </div>
-    <section id="main-content"
-        class="flex flex-col items-center w-full bg-white gap-10 p-6 lg:p-14 pt-28 md:pt-22 lg:pt-32 min-h-screen">
+    <section id="main-content" class="flex flex-col items-center justify-center w-full bg-white gap-10 p-6 min-h-screen">
         <div class="w-full max-w-md">
             <div class="text-center mb-8">
                 <h1 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">Daftar</h1>
@@ -60,5 +57,4 @@
             </p>
         </div>
     </section>
-    @include('components/footer')
 @endsection

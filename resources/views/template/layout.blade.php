@@ -24,7 +24,9 @@
 </head>
 
 <body class="bg-black flex flex-col w-full">
-    <div class="flex flex-col justify-center items-center">
+    @include('components/navbar')
+    <div class="flex flex-col justify-center items-center py-8">
         @yield('content')
     </div>
+    @include('components/footer')
 </body>

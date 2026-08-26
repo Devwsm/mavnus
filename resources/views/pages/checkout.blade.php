@@ -1,8 +1,5 @@
 @extends('template.layout')
 @section('content')
-    <div class="relative flex">
-        @include('components/navbar')
-    </div>
     <section id="main-content" class="flex flex-col w-full bg-white gap-10 p-6 lg:p-14 pt-28 md:pt-22 lg:pt-32">
         <div>
             <h1 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">Checkout</h1>
@@ -298,6 +295,4 @@
             }
         });
     </script>
-
-    @include('components/footer')
 @endsection
