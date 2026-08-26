@@ -3,10 +3,10 @@
     Ada chip filter status (Semua/Menunggu/Diproses/Dikirim/Selesai/Dibatalkan)
     yang nyambung ke query ?status= di accountController::orders().
 --}}
-@extends('template.layout')
+@extends('template.account-layout')
 @section('content')
     <section id="main-content"
-        class="flex flex-col w-full bg-[#F5F6F8] gap-4 lg:gap-10 p-3 sm:p-6 lg:p-14 pt-24 md:pt-22 lg:pt-32 min-h-screen">
+        class="flex flex-col w-full bg-[#F5F6F8] gap-4 lg:gap-10 p-3 sm:p-6 lg:p-14 pt-24 md:pt-22 lg:pt-32 pb-24 lg:pb-14 min-h-screen">
         @include('components/errors/alerts')
 
         <div class="hidden lg:block">

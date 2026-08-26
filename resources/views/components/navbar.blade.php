@@ -30,8 +30,10 @@
             <!-- Right -->
             <div class="w-1/3 flex items-center justify-end gap-2 md:gap-4">
                 <!-- Account & Cart (selalu tampil) -->
-                <a href="{{ route('account') }}" aria-label="Akun Saya" class="hidden lg:inline-flex text-lg">
-                    <i class="bi bi-person" aria-hidden="true"></i>
+                <a href="{{ route('account') }}" aria-label="Akun Saya"
+                    class="hidden lg:inline-flex text-lg {{ request()->routeIs('account', 'account.*') ? 'text-white' : 'text-white/70 hover:text-white' }} transition">
+                    <i class="bi {{ request()->routeIs('account', 'account.*') ? 'bi-person-fill' : 'bi-person' }}"
+                        aria-hidden="true"></i>
                 </a>
                 <!-- Search (mobile/tablet saja, desktop pakai tombol di kiri) -->
                 <button id="searchBtnMobile" type="button" aria-label="Buka pencarian"
@@ -44,16 +46,20 @@
 
         <!-- ===================== SECTION 2: clothes | Accessories | Albums | Tour (desktop only) ===================== -->
         <div class="hidden lg:flex items-center justify-center gap-10 py-3 border-t border-white/10">
-            <a href="{{ route('clothes') }}">
+            <a href="{{ route('clothes') }}"
+                class="{{ request()->routeIs('clothes', 'product_detail.clothes') ? 'text-white' : 'text-white/50 hover:text-white/80' }} transition">
                 <span class="font-bold uppercase text-sm tracking-wide">clothes</span>
             </a>
-            <a href="{{ route('accessoris') }}">
+            <a href="{{ route('accessoris') }}"
+                class="{{ request()->routeIs('accessoris') ? 'text-white' : 'text-white/50 hover:text-white/80' }} transition">
                 <span class="font-bold uppercase text-sm tracking-wide">Accessories</span>
             </a>
-            <a href="{{ route('albums') }}">
+            <a href="{{ route('albums') }}"
+                class="{{ request()->routeIs('albums') ? 'text-white' : 'text-white/50 hover:text-white/80' }} transition">
                 <span class="font-bold uppercase text-sm tracking-wide">Albums</span>
             </a>
-            <a href="{{ route('home') }}">
+            <a href="{{ route('home') }}"
+                class="{{ request()->routeIs('home') ? 'text-white' : 'text-white/50 hover:text-white/80' }} transition">
                 <span class="font-bold uppercase text-sm tracking-wide">Tour</span>
             </a>
         </div>
@@ -90,21 +96,41 @@
             <i class="bi bi-x"></i>
         </button>
 
-        <a href="{{ route('clothes') }}" class="menu-link">
-            <span class="text-xl font-bold uppercase">clothes</span>
-        </a>
-        <a href="{{ route('accessoris') }}" class="menu-link">
-            <span class="text-xl font-bold uppercase">Accessories</span>
-        </a>
-        <a href="{{ route('albums') }}" class="menu-link">
-            <span class="text-xl font-bold uppercase">Albums</span>
-        </a>
-        <a href="{{ route('home') }}" class="menu-link">
-            <span class="text-xl font-bold uppercase">Tour</span>
-        </a>
-        <!-- Account & Cart (selalu tampil) -->
-        <a href="{{ route('account') }}" aria-label="Akun Saya" class="menu-link inline-flex lg:hidden text-lg">
-            <i class="bi bi-person" aria-hidden="true"></i>
+        @php
+            $drawerLinks = [
+                [
+                    'route' => route('clothes'),
+                    'active' => request()->routeIs('clothes', 'product_detail.clothes'),
+                    'label' => 'clothes',
+                ],
+                [
+                    'route' => route('accessoris'),
+                    'active' => request()->routeIs('accessoris'),
+                    'label' => 'Accessories',
+                ],
+                ['route' => route('albums'), 'active' => request()->routeIs('albums'), 'label' => 'Albums'],
+                ['route' => route('home'), 'active' => request()->routeIs('home'), 'label' => 'Tour'],
+            ];
+        @endphp
+        @foreach ($drawerLinks as $link)
+            <a href="{{ $link['route'] }}" aria-current="{{ $link['active'] ? 'page' : 'false' }}"
+                class="menu-link flex items-center gap-2.5 {{ $link['active'] ? 'text-white' : 'text-white/50' }}">
+                @if ($link['active'])
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#5E0006] shrink-0"></span>
+                @endif
+                <span class="text-xl font-bold uppercase">{{ $link['label'] }}</span>
+            </a>
+        @endforeach
+
+        <!-- Akun (selalu tampil, mobile only) -->
+        @php($accountActive = request()->routeIs('account', 'account.*'))
+        <a href="{{ route('account') }}" aria-current="{{ $accountActive ? 'page' : 'false' }}"
+            class="menu-link inline-flex lg:hidden items-center gap-2.5 {{ $accountActive ? 'text-white' : 'text-white/50' }}">
+            @if ($accountActive)
+                <span class="w-1.5 h-1.5 rounded-full bg-[#5E0006] shrink-0"></span>
+            @endif
+            <i class="bi {{ $accountActive ? 'bi-person-fill' : 'bi-person' }} text-xl" aria-hidden="true"></i>
+            <span class="text-xl font-bold uppercase">Akun Saya</span>
         </a>
     </div>
 </div>

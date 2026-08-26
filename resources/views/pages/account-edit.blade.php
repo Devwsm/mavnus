@@ -4,7 +4,8 @@
     tombol back, background abu-abu muda, card putih shadow lembut, input
     besar & nyaman disentuh, tombol simpan sticky di bawah layar buat mobile.
 --}}
-@extends('template.layout')
+@extends('template.account-layout')
+@section('hideBottomNav', 'yes')
 @section('content')
     <section id="main-content"
         class="flex flex-col w-full bg-[#F5F6F8] gap-4 p-3 sm:p-6 lg:p-14 pt-24 md:pt-22 lg:pt-32 pb-28 lg:pb-14 min-h-screen">
