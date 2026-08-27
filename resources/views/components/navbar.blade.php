@@ -44,8 +44,12 @@
             </div>
         </div>
 
-        <!-- ===================== SECTION 2: clothes | Accessories | Albums | Tour (desktop only) ===================== -->
+        <!-- ===================== SECTION 2: clothes | Accessories | Albums | Home (desktop only) ===================== -->
         <div class="hidden lg:flex items-center justify-center gap-10 py-3 border-t border-white/10">
+            <a href="{{ route('home') }}"
+                class="{{ request()->routeIs('home') ? 'text-white' : 'text-white/50 hover:text-white/80' }} transition">
+                <span class="font-bold uppercase text-sm tracking-wide">Home</span>
+            </a>
             <a href="{{ route('clothes') }}"
                 class="{{ request()->routeIs('clothes', 'product_detail.clothes') ? 'text-white' : 'text-white/50 hover:text-white/80' }} transition">
                 <span class="font-bold uppercase text-sm tracking-wide">clothes</span>
@@ -57,10 +61,6 @@
             <a href="{{ route('albums') }}"
                 class="{{ request()->routeIs('albums') ? 'text-white' : 'text-white/50 hover:text-white/80' }} transition">
                 <span class="font-bold uppercase text-sm tracking-wide">Albums</span>
-            </a>
-            <a href="{{ route('home') }}"
-                class="{{ request()->routeIs('home') ? 'text-white' : 'text-white/50 hover:text-white/80' }} transition">
-                <span class="font-bold uppercase text-sm tracking-wide">Tour</span>
             </a>
         </div>
     </div>
@@ -98,6 +98,7 @@
 
         @php
             $drawerLinks = [
+                ['route' => route('home'), 'active' => request()->routeIs('home'), 'label' => 'Home'],
                 [
                     'route' => route('clothes'),
                     'active' => request()->routeIs('clothes', 'product_detail.clothes'),
@@ -109,7 +110,6 @@
                     'label' => 'Accessories',
                 ],
                 ['route' => route('albums'), 'active' => request()->routeIs('albums'), 'label' => 'Albums'],
-                ['route' => route('home'), 'active' => request()->routeIs('home'), 'label' => 'Tour'],
             ];
         @endphp
         @foreach ($drawerLinks as $link)

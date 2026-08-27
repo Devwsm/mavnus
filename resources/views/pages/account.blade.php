@@ -4,7 +4,9 @@
     Gaya "app shell": background abu-abu muda, card putih shadow lembut,
     quick-access status pesanan dengan angka real — mirip Shopee/Tokopedia.
 --}}
-@php($active = 'account')
+@php
+    $active = 'account';
+@endphp
 @extends('template.account-layout')
 @section('content')
     <section id="main-content"

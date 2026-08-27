@@ -3,6 +3,9 @@
     Ada chip filter status (Semua/Menunggu/Diproses/Dikirim/Selesai/Dibatalkan)
     yang nyambung ke query ?status= di accountController::orders().
 --}}
+@php
+    $active = 'orders';
+@endphp
 @extends('template.account-layout')
 @section('content')
     <section id="main-content"
@@ -24,16 +27,7 @@
 
             {{-- Konten: filter chip + list order --}}
             <div class="lg:col-span-2 order-2 flex flex-col gap-4">
-                {{-- Chip filter status --}}
                 @php
-                    $filters = [
-                        'all' => 'Semua',
-                        'pending' => 'Menunggu',
-                        'processing' => 'Diproses',
-                        'shipped' => 'Dikirim',
-                        'completed' => 'Selesai',
-                        'cancelled' => 'Dibatalkan',
-                    ];
                     $activeFilter = $statusFilter ?? 'all';
                 @endphp
                 <div class="flex gap-2 overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0 no-scrollbar">
@@ -96,7 +90,8 @@
                         </span>
                         <p class="text-sm text-gray-500">
                             @if ($statusFilter)
-                                Belum ada pesanan dengan status "{{ $filters[$statusFilter] ?? ucfirst($statusFilter) }}".
+                                Belum ada pesanan dengan status
+                                "{{ $filters[$statusFilter] ?? null ?? ucfirst($statusFilter) }}".
                             @else
                                 Kamu belum punya pesanan apa pun.
                             @endif

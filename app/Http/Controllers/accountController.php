@@ -88,10 +88,20 @@ class accountController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        $filters = [
+            'all'        => 'Semua',
+            'pending'    => 'Menunggu',
+            'processing' => 'Diproses',
+            'shipped'    => 'Dikirim',
+            'completed'  => 'Selesai',
+            'cancelled'  => 'Dibatalkan',
+        ];
+
         return view('pages.account-orders', [
             'user'         => Auth::user(),
             'orders'       => $orders,
             'statusFilter' => $status,
+            'filters'      => $filters,
         ]);
     }
 }
