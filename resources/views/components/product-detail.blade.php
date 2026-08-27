@@ -1,4 +1,4 @@
-<section class="flex flex-col w-full bg-white max-w-7xl gap-24 p-6 lg:p-14 pt-22 md:pt-18 lg:pt-28">
+<section class="flex flex-col w-full bg-white max-w-7xl gap-24 p-6 lg:p-14 pt-28 md:pt-32 lg:pt-40">
     <div class="">
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16">

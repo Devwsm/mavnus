@@ -1,4 +1,4 @@
-<section class="flex flex-col w-full max-w-7xl gap-24 p-6 lg:p-14 pt-22 md:pt-18 lg:pt-28">
+<section class="flex flex-col w-full max-w-7xl gap-24 p-6 lg:p-14 pt-28 md:pt-32 lg:pt-40">
 
     <!-- ===================== Accessoris ===================== -->
     <div class="flex flex-col gap-4">
