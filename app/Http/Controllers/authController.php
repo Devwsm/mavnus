@@ -25,7 +25,7 @@ class authController extends Controller
             'name.required'     => 'Nama wajib diisi.',
             'email.required'    => 'Email wajib diisi.',
             'email.email'       => 'Format email tidak valid.',
-            'email.unique'      => 'Email ini udah kepake, coba masuk aja.',
+            'email.unique'      => 'Email ini sudah ada.',
             'password.required' => 'Password wajib diisi.',
             'password.min'      => 'Password minimal 8 karakter.',
             'password.confirmed' => 'Konfirmasi password gak cocok.',
@@ -51,14 +51,25 @@ class authController extends Controller
             'password' => 'required|string',
         ], [
             'email.required'    => 'Email wajib diisi.',
+            'email.email'       => 'Format email tidak valid.',
             'password.required' => 'Password wajib diisi.',
         ]);
 
-        if (! Auth::attempt(['email' => $validated['email'], 'password' => $validated['password']], $request->boolean('remember'))) {
-            // Pesan sengaja dibuat generik - gak bocorin mana yang salah (email atau password)
-            return back()->withErrors(['login' => 'Email atau password salah.'])->onlyInput('email');
+        $user = User::where('email', $validated['email'])->first();
+
+        if (! $user) {
+            // Email belum kedaftar sama sekali. Sengaja dibedain dari pesan
+            // "password salah" (bukan digeneralisir) karena celah ini udah
+            // ada duluan di form Daftar (pesan 'email ini udah kepake'),
+            // jadi info ini emang udah bisa dicek orang lewat sana.
+            return back()->withErrors(['login' => 'Email ini belum terdaftar. Yuk, daftar dulu.'])->onlyInput('email');
         }
 
+        if (! Hash::check($validated['password'], $user->password)) {
+            return back()->withErrors(['login' => 'Password salah, coba lagi.'])->onlyInput('email');
+        }
+
+        Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
 
         return redirect()->intended(route('home'));
