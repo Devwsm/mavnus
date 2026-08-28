@@ -114,7 +114,7 @@
 
     <div class="w-px h-6 bg-white/10 mx-1"></div>
 
-    <a href="{{ route('crew.logout') }}"
+    <a href="{{ route('crew.logout') }}" onclick="event.preventDefault(); confirmCrewLogout();"
         class="group relative flex items-center justify-center w-12 h-12 rounded-xl text-[#B71C1C] hover:text-[#891212] hover:bg-[#B71C1C]/5 text-xl transition">
         <i class="bi bi-box-arrow-right"></i>
         <span
@@ -207,7 +207,7 @@
         <i class="bi bi-file-earmark-excel text-3xl"></i>
         <span class="text-[10px] font-semibold uppercase tracking-wide">Import & Export</span>
     </a>
-    <a href="{{ route('crew.logout') }}"
+    <a href="{{ route('crew.logout') }}" onclick="event.preventDefault(); confirmCrewLogout();"
         class="flex flex-col items-center gap-1.5 text-[#B71C1C] hover:text-[#891212]">
         <i class="bi bi-box-arrow-right text-3xl"></i>
         <span class="text-[10px] font-semibold uppercase tracking-wide">Logout</span>
@@ -264,5 +264,24 @@
         submenu.classList.toggle('flex');
         chevron.classList.toggle('bi-chevron-down');
         chevron.classList.toggle('bi-chevron-up');
+    }
+
+    // ---- Konfirmasi sebelum logout staff, biar gak ke-tap gak sengaja ----
+    function confirmCrewLogout() {
+        Swal.fire({
+            icon: 'question',
+            title: 'Keluar dari dashboard?',
+            text: 'Kamu perlu login lagi untuk mengakses dashboard.',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, keluar',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#B71C1C',
+            cancelButtonColor: '#6b7280',
+            reverseButtons: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "{{ route('crew.logout') }}";
+            }
+        });
     }
 </script>
