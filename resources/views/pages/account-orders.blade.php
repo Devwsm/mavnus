@@ -91,7 +91,7 @@
                         <p class="text-sm text-gray-500">
                             @if ($statusFilter)
                                 Belum ada pesanan dengan status
-                                "{{ $filters[$statusFilter] ?? null ?? ucfirst($statusFilter) }}".
+                                "{{ $filters[$statusFilter] ?? (null ?? ucfirst($statusFilter)) }}".
                             @else
                                 Kamu belum punya pesanan apa pun.
                             @endif
@@ -105,7 +105,7 @@
 
                 @if ($orders->hasPages())
                     <div class="mt-2">
-                        {{ $orders->links() }}
+                        {{ $orders->links('components.pagination-light') }}
                     </div>
                 @endif
             </div>
