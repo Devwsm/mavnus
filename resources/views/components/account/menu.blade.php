@@ -34,36 +34,8 @@
         </div>
     </div>
 
-    {{-- Mobile: list menu full width, kartu putih shadow lembut --}}
-    <nav
-        class="lg:hidden flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm shadow-black/5 divide-y divide-gray-100">
-        <a href="{{ route('account') }}" class="flex items-center gap-3 px-5 py-4 active:bg-gray-50 transition">
-            <span
-                class="w-9 h-9 rounded-xl {{ $active === 'account' ? 'bg-black text-white' : 'bg-gray-100 text-gray-500' }} flex items-center justify-center text-base shrink-0 transition">
-                <i class="bi bi-person-fill"></i>
-            </span>
-            <span
-                class="flex-1 text-sm font-semibold {{ $active === 'account' ? 'text-black' : 'text-gray-600' }}">Profil
-                Saya</span>
-            <i class="bi bi-chevron-right text-gray-300 text-sm"></i>
-        </a>
-        <a href="{{ route('account.orders') }}" class="flex items-center gap-3 px-5 py-4 active:bg-gray-50 transition">
-            <span
-                class="w-9 h-9 rounded-xl {{ $active === 'orders' ? 'bg-black text-white' : 'bg-gray-100 text-gray-500' }} flex items-center justify-center text-base shrink-0 transition">
-                <i class="bi bi-bag-fill"></i>
-            </span>
-            <span
-                class="flex-1 text-sm font-semibold {{ $active === 'orders' ? 'text-black' : 'text-gray-600' }}">Riwayat
-                Pesanan</span>
-            <i class="bi bi-chevron-right text-gray-300 text-sm"></i>
-        </a>
-        <a href="{{ route('logout') }}" class="flex items-center gap-3 px-5 py-4 active:bg-gray-50 transition">
-            <span class="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center text-base shrink-0 text-red-500">
-                <i class="bi bi-box-arrow-right"></i>
-            </span>
-            <span class="flex-1 text-sm font-semibold text-red-500">Keluar</span>
-        </a>
-    </nav>
+    {{-- Mobile: navigasi menu & logout sudah ada di bottom nav (components.account.bottom-nav),
+        jadi di sini cukup kartu profil di atas, tanpa list menu lagi biar gak dobel. --}}
 
     {{-- Desktop: sidebar vertikal, shadow lembut --}}
     <nav class="hidden lg:flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm shadow-black/5">
