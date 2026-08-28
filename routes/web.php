@@ -39,38 +39,58 @@ Route::prefix('/')->group(function () {
 });
 
 Route::prefix('/dashboard')->middleware('cekLogin')->group(function () {
+    // Landing gak dikunci per role — controller yang milih view mana
+    // yang cocok buat role staff yang login (lihat dashboardController).
     Route::get('/', [dashboardController::class, 'dashboard'])->name('dashboard');
 
-    Route::prefix('/orders')->group(function () {
+    // Pesanan: Owner + Staff Pesanan
+    Route::prefix('/orders')->middleware('role:owner,staff_pesanan')->group(function () {
         Route::get('/', [orderController::class, 'dashboardIndex'])->name('dashboard.orders');
         Route::get('/{order}', [orderController::class, 'dashboardShow'])->name('dashboard.orders.show');
         Route::patch('/{order}/status', [orderController::class, 'updateStatus'])->name('dashboard.orders.updateStatus');
     });
 
-    Route::prefix('/clothes')->group(function () {
+    // Produk: Owner + Admin Produk
+    Route::prefix('/clothes')->middleware('role:owner,admin_produk')->group(function () {
         Route::get('/', [clothesController::class, 'clothes'])->name('dashboard.clothes');
         Route::post('/store', [clothesController::class, 'store'])->name('clothes.store');
         Route::delete('/{product}', [clothesController::class, 'destroy'])->name('clothes.destroy');
         Route::put('/{product}', [clothesController::class, 'update'])->name('clothes.update');
     });
 
-    Route::prefix('/visitors')->group(function () {
+    // Statistik pengunjung: Owner only
+    Route::prefix('/visitors')->middleware('role:owner')->group(function () {
         Route::get('/', [visitorController::class, 'dashboardIndex'])->name('dashboard.visitors');
         Route::get('/pages', [visitorController::class, 'pages'])->name('dashboard.visitors.pages');
     });
 
-    Route::prefix('/import-export')->middleware('cekLogin')->group(function () {
-        Route::get('/', [importExportController::class, 'index'])->name('dashboard.import-export');
+    Route::prefix('/import-export')->group(function () {
+        // Halaman index-nya sendiri dibuka buat 3 role (isinya beda-beda
+        // tombol tergantung role — diatur di view). Yang benar-benar
+        // dikunci ketat adalah tiap endpoint export di bawah ini.
+        Route::get('/', [importExportController::class, 'index'])
+            ->name('dashboard.import-export')
+            ->middleware('role:owner,admin_produk,staff_pesanan');
 
-        Route::get('/orders/export', [importExportController::class, 'exportOrders'])->name('export.orders');
-        Route::get('/orders/invoice/preview', [importExportController::class, 'ordersInvoicePreview'])->name('export.orders.preview');
-        Route::get('/orders/invoice/pdf', [importExportController::class, 'exportOrdersPdf'])->name('export.orders.pdf');
+        // Invoice & data pesanan: Owner + Staff Pesanan
+        Route::middleware('role:owner,staff_pesanan')->group(function () {
+            Route::get('/orders/export', [importExportController::class, 'exportOrders'])->name('export.orders');
+            Route::get('/orders/invoice/preview', [importExportController::class, 'ordersInvoicePreview'])->name('export.orders.preview');
+            Route::get('/orders/invoice/pdf', [importExportController::class, 'exportOrdersPdf'])->name('export.orders.pdf');
+        });
 
-        Route::get('/products/export-sql', [importExportController::class, 'exportProductsSql'])->name('export.products.sql');
-        Route::get('/orders/export-sql', [importExportController::class, 'exportOrdersSql'])->name('export.orders.sql');
+        // Data produk (SQL): Owner + Admin Produk
+        Route::middleware('role:owner,admin_produk')->group(function () {
+            Route::get('/products/export-sql', [importExportController::class, 'exportProductsSql'])->name('export.products.sql');
+        });
 
-        Route::get('/database/export', [importExportController::class, 'exportDatabase'])->name('export.database');
-        Route::get('/storage/export', [importExportController::class, 'exportStorage'])->name('export.storage');
+        // Backup mentah (SQL pesanan, full database, storage): Owner only —
+        // ini yang paling sensitif karena isinya semua data customer.
+        Route::middleware('role:owner')->group(function () {
+            Route::get('/orders/export-sql', [importExportController::class, 'exportOrdersSql'])->name('export.orders.sql');
+            Route::get('/database/export', [importExportController::class, 'exportDatabase'])->name('export.database');
+            Route::get('/storage/export', [importExportController::class, 'exportStorage'])->name('export.storage');
+        });
     });
 });
 

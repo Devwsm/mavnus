@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         //
         $middleware->alias([
             'cekLogin' => \App\Http\Middleware\cekLogin::class,
+            'role' => \App\Http\Middleware\cekRole::class,
         ]);
 
         $middleware->web(append: [

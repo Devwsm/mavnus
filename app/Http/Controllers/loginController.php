@@ -40,10 +40,22 @@ class loginController extends Controller
             return back()->withErrors(['login' => 'Username atau password salah.'])->onlyInput('username');
         }
 
+        if (!$user->is_active) {
+            // Akun staff dinonaktifkan (mis. resign) — jangan bocorin alasannya,
+            // cukup pesan generik yang sama kayak "user tidak ditemukan".
+            return back()->withErrors(['login' => 'Username atau password salah.'])->onlyInput('username');
+        }
+
         // Regenerate session ID — cegah session fixation attack
         $request->session()->regenerate();
         $request->session()->put('login', true);
         $request->session()->put('user', $user->username);
+        // Role & nama disimpan di session saat login supaya middleware/view
+        // gak perlu query ulang tiap request. Konsekuensinya: kalau role
+        // staff diubah lewat "Kelola Akun Staff" pas dia lagi login, efeknya
+        // baru kepakai setelah dia login ulang — cukup buat kasus ini.
+        $request->session()->put('role', $user->role);
+        $request->session()->put('name', $user->name);
 
         // Pakai key intended sendiri ('staff_intended_url'), JANGAN pakai
         // redirect()->intended() bawaan Laravel — itu baca session('url.intended')
@@ -59,7 +71,7 @@ class loginController extends Controller
         // Cuma bersihkan data punya sesi staff, JANGAN invalidate() seluruh session —
         // itu juga bakal ngehapus status login customer (guard 'web') yang numpang
         // di session yang sama, jadi customer ikut ke-logout.
-        $request->session()->forget(['login', 'user']);
+        $request->session()->forget(['login', 'user', 'role', 'name']);
         // Tetap regenerate ID + token session buat keamanan, tanpa flush data lain.
         $request->session()->regenerate();
         return redirect()->route('home');

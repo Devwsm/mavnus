@@ -17,8 +17,10 @@ class accountSeeder extends Seeder
         //
         account::create([
             'username' => 'admin.mavnus',
+            'name' => 'Owner',
             'password' => Hash::make('manage@mavnus'),
-            'role' => 'admin',
+            'role' => 'owner',
+            'is_active' => true,
         ]);
     }
 }
