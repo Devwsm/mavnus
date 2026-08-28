@@ -14,12 +14,26 @@ use Illuminate\Support\Str;
 class orderController extends Controller
 {
     //
-    public function dashboardIndex()
+    public function dashboardIndex(Request $request)
     {
+        $status = $request->query('status');
+
         $orders = Order::with(['items.product.images'])
+            ->when($status, fn($query) => $query->where('status', $status))
             ->latest()
-            ->paginate(15);
-        return view('pages.dashboard.orders', compact('orders'));
+            ->paginate(15)
+            ->withQueryString();
+
+        // Dihitung terpisah dari data yang tampil di halaman (yang cuma 15
+        // per page & bisa lagi difilter) supaya angkanya selalu total asli.
+        $statusCounts = [
+            'pending'    => Order::where('status', 'pending')->count(),
+            'processing' => Order::where('status', 'processing')->count(),
+            'shipped'    => Order::where('status', 'shipped')->count(),
+            'completed'  => Order::where('status', 'completed')->count(),
+        ];
+
+        return view('pages.dashboard.orders', compact('orders', 'status', 'statusCounts'));
     }
 
     public function dashboardShow(Order $order)

@@ -18,7 +18,20 @@ class clothesController extends Controller
 {
     public function clothes()
     {
-        return view('pages.dashboard.clothes');
+        $products = product::clothesCategory()
+            ->with(['images', 'clothes', 'variants'])
+            ->latest()
+            ->get();
+
+        // Varian dengan stok menipis (1-3 pcs, belum sampai habis) dari produk yang masih aktif
+        $lowStockVariants = ProductVariant::with('product.images')
+            ->whereHas('product', fn($query) => $query->where('is_active', true))
+            ->where('stock', '>', 0)
+            ->where('stock', '<=', 3)
+            ->orderBy('stock')
+            ->get();
+
+        return view('pages.dashboard.clothes', compact('products', 'lowStockVariants'));
     }
 
     public function store(Request $request)

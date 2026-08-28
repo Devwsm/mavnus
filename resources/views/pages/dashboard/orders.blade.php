@@ -10,32 +10,37 @@
         </div>
 
         <div class="flex flex-col w-full max-w-6xl gap-5 p-6 lg:p-14">
-            {{-- Ringkasan cepat --}}
+            {{-- Ringkasan cepat (angka total asli, sekaligus tombol filter) --}}
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                @php
-                    $pendingCount = $orders->where('status', 'pending')->count();
-                    $processingCount = $orders->where('status', 'processing')->count();
-                    $shippedCount = $orders->where('status', 'shipped')->count();
-                    $completedCount = $orders->where('status', 'completed')->count();
-                @endphp
-
-                <div class="bg-[#0D0D0D] border border-white/10 rounded-2xl p-5 flex flex-col gap-1">
-                    <span class="text-[#B77B1C] text-2xl font-bold">{{ $pendingCount }}</span>
+                <a href="{{ route('dashboard.orders', ['status' => 'pending']) }}"
+                    class="bg-[#0D0D0D] border rounded-2xl p-5 flex flex-col gap-1 transition {{ $status === 'pending' ? 'border-[#B77B1C]/60' : 'border-white/10 hover:border-white/20' }}">
+                    <span class="text-[#B77B1C] text-2xl font-bold">{{ $statusCounts['pending'] }}</span>
                     <span class="text-white/40 text-xs uppercase tracking-wide">Pending</span>
-                </div>
-                <div class="bg-[#0D0D0D] border border-white/10 rounded-2xl p-5 flex flex-col gap-1">
-                    <span class="text-[#1C1CB7] text-2xl font-bold">{{ $processingCount }}</span>
+                </a>
+                <a href="{{ route('dashboard.orders', ['status' => 'processing']) }}"
+                    class="bg-[#0D0D0D] border rounded-2xl p-5 flex flex-col gap-1 transition {{ $status === 'processing' ? 'border-[#1C1CB7]/60' : 'border-white/10 hover:border-white/20' }}">
+                    <span class="text-[#1C1CB7] text-2xl font-bold">{{ $statusCounts['processing'] }}</span>
                     <span class="text-white/40 text-xs uppercase tracking-wide">Diproses</span>
-                </div>
-                <div class="bg-[#0D0D0D] border border-white/10 rounded-2xl p-5 flex flex-col gap-1">
-                    <span class="text-[#5E1C5E] text-2xl font-bold">{{ $shippedCount }}</span>
+                </a>
+                <a href="{{ route('dashboard.orders', ['status' => 'shipped']) }}"
+                    class="bg-[#0D0D0D] border rounded-2xl p-5 flex flex-col gap-1 transition {{ $status === 'shipped' ? 'border-[#5E1C5E]/60' : 'border-white/10 hover:border-white/20' }}">
+                    <span class="text-[#5E1C5E] text-2xl font-bold">{{ $statusCounts['shipped'] }}</span>
                     <span class="text-white/40 text-xs uppercase tracking-wide">Dikirim</span>
-                </div>
-                <div class="bg-[#0D0D0D] border border-white/10 rounded-2xl p-5 flex flex-col gap-1">
-                    <span class="text-[#1C7B1C] text-2xl font-bold">{{ $completedCount }}</span>
+                </a>
+                <a href="{{ route('dashboard.orders', ['status' => 'completed']) }}"
+                    class="bg-[#0D0D0D] border rounded-2xl p-5 flex flex-col gap-1 transition {{ $status === 'completed' ? 'border-[#1C7B1C]/60' : 'border-white/10 hover:border-white/20' }}">
+                    <span class="text-[#1C7B1C] text-2xl font-bold">{{ $statusCounts['completed'] }}</span>
                     <span class="text-white/40 text-xs uppercase tracking-wide">Selesai</span>
-                </div>
+                </a>
             </div>
+
+            @if ($status)
+                <div class="flex items-center gap-2 text-sm text-white/50">
+                    <span>Menampilkan status: <span class="text-white font-semibold">{{ ucfirst($status) }}</span></span>
+                    <a href="{{ route('dashboard.orders') }}" class="text-[#e05656] hover:underline">Tampilkan
+                        semua</a>
+                </div>
+            @endif
 
             {{-- Grid card order --}}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">

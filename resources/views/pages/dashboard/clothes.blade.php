@@ -162,7 +162,210 @@
                 </div>
             </div>
         </div>
+
+        {{-- ===================== STOK MENIPIS ===================== --}}
+        @if ($lowStockVariants->isNotEmpty())
+            <div class="flex flex-col w-full max-w-6xl gap-4 px-6 lg:px-14">
+                <div class="bg-amber-400/5 border border-amber-400/20 rounded-2xl p-5 flex flex-col gap-4">
+                    <div class="flex items-center gap-2.5">
+                        <i class="bi bi-exclamation-triangle-fill text-amber-400"></i>
+                        <h2 class="text-amber-400 text-sm font-bold uppercase tracking-wide">
+                            Stok Menipis ({{ $lowStockVariants->count() }})
+                        </h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                        @foreach ($lowStockVariants as $variant)
+                            <a href="{{ route('dashboard.clothes', ['edit' => optional($variant->product)->id_product]) }}#product-{{ optional($variant->product)->id_product }}"
+                                class="flex items-center gap-3 bg-black/40 hover:bg-black/60 border border-white/5 rounded-xl px-3.5 py-2.5 transition">
+                                <div class="w-9 h-9 rounded-lg bg-white/5 overflow-hidden shrink-0">
+                                    @if (optional($variant->product)->images && $variant->product->images->first())
+                                        <img src="{{ Storage::url($variant->product->images->first()->image_path) }}"
+                                            alt="{{ $variant->product->name }}" class="w-full h-full object-cover">
+                                    @endif
+                                </div>
+                                <div class="flex flex-col min-w-0">
+                                    <span class="text-white text-xs font-semibold truncate">
+                                        {{ $variant->product->name ?? 'Produk tidak ditemukan' }}
+                                    </span>
+                                    <span class="text-white/40 text-[11px]">
+                                        Ukuran {{ $variant->label }} · tersisa {{ $variant->stock }} pcs
+                                    </span>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        {{-- ===================== SEMUA PRODUK (edit/hapus) ===================== --}}
+        <div class="flex flex-col w-full max-w-6xl gap-4 p-6 lg:p-14">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-bold uppercase tracking-wide">Semua Produk Clothes</h2>
+                <span class="text-white/40 text-sm">{{ $products->count() }} produk</span>
+            </div>
+            <div class="flex flex-col w-full">
+                @include('components/errors/alerts')
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                @forelse ($products as $product)
+                    @php
+                        $totalStock = $product->variants->sum('stock');
+                        $extraImages = $product->images->slice(1, 3);
+                        $remainingCount = $product->images->count() - 4;
+                    @endphp
+                    <div id="product-{{ $product->id_product }}"
+                        class="group bg-[#0D0D0D] border border-white/10 rounded-2xl overflow-hidden hover:border-white/20 transition-all duration-300 scroll-mt-24">
+
+                        {{-- Foto --}}
+                        <div class="relative w-full aspect-square bg-black overflow-hidden">
+                            @if ($product->images->first())
+                                <img src="{{ Storage::url($product->images->first()->image_path) }}"
+                                    alt="{{ $product->name }}"
+                                    class="w-full h-full object-cover object-center group-hover:scale-105 transition duration-500">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center">
+                                    <i class="bi bi-image text-white/15 text-4xl"></i>
+                                </div>
+                            @endif
+
+                            {{-- Gradient overlay biar strip foto & badge lebih nempel --}}
+                            <div
+                                class="absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-black/80 to-transparent pointer-events-none">
+                            </div>
+
+                            {{-- Status badge --}}
+                            <div class="absolute top-3 right-3 flex flex-col items-end gap-1.5">
+                                @if ($product->is_scheduled)
+                                    <span
+                                        class="inline-flex items-center gap-1.5 bg-black/70 backdrop-blur text-amber-400 text-[10px] font-semibold px-2 py-1 rounded-md">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                                        Terjadwal {{ $product->published_at->translatedFormat('d M, H:i') }}
+                                    </span>
+                                @elseif ($product->is_active)
+                                    <span
+                                        class="inline-flex items-center gap-1.5 bg-black/70 backdrop-blur text-green-400 text-[10px] font-semibold px-2 py-1 rounded-md">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
+                                        Tersedia
+                                    </span>
+                                @else
+                                    <span
+                                        class="inline-flex items-center gap-1.5 bg-black/70 backdrop-blur text-[#e05656] text-[10px] font-semibold px-2 py-1 rounded-md">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#e05656]"></span>
+                                        Sold Out
+                                    </span>
+                                @endif
+                            </div>
+
+                            {{-- Strip mini thumbnail (kalau foto lebih dari 1) --}}
+                            @if ($product->images->count() > 1)
+                                <div class="absolute bottom-3 left-3 flex items-center gap-1.5">
+                                    @foreach ($extraImages as $extra)
+                                        <div class="w-7 h-7 rounded-md overflow-hidden ring-1.5 ring-white/40">
+                                            <img src="{{ Storage::url($extra->image_path) }}" alt="{{ $product->name }}"
+                                                class="w-full h-full object-cover object-center">
+                                        </div>
+                                    @endforeach
+
+                                    @if ($remainingCount > 0)
+                                        <div class="w-7 h-7 rounded-md bg-[#B71C1C] flex items-center justify-center">
+                                            <span class="text-white text-[10px] font-bold">+{{ $remainingCount }}</span>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- Info --}}
+                        <div class="flex flex-col gap-3 p-4">
+                            <div>
+                                <h3 class="font-semibold text-white uppercase tracking-wide truncate">
+                                    {{ $product->name }}
+                                </h3>
+                                <p class="text-white/40 text-xs mt-0.5 line-clamp-1">
+                                    {{ $product->description ?: 'Tidak ada deskripsi' }}
+                                </p>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <span class="text-white font-bold">{{ $product->formatted_price }}</span>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="w-3 h-3 rounded-full border border-white/20"
+                                        style="background-color: {{ $product->clothes->color }}"></span>
+                                    <span class="text-white/50 text-xs">{{ $product->clothes->material }}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between pt-3 border-t border-white/6">
+                                <span class="text-white/40 text-xs">Total Stok</span>
+                                <span class="text-white text-sm font-semibold">{{ $totalStock }} pcs</span>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <span class="text-white/40 text-xs">Berat</span>
+                                <span class="text-white text-sm">{{ $product->weight }} gram</span>
+                            </div>
+
+                            <div class="flex flex-wrap gap-1.5">
+                                @foreach ($product->variants as $variant)
+                                    @php
+                                        $stockColor =
+                                            $variant->stock === 0
+                                                ? 'text-[#e05656] border-[#B71C1C]/30 bg-[#B71C1C]/5'
+                                                : ($variant->stock <= 3
+                                                    ? 'text-amber-400 border-amber-400/20 bg-amber-400/5'
+                                                    : 'text-green-400 border-green-400/20 bg-green-400/5');
+                                    @endphp
+                                    <span
+                                        class="flex items-center gap-1 border rounded-md px-2 py-1 text-[11px] {{ $stockColor }}">
+                                        <span class="font-medium opacity-70">{{ $variant->label }}</span>
+                                        <span class="opacity-30">·</span>
+                                        <span class="font-semibold">{{ $variant->stock }}</span>
+                                    </span>
+                                @endforeach
+                            </div>
+
+                            {{-- Aksi --}}
+                            <div class="flex items-center gap-2 pt-3 border-t border-white/6">
+                                @include('components/dashboard/modal-edit-clothes')
+                                @include('components/dashboard/btn-hapus-clothes')
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div
+                        class="col-span-full flex flex-col items-center gap-2 py-20 bg-[#0D0D0D] border border-white/10 rounded-xl">
+                        <i class="bi bi-inbox text-white/15 text-4xl"></i>
+                        <p class="text-white/30 text-sm">Belum ada produk clothes.</p>
+                        <p class="text-white/20 text-xs">Isi form di atas untuk mulai menambahkan.</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
     </div>
+
+    <script>
+        // Kalau datang dari klik "Stok Menipis" (?edit=ID), otomatis buka modal edit produk itu
+        document.addEventListener('DOMContentLoaded', () => {
+            const editId = new URLSearchParams(window.location.search).get('edit');
+            if (!editId) return;
+
+            const card = document.getElementById('product-' + editId);
+            if (card) {
+                card.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }
+
+            const modal = document.getElementById('editModal-' + editId);
+            if (modal && typeof toggleEditModal === 'function') {
+                toggleEditModal('editModal-' + editId, true);
+            }
+        });
+    </script>
 
     <script>
         // ---- Toggle field jadwal rilis ----

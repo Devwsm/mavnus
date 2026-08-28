@@ -1,10 +1,25 @@
-{{-- desktop --}}
+{{--
+    Navbar dashboard (desktop pill bawah + mobile fullscreen). Menu yang
+    ditampilin disaring sesuai role staff yang login (session 'role'),
+    biar gak ada menu yang keliatan padahal bakal ditolak middleware
+    kalau diklik. Urutan & style dipertahankan sama kayak sebelumnya.
+--}}
 @php
-    $navLowStockCount = \App\Models\ProductVariant::where('stock', '>', 0)
-        ->where('stock', '<=', 3)
-        ->whereHas('product', fn($query) => $query->where('is_active', true))
-        ->count();
+    $role = session('role');
+    $canOrders = in_array($role, ['owner', 'staff_pesanan']);
+    $canVisitors = $role === 'owner';
+    $canProduk = in_array($role, ['owner', 'admin_produk']);
+
+    // Badge stok menipis cuma relevan buat role yang urus stok
+    $navLowStockCount = 0;
+    if (in_array($role, ['owner', 'admin_produk'])) {
+        $navLowStockCount = \App\Models\ProductVariant::where('stock', '>', 0)
+            ->where('stock', '<=', 3)
+            ->whereHas('product', fn($query) => $query->where('is_active', true))
+            ->count();
+    }
 @endphp
+{{-- desktop --}}
 <div
     class="nav z-50 fixed bottom-5 left-1/2 -translate-x-1/2 hidden lg:flex items-center gap-1 bg-[#0D0D0D] rounded-2xl px-2 py-2">
 
@@ -23,56 +38,68 @@
         </span>
     </a>
 
-    <div class="w-px h-6 bg-white/10 mx-1"></div>
+    @if ($canOrders)
+        <div class="w-px h-6 bg-white/10 mx-1"></div>
 
-    <a href="{{ route('dashboard.orders') }}"
-        class="group relative flex items-center justify-center w-12 h-12 rounded-xl text-white/85 hover:text-white hover:bg-white/10 text-xl transition {{ request()->routeIs('dashboard.orders') ? 'text-[#B71C1C] bg-[#B71C1C]/20' : '' }}">
-        <i class="bi bi-box-seam"></i>
-        <span
-            class="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition">
-            Orders
-        </span>
-    </a>
-
-    <div class="w-px h-6 bg-white/10 mx-1"></div>
-
-    <a href="{{ route('dashboard.visitors') }}"
-        class="group relative flex items-center justify-center w-12 h-12 rounded-xl text-white/85 hover:text-white hover:bg-white/10 text-xl transition {{ request()->routeIs('dashboard.visitors') ? 'text-[#B71C1C] bg-[#B71C1C]/20' : '' }}">
-        <i class="bi bi-people-fill"></i>
-        <span
-            class="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition">
-            Pengunjung
-        </span>
-    </a>
-
-    {{-- Produk (gabungan Clothes/Accessories/Albums) --}}
-    <div class="relative">
-        <button type="button" onclick="toggleProductMenu()" id="productMenuBtn"
-            class="group relative flex items-center justify-center w-12 h-12 rounded-xl text-white/85 hover:text-white hover:bg-white/10 text-xl transition {{ request()->routeIs(['dashboard.clothes', 'dashboard.accessories', 'dashboard.albums']) ? 'text-[#B71C1C] bg-[#B71C1C]/20' : '' }}">
-            <i class="bi bi-grid-fill"></i>
+        <a href="{{ route('dashboard.orders') }}"
+            class="group relative flex items-center justify-center w-12 h-12 rounded-xl text-white/85 hover:text-white hover:bg-white/10 text-xl transition {{ request()->routeIs('dashboard.orders') ? 'text-[#B71C1C] bg-[#B71C1C]/20' : '' }}">
+            <i class="bi bi-box-seam"></i>
             <span
                 class="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition">
-                Produk
+                Orders
             </span>
-        </button>
+        </a>
+    @endif
 
-        {{-- Flyout ke atas --}}
-        <div id="productMenuFlyout"
-            class="hidden absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-44 bg-[#0D0D0D] border border-white/10 rounded-xl p-1.5 flex-col gap-1">
-            <a href="{{ route('dashboard.clothes') }}"
-                class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/10 transition {{ request()->routeIs('dashboard.clothes') ? 'text-[#B71C1C] bg-[#B71C1C]/10' : '' }}">
-                <i class="bi bi-bag-fill"></i> Clothes
-            </a>
-            <a href="{{ route('dashboard') }}"
-                class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/10 transition {{ request()->routeIs('dashboard.accessories') ? 'text-[#B71C1C] bg-[#B71C1C]/10' : '' }}">
-                <i class="bi bi-gem"></i> Accessories
-            </a>
-            <a href="{{ route('dashboard') }}"
-                class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/10 transition {{ request()->routeIs('dashboard.albums') ? 'text-[#B71C1C] bg-[#B71C1C]/10' : '' }}">
-                <i class="bi bi-disc-fill"></i> Albums
-            </a>
+    @if ($canVisitors)
+        <div class="w-px h-6 bg-white/10 mx-1"></div>
+
+        <a href="{{ route('dashboard.visitors') }}"
+            class="group relative flex items-center justify-center w-12 h-12 rounded-xl text-white/85 hover:text-white hover:bg-white/10 text-xl transition {{ request()->routeIs('dashboard.visitors') ? 'text-[#B71C1C] bg-[#B71C1C]/20' : '' }}">
+            <i class="bi bi-people-fill"></i>
+            <span
+                class="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition">
+                Pengunjung
+            </span>
+        </a>
+    @endif
+
+    @if ($canProduk)
+        {{-- Divider cuma dipasang kalau Produk adalah item pertama yang muncul
+            (Orders & Pengunjung disembunyikan) — biar gak ada divider dobel/nyangkut --}}
+        @if (!$canOrders && !$canVisitors)
+            <div class="w-px h-6 bg-white/10 mx-1"></div>
+        @endif
+
+        {{-- Produk (gabungan Clothes/Accessories/Albums) --}}
+        <div class="relative">
+            <button type="button" onclick="toggleProductMenu()" id="productMenuBtn"
+                class="group relative flex items-center justify-center w-12 h-12 rounded-xl text-white/85 hover:text-white hover:bg-white/10 text-xl transition {{ request()->routeIs(['dashboard.clothes', 'dashboard.accessories', 'dashboard.albums']) ? 'text-[#B71C1C] bg-[#B71C1C]/20' : '' }}">
+                <i class="bi bi-grid-fill"></i>
+                <span
+                    class="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition">
+                    Produk
+                </span>
+            </button>
+
+            {{-- Flyout ke atas --}}
+            <div id="productMenuFlyout"
+                class="hidden absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-44 bg-[#0D0D0D] border border-white/10 rounded-xl p-1.5 flex-col gap-1">
+                <a href="{{ route('dashboard.clothes') }}"
+                    class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/10 transition {{ request()->routeIs('dashboard.clothes') ? 'text-[#B71C1C] bg-[#B71C1C]/10' : '' }}">
+                    <i class="bi bi-bag-fill"></i> Clothes
+                </a>
+                <a href="{{ route('dashboard') }}"
+                    class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/10 transition {{ request()->routeIs('dashboard.accessories') ? 'text-[#B71C1C] bg-[#B71C1C]/10' : '' }}">
+                    <i class="bi bi-gem"></i> Accessories
+                </a>
+                <a href="{{ route('dashboard') }}"
+                    class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/10 transition {{ request()->routeIs('dashboard.albums') ? 'text-[#B71C1C] bg-[#B71C1C]/10' : '' }}">
+                    <i class="bi bi-disc-fill"></i> Albums
+                </a>
+            </div>
         </div>
-    </div>
+    @endif
 
     <div class="w-px h-6 bg-white/10 mx-1"></div>
 
@@ -130,42 +157,50 @@
         </span>
         <span class="text-[10px] font-semibold uppercase tracking-wide">Dashboard</span>
     </a>
-    <a href="{{ route('dashboard.orders') }}"
-        class="flex flex-col items-center gap-1.5 {{ request()->routeIs('dashboard.orders') ? 'text-[#B71C1C]' : 'text-white' }}">
-        <i class="bi bi-box-seam text-3xl"></i>
-        <span class="text-[10px] font-semibold uppercase tracking-wide">Orders</span>
-    </a>
-    <a href="{{ route('dashboard.visitors') }}"
-        class="flex flex-col items-center gap-1.5 {{ request()->routeIs('dashboard.visitors') ? 'text-[#B71C1C]' : 'text-white' }}">
-        <i class="bi bi-people-fill text-3xl"></i>
-        <span class="text-[10px] font-semibold uppercase tracking-wide">Pengunjung</span>
-    </a>
 
-    {{-- Produk (accordion) --}}
-    <div class="flex flex-col items-center gap-3 w-full">
-        <button type="button" onclick="toggleMobileProductMenu()"
-            class="flex flex-col items-center gap-1.5 {{ request()->routeIs(['dashboard.clothes', 'dashboard.accessories', 'dashboard.albums']) ? 'text-[#B71C1C]' : 'text-white' }}">
-            <i class="bi bi-grid-fill text-3xl"></i>
-            <span class="text-[10px] font-semibold uppercase tracking-wide flex items-center gap-1">
-                Produk <i class="bi bi-chevron-down text-[8px]" id="mobileProductChevron"></i>
-            </span>
-        </button>
+    @if ($canOrders)
+        <a href="{{ route('dashboard.orders') }}"
+            class="flex flex-col items-center gap-1.5 {{ request()->routeIs('dashboard.orders') ? 'text-[#B71C1C]' : 'text-white' }}">
+            <i class="bi bi-box-seam text-3xl"></i>
+            <span class="text-[10px] font-semibold uppercase tracking-wide">Orders</span>
+        </a>
+    @endif
 
-        <div id="mobileProductSubmenu" class="hidden flex-col items-center gap-4 w-full">
-            <a href="{{ route('dashboard.clothes') }}"
-                class="flex items-center gap-2 text-sm {{ request()->routeIs('dashboard.clothes') ? 'text-[#B71C1C]' : 'text-white/70' }}">
-                <i class="bi bi-bag-fill"></i> Clothes
-            </a>
-            <a href="{{ route('dashboard') }}"
-                class="flex items-center gap-2 text-sm {{ request()->routeIs('dashboard.accessories') ? 'text-[#B71C1C]' : 'text-white/70' }}">
-                <i class="bi bi-gem"></i> Accessories
-            </a>
-            <a href="{{ route('dashboard') }}"
-                class="flex items-center gap-2 text-sm {{ request()->routeIs('dashboard.albums') ? 'text-[#B71C1C]' : 'text-white/70' }}">
-                <i class="bi bi-disc-fill"></i> Albums
-            </a>
+    @if ($canVisitors)
+        <a href="{{ route('dashboard.visitors') }}"
+            class="flex flex-col items-center gap-1.5 {{ request()->routeIs('dashboard.visitors') ? 'text-[#B71C1C]' : 'text-white' }}">
+            <i class="bi bi-people-fill text-3xl"></i>
+            <span class="text-[10px] font-semibold uppercase tracking-wide">Pengunjung</span>
+        </a>
+    @endif
+
+    @if ($canProduk)
+        {{-- Produk (accordion) --}}
+        <div class="flex flex-col items-center gap-3 w-full">
+            <button type="button" onclick="toggleMobileProductMenu()"
+                class="flex flex-col items-center gap-1.5 {{ request()->routeIs(['dashboard.clothes', 'dashboard.accessories', 'dashboard.albums']) ? 'text-[#B71C1C]' : 'text-white' }}">
+                <i class="bi bi-grid-fill text-3xl"></i>
+                <span class="text-[10px] font-semibold uppercase tracking-wide flex items-center gap-1">
+                    Produk <i class="bi bi-chevron-down text-[8px]" id="mobileProductChevron"></i>
+                </span>
+            </button>
+
+            <div id="mobileProductSubmenu" class="hidden flex-col items-center gap-4 w-full">
+                <a href="{{ route('dashboard.clothes') }}"
+                    class="flex items-center gap-2 text-sm {{ request()->routeIs('dashboard.clothes') ? 'text-[#B71C1C]' : 'text-white/70' }}">
+                    <i class="bi bi-bag-fill"></i> Clothes
+                </a>
+                <a href="{{ route('dashboard') }}"
+                    class="flex items-center gap-2 text-sm {{ request()->routeIs('dashboard.accessories') ? 'text-[#B71C1C]' : 'text-white/70' }}">
+                    <i class="bi bi-gem"></i> Accessories
+                </a>
+                <a href="{{ route('dashboard') }}"
+                    class="flex items-center gap-2 text-sm {{ request()->routeIs('dashboard.albums') ? 'text-[#B71C1C]' : 'text-white/70' }}">
+                    <i class="bi bi-disc-fill"></i> Albums
+                </a>
+            </div>
         </div>
-    </div>
+    @endif
 
     <a href="{{ route('dashboard.import-export') }}"
         class="flex flex-col items-center gap-1.5 {{ request()->routeIs('dashboard.import-export') ? 'text-[#B71C1C]' : 'text-white' }}">
@@ -206,17 +241,19 @@
     const productMenuBtn = document.getElementById('productMenuBtn');
     const productMenuFlyout = document.getElementById('productMenuFlyout');
 
-    function toggleProductMenu() {
-        productMenuFlyout.classList.toggle('hidden');
-        productMenuFlyout.classList.toggle('flex');
-    }
-
-    document.addEventListener('click', (e) => {
-        if (!productMenuFlyout.contains(e.target) && !productMenuBtn.contains(e.target)) {
-            productMenuFlyout.classList.add('hidden');
-            productMenuFlyout.classList.remove('flex');
+    if (productMenuBtn && productMenuFlyout) {
+        function toggleProductMenu() {
+            productMenuFlyout.classList.toggle('hidden');
+            productMenuFlyout.classList.toggle('flex');
         }
-    });
+
+        document.addEventListener('click', (e) => {
+            if (!productMenuFlyout.contains(e.target) && !productMenuBtn.contains(e.target)) {
+                productMenuFlyout.classList.add('hidden');
+                productMenuFlyout.classList.remove('flex');
+            }
+        });
+    }
 
     // ---- Mobile: accordion Produk ----
     function toggleMobileProductMenu() {
