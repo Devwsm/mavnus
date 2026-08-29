@@ -3,7 +3,7 @@
 use App\Http\Controllers\accountController;
 use App\Http\Controllers\authController;
 use App\Http\Controllers\cartController;
-use App\Http\Controllers\clothesController;
+use App\Http\Controllers\productController;
 use App\Http\Controllers\dashboardController;
 use App\Http\Controllers\homeController;
 use App\Http\Controllers\importExportController;
@@ -50,12 +50,12 @@ Route::prefix('/dashboard')->middleware('cekLogin')->group(function () {
         Route::patch('/{order}/status', [orderController::class, 'updateStatus'])->name('dashboard.orders.updateStatus');
     });
 
-    // Produk: Owner + Admin Produk
-    Route::prefix('/clothes')->middleware('role:owner,admin_produk')->group(function () {
-        Route::get('/', [clothesController::class, 'clothes'])->name('dashboard.clothes');
-        Route::post('/store', [clothesController::class, 'store'])->name('clothes.store');
-        Route::delete('/{product}', [clothesController::class, 'destroy'])->name('clothes.destroy');
-        Route::put('/{product}', [clothesController::class, 'update'])->name('clothes.update');
+    // Produk (Clothes & Accessories digabung jadi 1 halaman): Owner + Admin Produk
+    Route::prefix('/produk')->middleware('role:owner,admin_produk')->group(function () {
+        Route::get('/', [productController::class, 'produk'])->name('dashboard.produk');
+        Route::post('/store', [productController::class, 'store'])->name('produk.store');
+        Route::delete('/{product}', [productController::class, 'destroy'])->name('produk.destroy');
+        Route::put('/{product}', [productController::class, 'update'])->name('produk.update');
     });
 
     // Statistik pengunjung: Owner only
@@ -121,7 +121,7 @@ Route::prefix('/')->group(function () {
 
     Route::prefix('/clothes')->group(function () {
         Route::get('/', [homeController::class, 'clothes'])->name('clothes');
-        Route::get('/{slug}', [clothesController::class, 'show'])->name('product_detail.clothes');
+        Route::get('/{slug}', [productController::class, 'show'])->name('product_detail.clothes');
     });
 
     Route::get('/accessoris', [homeController::class, 'accessoris'])->name('accessoris');

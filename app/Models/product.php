@@ -21,12 +21,14 @@ class product extends Model
         'description',
         'is_active',
         'published_at',
+        'stock',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'price' => 'integer',
         'published_at' => 'datetime',
+        'stock' => 'integer',
     ];
 
     // Relasi: satu produk bisa punya banyak foto, diurutkan sesuai sort_order
@@ -35,13 +37,13 @@ class product extends Model
         return $this->hasMany(ProductImage::class, 'product_id', 'id_product')->orderBy('sort_order');
     }
 
-    // Relasi: satu produk (kategori cl othes) punya satu detail warna/material
+    // Relasi: satu produk (kategori clothes) punya satu detail warna/material
     public function clothes()
     {
         return $this->hasOne(clothes::class, 'product_id', 'id_product');
     }
 
-    // Relasi: satu produk (kategori accessoris) punya satu detail warna/material
+    // Relasi: satu produk (kategori accessoris) punya satu detail tipe
     public function accessories()
     {
         return $this->hasOne(accessoris::class, 'product_id', 'id_product');
@@ -54,9 +56,14 @@ class product extends Model
     }
 
     // Sync status
+    // Clothes pakai total stok dari semua variant (S/M/L/XL).
+    // Accessories (keychain/sticker/totebag) gak punya variant, jadi
+    // langsung pakai kolom stock tunggal di produk itu sendiri.
     public function syncActiveStatus(): void
     {
-        $totalStock = $this->variants()->sum('stock');
+        $totalStock = $this->category === 'clothes'
+            ? $this->variants()->sum('stock')
+            : (int) $this->stock;
 
         $this->update([
             'is_active' => $totalStock > 0,

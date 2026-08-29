@@ -71,30 +71,15 @@
             <div class="w-px h-6 bg-white/10 mx-1"></div>
         @endif
 
-        {{-- Produk (gabungan Clothes/Accessories) --}}
-        <div class="relative">
-            <button type="button" onclick="toggleProductMenu()" id="productMenuBtn"
-                class="group relative flex items-center justify-center w-12 h-12 rounded-xl text-white/85 hover:text-white hover:bg-white/10 text-xl transition {{ request()->routeIs(['dashboard.clothes', 'dashboard.accessories']) ? 'text-[#B71C1C] bg-[#B71C1C]/20' : '' }}">
-                <i class="bi bi-grid-fill"></i>
-                <span
-                    class="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition">
-                    Produk
-                </span>
-            </button>
-
-            {{-- Flyout ke atas --}}
-            <div id="productMenuFlyout"
-                class="hidden absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-44 bg-[#0D0D0D] border border-white/10 rounded-xl p-1.5 flex-col gap-1">
-                <a href="{{ route('dashboard.clothes') }}"
-                    class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/10 transition {{ request()->routeIs('dashboard.clothes') ? 'text-[#B71C1C] bg-[#B71C1C]/10' : '' }}">
-                    <i class="bi bi-bag-fill"></i> Clothes
-                </a>
-                <a href="{{ route('dashboard') }}"
-                    class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/10 transition {{ request()->routeIs('dashboard.accessories') ? 'text-[#B71C1C] bg-[#B71C1C]/10' : '' }}">
-                    <i class="bi bi-gem"></i> Accessories
-                </a>
-            </div>
-        </div>
+        {{-- Input Produk (1 halaman, gabungan Clothes/Accessories lewat dropdown kategori) --}}
+        <a href="{{ route('dashboard.produk') }}"
+            class="group relative flex items-center justify-center w-12 h-12 rounded-xl text-white/85 hover:text-white hover:bg-white/10 text-xl transition {{ request()->routeIs('dashboard.produk') ? 'text-[#B71C1C] bg-[#B71C1C]/20' : '' }}">
+            <i class="bi bi-grid-fill"></i>
+            <span
+                class="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition">
+                Input Produk
+            </span>
+        </a>
     @endif
 
     <div class="w-px h-6 bg-white/10 mx-1"></div>
@@ -171,27 +156,11 @@
     @endif
 
     @if ($canProduk)
-        {{-- Produk (accordion) --}}
-        <div class="flex flex-col items-center gap-3 w-full">
-            <button type="button" onclick="toggleMobileProductMenu()"
-                class="flex flex-col items-center gap-1.5 {{ request()->routeIs(['dashboard.clothes', 'dashboard.accessories']) ? 'text-[#B71C1C]' : 'text-white' }}">
-                <i class="bi bi-grid-fill text-3xl"></i>
-                <span class="text-[10px] font-semibold uppercase tracking-wide flex items-center gap-1">
-                    Produk <i class="bi bi-chevron-down text-[8px]" id="mobileProductChevron"></i>
-                </span>
-            </button>
-
-            <div id="mobileProductSubmenu" class="hidden flex-col items-center gap-4 w-full">
-                <a href="{{ route('dashboard.clothes') }}"
-                    class="flex items-center gap-2 text-sm {{ request()->routeIs('dashboard.clothes') ? 'text-[#B71C1C]' : 'text-white/70' }}">
-                    <i class="bi bi-bag-fill"></i> Clothes
-                </a>
-                <a href="{{ route('dashboard') }}"
-                    class="flex items-center gap-2 text-sm {{ request()->routeIs('dashboard.accessories') ? 'text-[#B71C1C]' : 'text-white/70' }}">
-                    <i class="bi bi-gem"></i> Accessories
-                </a>
-            </div>
-        </div>
+        <a href="{{ route('dashboard.produk') }}"
+            class="flex flex-col items-center gap-1.5 {{ request()->routeIs('dashboard.produk') ? 'text-[#B71C1C]' : 'text-white' }}">
+            <i class="bi bi-grid-fill text-3xl"></i>
+            <span class="text-[10px] font-semibold uppercase tracking-wide">Input Produk</span>
+        </a>
     @endif
 
     <a href="{{ route('dashboard.import-export') }}"
@@ -228,35 +197,6 @@
         dashMobileOverlay.classList.add('opacity-0', 'pointer-events-none');
         document.body.classList.remove('overflow-hidden');
     });
-
-    // ---- Desktop: flyout menu Produk ----
-    const productMenuBtn = document.getElementById('productMenuBtn');
-    const productMenuFlyout = document.getElementById('productMenuFlyout');
-
-    if (productMenuBtn && productMenuFlyout) {
-        function toggleProductMenu() {
-            productMenuFlyout.classList.toggle('hidden');
-            productMenuFlyout.classList.toggle('flex');
-        }
-
-        document.addEventListener('click', (e) => {
-            if (!productMenuFlyout.contains(e.target) && !productMenuBtn.contains(e.target)) {
-                productMenuFlyout.classList.add('hidden');
-                productMenuFlyout.classList.remove('flex');
-            }
-        });
-    }
-
-    // ---- Mobile: accordion Produk ----
-    function toggleMobileProductMenu() {
-        const submenu = document.getElementById('mobileProductSubmenu');
-        const chevron = document.getElementById('mobileProductChevron');
-
-        submenu.classList.toggle('hidden');
-        submenu.classList.toggle('flex');
-        chevron.classList.toggle('bi-chevron-down');
-        chevron.classList.toggle('bi-chevron-up');
-    }
 
     // ---- Konfirmasi sebelum logout staff, biar gak ke-tap gak sengaja ----
     function confirmCrewLogout() {
