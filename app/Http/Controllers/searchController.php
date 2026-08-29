@@ -25,7 +25,6 @@ class searchController extends Controller
                 $routeName = match ($product->category) {
                     'clothes'     => 'product_detail.clothes',
                     'accessories' => 'product_detail.accessories',
-                    'album'       => 'product_detail.albums',
                 };
 
                 return [

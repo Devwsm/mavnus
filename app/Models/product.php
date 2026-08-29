@@ -47,12 +47,6 @@ class product extends Model
         return $this->hasOne(accessoris::class, 'product_id', 'id_product');
     }
 
-    // Relasi: satu produk (kategori albums) punya satu detail warna/material
-    public function albums()
-    {
-        return $this->hasOne(albums::class, 'product_id', 'id_product');
-    }
-
     public function variants()
     {
         return $this->hasMany(ProductVariant::class, 'product_id', 'id_product')
@@ -95,12 +89,6 @@ class product extends Model
     public function scopeAccessoriesCategory($query)
     {
         return $query->where('category', 'accessories');
-    }
-
-    // Scope: filter produk yang kategorinya "albums" saja
-    public function scopeAlbumsCategory($query)
-    {
-        return $query->where('category', 'album');
     }
 
     // Accessor: format harga jadi "Rp250.000", dipanggil lewat $product->formatted_price

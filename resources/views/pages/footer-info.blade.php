@@ -42,8 +42,8 @@
                 <div id="store" class="scroll-mt-28 flex flex-col gap-3">
                     <h2 class="text-lg font-bold uppercase tracking-wide border-b border-black/10 pb-3">Search</h2>
                     <p class="text-sm text-gray-600 leading-relaxed">
-                        Gunakan ikon kaca pembesar di navbar untuk mencari produk berdasarkan nama, baik itu clothes,
-                        accessories, maupun albums. Hasil pencarian akan muncul secara langsung saat kamu mengetik.
+                        Gunakan ikon kaca pembesar di navbar untuk mencari produk berdasarkan nama, baik itu clothes
+                        maupun accessories. Hasil pencarian akan muncul secara langsung saat kamu mengetik.
                     </p>
                     <p class="text-sm text-gray-600 leading-relaxed">
                         Belum menemukan yang kamu cari? Coba kata kunci yang lebih umum, atau jelajahi kategori

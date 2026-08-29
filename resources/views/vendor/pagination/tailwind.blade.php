@@ -5,7 +5,7 @@
     resources/views/vendor/pagination/tailwind.blade.php kalau ada,
     gantiin bawaan package-nya.
 
-    Dipakai di: storefront (clothes/accessories/albums), dashboard
+    Dipakai di: storefront (clothes/accessories), dashboard
     (orders, visitors, visitor-pages).
 --}}
 @if ($paginator->hasPages())

@@ -67,7 +67,7 @@ class importExportController extends Controller
     }
 
     /**
-     * Export data produk (products, clothes, accessories, albums, product_variants,
+     * Export data produk (products, clothes, accessories, product_variants,
      * product_images) sebagai SQL — hanya INSERT, tanpa DROP/CREATE TABLE.
      * Dipakai setelah migrate:fresh + db:seed di local, supaya data real production
      * bisa dimasukkan ke struktur tabel yang sudah bersih tanpa konflik.
@@ -75,7 +75,7 @@ class importExportController extends Controller
     public function exportProductsSql()
     {
         try {
-            $tables = ['products', 'clothes', 'accessories', 'albums', 'product_variants', 'product_images'];
+            $tables = ['products', 'clothes', 'accessories', 'product_variants', 'product_images'];
             $sql = $this->generateInsertOnlySql($tables, 'Produk');
             $filename = 'mavnus-produk-' . now()->format('Y-m-d_His') . '.sql';
             return response($sql)

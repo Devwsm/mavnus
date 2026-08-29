@@ -71,10 +71,10 @@
             <div class="w-px h-6 bg-white/10 mx-1"></div>
         @endif
 
-        {{-- Produk (gabungan Clothes/Accessories/Albums) --}}
+        {{-- Produk (gabungan Clothes/Accessories) --}}
         <div class="relative">
             <button type="button" onclick="toggleProductMenu()" id="productMenuBtn"
-                class="group relative flex items-center justify-center w-12 h-12 rounded-xl text-white/85 hover:text-white hover:bg-white/10 text-xl transition {{ request()->routeIs(['dashboard.clothes', 'dashboard.accessories', 'dashboard.albums']) ? 'text-[#B71C1C] bg-[#B71C1C]/20' : '' }}">
+                class="group relative flex items-center justify-center w-12 h-12 rounded-xl text-white/85 hover:text-white hover:bg-white/10 text-xl transition {{ request()->routeIs(['dashboard.clothes', 'dashboard.accessories']) ? 'text-[#B71C1C] bg-[#B71C1C]/20' : '' }}">
                 <i class="bi bi-grid-fill"></i>
                 <span
                     class="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition">
@@ -92,10 +92,6 @@
                 <a href="{{ route('dashboard') }}"
                     class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/10 transition {{ request()->routeIs('dashboard.accessories') ? 'text-[#B71C1C] bg-[#B71C1C]/10' : '' }}">
                     <i class="bi bi-gem"></i> Accessories
-                </a>
-                <a href="{{ route('dashboard') }}"
-                    class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/10 transition {{ request()->routeIs('dashboard.albums') ? 'text-[#B71C1C] bg-[#B71C1C]/10' : '' }}">
-                    <i class="bi bi-disc-fill"></i> Albums
                 </a>
             </div>
         </div>
@@ -178,7 +174,7 @@
         {{-- Produk (accordion) --}}
         <div class="flex flex-col items-center gap-3 w-full">
             <button type="button" onclick="toggleMobileProductMenu()"
-                class="flex flex-col items-center gap-1.5 {{ request()->routeIs(['dashboard.clothes', 'dashboard.accessories', 'dashboard.albums']) ? 'text-[#B71C1C]' : 'text-white' }}">
+                class="flex flex-col items-center gap-1.5 {{ request()->routeIs(['dashboard.clothes', 'dashboard.accessories']) ? 'text-[#B71C1C]' : 'text-white' }}">
                 <i class="bi bi-grid-fill text-3xl"></i>
                 <span class="text-[10px] font-semibold uppercase tracking-wide flex items-center gap-1">
                     Produk <i class="bi bi-chevron-down text-[8px]" id="mobileProductChevron"></i>
@@ -193,10 +189,6 @@
                 <a href="{{ route('dashboard') }}"
                     class="flex items-center gap-2 text-sm {{ request()->routeIs('dashboard.accessories') ? 'text-[#B71C1C]' : 'text-white/70' }}">
                     <i class="bi bi-gem"></i> Accessories
-                </a>
-                <a href="{{ route('dashboard') }}"
-                    class="flex items-center gap-2 text-sm {{ request()->routeIs('dashboard.albums') ? 'text-[#B71C1C]' : 'text-white/70' }}">
-                    <i class="bi bi-disc-fill"></i> Albums
                 </a>
             </div>
         </div>

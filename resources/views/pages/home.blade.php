@@ -1,8 +1,8 @@
 @extends('template.layout')
 
-@section('title', 'Mavnus - Clothing, Accessories & Albums Original')
+@section('title', 'Mavnus - Clothing & Accessories Original')
 @section('meta_description',
-    'Belanja clothes, accessories, dan albums original Mavnus. Kualitas terbaik, desain
+    'Belanja clothes dan accessories original Mavnus. Kualitas terbaik, desain
     eksklusif, pengiriman ke seluruh Indonesia.')
 
 @section('content')

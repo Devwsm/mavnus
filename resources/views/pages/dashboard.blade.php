@@ -6,7 +6,7 @@
         <div class="flex flex-col items-center justify-center p-8 text-center">
             <h1 class="text-3xl font-bold">Mavnus Dashboard</h1>
             <p class="text-white/50 text-sm mt-2 max-w-md">
-                Kelola produk clothes, accessories, dan albums dari sini.
+                Kelola produk clothes dan accessories dari sini.
             </p>
         </div>
 

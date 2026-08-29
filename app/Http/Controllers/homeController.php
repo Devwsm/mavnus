@@ -12,7 +12,7 @@ class homeController extends Controller
     {
         $clothesProducts = product::clothesCategory()
             ->active()               // hanya produk yang stoknya masih ada (bukan Sold Out)
-            ->with(['images', 'clothes','variants']) // sekalian ambil foto & detail warna/material/stok, hindari N+1 query
+            ->with(['images', 'clothes', 'variants']) // sekalian ambil foto & detail warna/material/stok, hindari N+1 query
             ->latest()                // urutkan dari produk terbaru ditambahkan
             ->take(4)                 // batasi cuma 4 produk (sesuai slot grid di landing page)
             ->get();                  // eksekusi query, hasilnya disimpan ke variable
@@ -24,21 +24,14 @@ class homeController extends Controller
             ->take(4)
             ->get();
 
-        $albumsProducts = product::albumsCategory()
-            ->active()
-            ->with('images')
-            ->latest()
-            ->take(4)
-            ->get();
-
-        return view('pages.home', compact('clothesProducts', 'accessoriesProducts', 'albumsProducts'));
+        return view('pages.home', compact('clothesProducts', 'accessoriesProducts'));
     }
 
     public function clothes()
     {
         $products = product::clothesCategory()
             ->active()
-            ->with(['images', 'clothes','variants'])
+            ->with(['images', 'clothes', 'variants'])
             ->when(request('price_min'), fn($query, $min) => $query->where('price', '>=', $min))
             ->when(request('price_max'), fn($query, $max) => $query->where('price', '<=', $max))
             ->latest()
@@ -58,19 +51,6 @@ class homeController extends Controller
             ->paginate(12)
             ->withQueryString();
         return view('pages.accessoris', compact('products'));
-    }
-
-    public function albums()
-    {
-        $products = product::albumsCategory()
-            ->active()
-            ->with('images')
-            ->when(request('price_min'), fn($query, $min) => $query->where('price', '>=', $min))
-            ->when(request('price_max'), fn($query, $max) => $query->where('price', '<=', $max))
-            ->latest()
-            ->paginate(12)
-            ->withQueryString();
-        return view('pages.albums', compact('products'));
     }
 
     public function footerInfo()

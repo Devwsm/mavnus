@@ -73,7 +73,6 @@ class Visit extends Model
             '#^/clothes/[^/]+/?$#'       => 'Detail Produk Clothes',
             '#^/clothes/?$#'             => 'Daftar Clothes',
             '#^/accessoris/?$#'          => 'Daftar Accessories',
-            '#^/albums/?$#'              => 'Daftar Albums',
             '#^/info/?$#'                => 'Info',
         ];
     }

@@ -44,7 +44,7 @@
             </div>
         </div>
 
-        <!-- ===================== SECTION 2: clothes | Accessories | Albums | Home (desktop only) ===================== -->
+        <!-- ===================== SECTION 2: clothes | Accessories | Home (desktop only) ===================== -->
         <div class="hidden lg:flex items-center justify-center gap-10 py-3 border-t border-white/10">
             <a href="{{ route('home') }}"
                 class="{{ request()->routeIs('home') ? 'text-white' : 'text-white/50 hover:text-white/80' }} transition">
@@ -58,10 +58,6 @@
                 class="{{ request()->routeIs('accessoris') ? 'text-white' : 'text-white/50 hover:text-white/80' }} transition">
                 <span class="font-bold uppercase text-sm tracking-wide">Accessories</span>
             </a>
-            <a href="{{ route('albums') }}"
-                class="{{ request()->routeIs('albums') ? 'text-white' : 'text-white/50 hover:text-white/80' }} transition">
-                <span class="font-bold uppercase text-sm tracking-wide">Albums</span>
-            </a>
         </div>
     </div>
 
@@ -72,7 +68,7 @@
         <div class="flex items-center gap-3 bg-white/10 rounded-full px-4 py-2 lg:max-w-md lg:mx-auto">
             <i class="bi bi-search text-lg" aria-hidden="true"></i>
             <label for="searchInput" class="sr-only">Cari produk</label>
-            <input id="searchInput" type="text" placeholder="Clothes, Accessoris, albums....."
+            <input id="searchInput" type="text" placeholder="Clothes, Accessoris....."
                 class="bg-transparent outline-none placeholder-white/70 text-white w-full text-sm" autocomplete="off">
         </div>
 
@@ -109,7 +105,6 @@
                     'active' => request()->routeIs('accessoris'),
                     'label' => 'Accessories',
                 ],
-                ['route' => route('albums'), 'active' => request()->routeIs('albums'), 'label' => 'Albums'],
             ];
         @endphp
         @foreach ($drawerLinks as $link)
