@@ -124,7 +124,10 @@ Route::prefix('/')->group(function () {
         Route::get('/{slug}', [productController::class, 'show'])->name('product_detail.clothes');
     });
 
-    Route::get('/accessoris', [homeController::class, 'accessoris'])->name('accessoris');
+    Route::prefix('/accessoris')->group(function () {
+        Route::get('/', [homeController::class, 'accessoris'])->name('accessoris');
+        Route::get('/{slug}', [productController::class, 'show'])->name('product_detail.accessories');
+    });
 
     Route::get('/info', [homeController::class, 'footerInfo'])->name('footer');
 
