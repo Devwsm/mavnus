@@ -74,7 +74,7 @@
         {{-- Input Produk (1 halaman, gabungan Clothes/Accessories lewat dropdown kategori) --}}
         <a href="{{ route('dashboard.produk') }}"
             class="group relative flex items-center justify-center w-12 h-12 rounded-xl text-white/85 hover:text-white hover:bg-white/10 text-xl transition {{ request()->routeIs('dashboard.produk') ? 'text-[#B71C1C] bg-[#B71C1C]/20' : '' }}">
-            <i class="bi bi-grid-fill"></i>
+            <i class="bi bi-bag-plus-fill"></i>
             <span
                 class="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition">
                 Input Produk
@@ -158,7 +158,7 @@
     @if ($canProduk)
         <a href="{{ route('dashboard.produk') }}"
             class="flex flex-col items-center gap-1.5 {{ request()->routeIs('dashboard.produk') ? 'text-[#B71C1C]' : 'text-white' }}">
-            <i class="bi bi-grid-fill text-3xl"></i>
+            <i class="bi bi-bag-plus-fill text-3xl"></i>
             <span class="text-[10px] font-semibold uppercase tracking-wide">Input Produk</span>
         </a>
     @endif
