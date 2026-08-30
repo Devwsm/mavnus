@@ -1,6 +1,8 @@
 {{--
     Halaman "Akun Saya" (overview, read-only). Edit data dipisah ke halaman
-    tersendiri (pages.account-edit), diakses lewat pensil di avatar / header.
+    tersendiri (pages.account-edit), diakses lewat pensil di avatar atau
+    tombol "Ubah Data" - sengaja cuma 2 entry point biar gak numpuk pensil
+    yang ke tujuan sama di satu halaman.
     Gaya "app shell": background abu-abu muda, card putih shadow lembut,
     quick-access status pesanan dengan angka real — mirip Shopee/Tokopedia.
 --}}
@@ -97,12 +99,8 @@
 
                 {{-- Informasi Akun --}}
                 <div class="bg-white rounded-2xl shadow-sm shadow-black/5 overflow-hidden">
-                    <div class="flex items-center justify-between px-4 sm:px-5 py-4">
+                    <div class="px-4 sm:px-5 py-4">
                         <h2 class="text-sm font-bold">Informasi Akun</h2>
-                        <a href="{{ route('account.edit') }}" aria-label="Edit Profil"
-                            class="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-black flex items-center justify-center shrink-0 active:scale-90 transition">
-                            <i class="bi bi-pencil-fill text-sm"></i>
-                        </a>
                     </div>
 
                     {{-- List info read-only --}}

@@ -27,10 +27,6 @@
                 <p class="font-semibold truncate leading-tight">{{ $user->name }}</p>
                 <p class="text-xs text-white/60 truncate mt-0.5">{{ $user->email }}</p>
             </div>
-            <a href="{{ route('account.edit') }}" aria-label="Edit Profil"
-                class="hidden lg:flex w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 items-center justify-center shrink-0 transition">
-                <i class="bi bi-pencil-fill text-xs"></i>
-            </a>
         </div>
     </div>
 
