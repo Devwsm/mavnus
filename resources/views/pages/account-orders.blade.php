@@ -41,7 +41,7 @@
                 </div>
 
                 @forelse ($orders as $order)
-                    <a href="{{ route('order.success', $order) }}"
+                    <a href="{{ route('account.orders.show', $order) }}"
                         class="flex flex-col gap-4 bg-white rounded-2xl shadow-sm shadow-black/5 p-4 sm:p-6 hover:shadow-md active:scale-[0.99] transition">
                         <div class="flex items-center justify-between gap-2 flex-wrap pb-4 border-b border-gray-100">
                             <div>

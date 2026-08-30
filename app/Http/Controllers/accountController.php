@@ -104,4 +104,20 @@ class accountController extends Controller
             'filters'      => $filters,
         ]);
     }
+
+    // Detail satu pesanan - cuma bisa diliat pemilik akunnya sendiri
+    // (beda dari orderController::success yang juga ngizinin guest lewat link).
+    public function orderDetail(Order $order)
+    {
+        if ($order->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $order->load('items');
+
+        return view('pages.account-order-detail', [
+            'user'  => Auth::user(),
+            'order' => $order,
+        ]);
+    }
 }

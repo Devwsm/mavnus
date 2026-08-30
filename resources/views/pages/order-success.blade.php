@@ -78,6 +78,12 @@
         </div>
 
         <div class="flex flex-col sm:flex-row gap-3">
+            @if ($order->user_id)
+                <a href="{{ route('account.orders.show', $order) }}"
+                    class="flex-1 text-center border border-black/15 hover:bg-black/5 text-black uppercase font-bold tracking-widest py-3.5 rounded-lg transition">
+                    Lihat Detail Pesanan
+                </a>
+            @endif
             <a href="{{ route('home') }}"
                 class="flex-1 text-center bg-black hover:bg-black/80 text-white uppercase font-bold tracking-widest py-3.5 rounded-lg transition">
                 Kembali Belanja

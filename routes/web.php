@@ -31,6 +31,7 @@ Route::prefix('/')->group(function () {
     Route::get('/account/edit', [accountController::class, 'edit'])->name('account.edit')->middleware('auth');
     Route::post('/account', [accountController::class, 'update'])->name('account.update')->middleware(['auth', 'throttle:10,1,account-update']);
     Route::get('/account/orders', [accountController::class, 'orders'])->name('account.orders')->middleware('auth');
+    Route::get('/account/orders/{order}', [accountController::class, 'orderDetail'])->name('account.orders.show')->middleware('auth');
 
     // Login STAFF/crew - fungsional, otentikasi ke tabel accounts. Gak dilink di halaman customer.
     Route::get('/crew-portal', [loginController::class, 'crewLogin'])->name('crew.login');
