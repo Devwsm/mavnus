@@ -95,7 +95,7 @@ class orderController extends Controller
 
         // Validasi ulang stok sebelum diproses
         foreach ($cartItems as $item) {
-            $availableStock = $item->variant ? $item->variant->stock : 99;
+            $availableStock = $item->variant ? $item->variant->stock : $item->product->stock;
             if ($item->quantity > $availableStock) {
                 return redirect()->route('cart.index')
                     ->with('error', "Stok {$item->product->name} tidak mencukupi. Sisa stok: {$availableStock}.");
@@ -148,10 +148,15 @@ class orderController extends Controller
                     'subtotal'      => $item->product->price * $item->quantity,
                 ]);
 
-                // 3. Kurangi stok variant yang dipesan
+                // 3. Kurangi stok yang dipesan - clothes dari variant-nya,
+                // accessories langsung dari kolom stock di produknya sendiri
+                // (accessories gak punya varian ukuran).
                 if ($item->variant) {
                     $item->variant->decrement('stock', $item->quantity);
                     $item->variant->product->syncActiveStatus();
+                } else {
+                    $item->product->decrement('stock', $item->quantity);
+                    $item->product->syncActiveStatus();
                 }
             }
 

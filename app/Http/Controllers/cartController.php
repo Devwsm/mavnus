@@ -43,7 +43,7 @@ class cartController extends Controller
 
         $maxStock = isset($validated['variant_id'])
             ? ProductVariant::find($validated['variant_id'])->stock
-            : 99;
+            : $product->stock; // accessories gak punya varian, stoknya langsung dari produk
 
         if ($existing) {
             $existing->quantity = min($existing->quantity + $validated['quantity'], $maxStock);
@@ -67,7 +67,7 @@ class cartController extends Controller
         ]);
         $maxStock = $cartItem->variant_id
             ? $cartItem->variant->stock
-            : 99;
+            : $cartItem->product->stock; // accessories gak punya varian, stoknya langsung dari produk
         $cartItem->update([
             'quantity' => min($validated['quantity'], $maxStock),
         ]);
@@ -89,7 +89,7 @@ class cartController extends Controller
             'price'    => $item->product->formatted_price,
             'subtotal' => 'Rp' . number_format($item->product->price * $item->quantity, 0, ',', '.'),
             'quantity' => $item->quantity,
-            'max'      => $item->variant_id ? $item->variant->stock : 99,
+            'max'      => $item->variant_id ? $item->variant->stock : $item->product->stock,
             'image'    => $item->product->images->first()
                 ? asset('storage/' . $item->product->images->first()->image_path)
                 : null,

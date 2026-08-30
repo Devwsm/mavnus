@@ -35,7 +35,7 @@
             <div class="flex flex-col gap-6">
                 <!-- Title -->
                 <h1 class="text-2xl md:text-3xl font-semibold tracking-tight"
-                    style="color: {{ $product->clothes->color }}">
+                    @if ($product->category === 'clothes') style="color: {{ $product->clothes->color }}" @endif>
                     {{ $product->name }}
                 </h1>
                 <!-- Price -->
@@ -47,30 +47,48 @@
                     {{ $product->description ?: 'Tidak ada deskripsi untuk produk ini.' }}
                 </p>
 
-                <!-- Materials -->
-                <div class="text-xs text-gray-500 leading-relaxed">
-                    <p class="mb-2">Warna: {{ $product->clothes->color }}</p>
-                    <p>Material: {{ $product->clothes->material }}</p>
-                </div>
-
-                <!-- Sizes -->
-                <div class="flex flex-col gap-3">
-                    <span class="text-sm font-medium">Select Size</span>
-                    <div class="flex flex-wrap gap-3">
-                        @foreach ($product->variants as $variant)
-                            <button type="button"
-                                onclick="toggleSize('{{ $variant->label }}', {{ $variant->stock }}, {{ $variant->id_variant }})"
-                                data-size="{{ $variant->label }}"
-                                class="size-btn px-4 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm hover:border-gray-500 {{ $variant->stock === 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
-                                @disabled($variant->stock === 0)>
-                                {{ $variant->label }}
-                            </button>
-                        @endforeach
+                @if ($product->category === 'clothes')
+                    <!-- Materials -->
+                    <div class="text-xs text-gray-500 leading-relaxed">
+                        <p class="mb-2">Warna: {{ $product->clothes->color }}</p>
+                        <p>Material: {{ $product->clothes->material }}</p>
                     </div>
-                    <p id="size-message" class="text-xs text-red-600"></p>
-                    <p id="stock-message" class="text-xs text-gray-500"></p>
-                </div>
-                <!-- Sizes End -->
+
+                    <!-- Sizes -->
+                    <div class="flex flex-col gap-3">
+                        <span class="text-sm font-medium">Select Size</span>
+                        <div class="flex flex-wrap gap-3">
+                            @foreach ($product->variants as $variant)
+                                <button type="button"
+                                    onclick="toggleSize('{{ $variant->label }}', {{ $variant->stock }}, {{ $variant->id_variant }})"
+                                    data-size="{{ $variant->label }}"
+                                    class="size-btn px-4 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm hover:border-gray-500 {{ $variant->stock === 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                    @disabled($variant->stock === 0)>
+                                    {{ $variant->label }}
+                                </button>
+                            @endforeach
+                        </div>
+                        <p id="size-message" class="text-xs text-red-600"></p>
+                        <p id="stock-message" class="text-xs text-gray-500"></p>
+                    </div>
+                    <!-- Sizes End -->
+                @else
+                    <!-- Detail accessories (gak punya varian ukuran, stok langsung di produk) -->
+                    <div class="text-xs text-gray-500 leading-relaxed">
+                        <p>Tipe: {{ optional($product->accessories)->type_label ?? '-' }}</p>
+                    </div>
+
+                    <div class="flex flex-col gap-3">
+                        <p id="size-message" class="text-xs text-red-600"></p>
+                        <p id="stock-message" class="text-xs text-gray-500">
+                            @if ($product->stock > 0)
+                                Stok tersedia: {{ $product->stock }} pcs
+                            @else
+                                Stok habis.
+                            @endif
+                        </p>
+                    </div>
+                @endif
 
                 <!-- Quantity + Add to cart -->
                 <div class="flex flex-col md:flex-row gap-4">
@@ -132,6 +150,12 @@
 @endif
 
 <script>
+    // Clothes punya varian ukuran (harus pilih dulu baru bisa checkout).
+    // Accessories gak punya varian, stoknya langsung dari produk itu sendiri,
+    // jadi qty & tombol add-to-cart langsung aktif tanpa perlu pilih apa-apa.
+    const hasVariants = {{ $product->category === 'clothes' ? 'true' : 'false' }};
+    const accessoryStock = {{ $product->category === 'accessories' ? (int) $product->stock : 0 }};
+
     let selectedSize = null; // size yang sedang aktif dipilih, null kalau belum ada
     let selectedStock = 0; // stok dari size yang aktif, jadi batas atas qty
     let selectedVariantId = null; // id_variant dari size yang aktif, dikirim ke cart
@@ -253,9 +277,21 @@
 
     setQtyEnabled(false);
 
+    // Produk accessories langsung siap dibeli (gak ada pilihan ukuran),
+    // aktifkan qty & tombol add-to-cart begitu halaman dimuat.
+    if (!hasVariants) {
+        selectedVariantId = null;
+        selectedStock = accessoryStock;
+        if (accessoryStock > 0) {
+            setQtyEnabled(true);
+        } else {
+            document.getElementById('size-message').textContent = 'Produk ini sedang habis.';
+        }
+    }
+
     // ---- Add to Cart ----
     addToCartBtn.addEventListener('click', () => {
-        if (!selectedSize) return;
+        if (hasVariants && !selectedSize) return;
 
         fetch('{{ route('cart.add') }}', {
                 method: 'POST',

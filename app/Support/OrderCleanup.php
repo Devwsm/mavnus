@@ -40,7 +40,7 @@ class OrderCleanup
         $expiredOrders = Order::where('status', 'pending')
             ->where('payment_status', 'unpaid')
             ->where('created_at', '<=', $cutoff)
-            ->with('items.variant.product')
+            ->with(['items.variant.product', 'items.product'])
             ->get();
 
         if ($expiredOrders->isEmpty()) {
@@ -49,11 +49,15 @@ class OrderCleanup
 
         foreach ($expiredOrders as $order) {
             DB::transaction(function () use ($order) {
-                // Kembalikan stok tiap item yang punya variant
+                // Kembalikan stok tiap item - clothes ke variant-nya,
+                // accessories langsung ke kolom stock produknya.
                 foreach ($order->items as $item) {
                     if ($item->variant_id && $item->variant) {
                         $item->variant->increment('stock', $item->quantity);
                         $item->variant->product?->syncActiveStatus();
+                    } elseif ($item->product) {
+                        $item->product->increment('stock', $item->quantity);
+                        $item->product->syncActiveStatus();
                     }
                 }
 
