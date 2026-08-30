@@ -55,7 +55,7 @@
                 <span class="font-bold uppercase text-sm tracking-wide">clothes</span>
             </a>
             <a href="{{ route('accessoris') }}"
-                class="{{ request()->routeIs('accessoris') ? 'text-white' : 'text-white/50 hover:text-white/80' }} transition">
+                class="{{ request()->routeIs('accessoris', 'product_detail.accessories') ? 'text-white' : 'text-white/50 hover:text-white/80' }} transition">
                 <span class="font-bold uppercase text-sm tracking-wide">Accessories</span>
             </a>
         </div>
@@ -102,7 +102,7 @@
                 ],
                 [
                     'route' => route('accessoris'),
-                    'active' => request()->routeIs('accessoris'),
+                    'active' => request()->routeIs('accessoris', 'product_detail.accessories'),
                     'label' => 'Accessories',
                 ],
             ];

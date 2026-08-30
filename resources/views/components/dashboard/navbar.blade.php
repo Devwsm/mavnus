@@ -1,286 +1,219 @@
-<div class="navbar-cover">
-    <div id="navbar" class="fixed top-0 left-0 w-full bg-black text-white z-50 transition-transform duration-300">
+{{--
+    Navbar dashboard (desktop pill bawah + mobile fullscreen). Menu yang
+    ditampilin disaring sesuai role staff yang login (session 'role'),
+    biar gak ada menu yang keliatan padahal bakal ditolak middleware
+    kalau diklik. Urutan & style dipertahankan sama kayak sebelumnya.
+--}}
+@php
+    $role = session('role');
+    $canOrders = in_array($role, ['owner', 'staff_pesanan']);
+    $canVisitors = $role === 'owner';
+    $canProduk = in_array($role, ['owner', 'admin_produk']);
 
-        <!-- ===================== SECTION 1: Search | Logo | Account & Cart ===================== -->
-        <div class="flex items-center justify-between px-4 py-4 border-b border-white/10 lg:border-none">
-            <!-- Left -->
-            <div class="w-1/3 flex items-center">
-                <!-- Burger (mobile/tablet only) -->
-                <button id="menuBtn" type="button" aria-label="Buka menu navigasi" class="text-3xl lg:hidden">
-                    <i class="bi bi-list"></i>
-                </button>
-                <!-- Search (desktop only) -->
-                <button id="searchBtnDesktop" type="button"
-                    class="hidden lg:flex items-center gap-2 text-lg search-toggle-btn">
-                    <i class="bi bi-search"></i>
-                    <span class="uppercase text-sm font-semibold tracking-wide">Search</span>
-                </button>
-            </div>
+    // Badge stok menipis cuma relevan buat role yang urus stok
+    $navLowStockCount = 0;
+    if (in_array($role, ['owner', 'admin_produk'])) {
+        $navLowStockCount = \App\Models\ProductVariant::where('stock', '>', 0)
+            ->where('stock', '<=', 3)
+            ->whereHas('product', fn($query) => $query->where('is_active', true))
+            ->count();
+    }
+@endphp
+{{-- desktop --}}
+<div
+    class="nav z-50 fixed bottom-5 left-1/2 -translate-x-1/2 hidden lg:flex items-center gap-1 bg-[#0D0D0D] rounded-2xl px-2 py-2">
 
-            <!-- Logo (center, always) -->
-            <div class="w-1/3 flex justify-center">
-                <a href="{{ route('home') }}">
-                    <img src="{{ asset('aset/logo/Whisnu-Santika_Logo-2025-White.png') }}" loading="lazy"
-                        decoding="async" alt="whisnu-santika" class="object-cover hidden md:block w-52 rounded-lg">
-                    <img src="{{ asset('aset/logo/Whisnu-Santika_Logo-2025-2-White.png') }}" loading="lazy"
-                        decoding="async" alt="whisnu-santika" class="object-cover md:hidden w-52 rounded-lg">
-                </a>
-            </div>
+    <a href="{{ route('dashboard') }}"
+        class="group relative flex items-center justify-center w-12 h-12 rounded-xl text-white/85 hover:text-white hover:bg-white/10 text-xl transition {{ request()->routeIs('dashboard') ? 'text-[#B71C1C] bg-[#B71C1C]/20' : '' }}">
+        <i class="bi bi-house-door-fill"></i>
+        @if ($navLowStockCount > 0)
+            <span
+                class="absolute top-1.5 right-1.5 flex items-center justify-center min-w-4 h-4 px-1 rounded-full bg-amber-400 text-black text-[9px] font-bold">
+                {{ $navLowStockCount > 9 ? '9+' : $navLowStockCount }}
+            </span>
+        @endif
+        <span
+            class="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition">
+            Dashboard
+        </span>
+    </a>
 
-            <!-- Right -->
-            <div class="w-1/3 flex items-center justify-end gap-2 md:gap-4">
-                <!-- Account & Cart (selalu tampil) -->
-                <a href="{{ route('account') }}" aria-label="Akun Saya"
-                    class="hidden lg:inline-flex text-lg {{ request()->routeIs('account', 'account.*') ? 'text-white' : 'text-white/70 hover:text-white' }} transition">
-                    <i class="bi {{ request()->routeIs('account', 'account.*') ? 'bi-person-fill' : 'bi-person' }}"
-                        aria-hidden="true"></i>
-                </a>
-                <!-- Search (mobile/tablet saja, desktop pakai tombol di kiri) -->
-                <button id="searchBtnMobile" type="button" aria-label="Buka pencarian"
-                    class="text-lg lg:hidden search-toggle-btn">
-                    <i class="bi bi-search"></i>
-                </button>
-                @include('components/cart')
-            </div>
-        </div>
+    @if ($canOrders)
+        <div class="w-px h-6 bg-white/10 mx-1"></div>
 
-        <!-- ===================== SECTION 2: clothes | Accessories | Home (desktop only) ===================== -->
-        <div class="hidden lg:flex items-center justify-center gap-10 py-3 border-t border-white/10">
-            <a href="{{ route('home') }}"
-                class="{{ request()->routeIs('home') ? 'text-white' : 'text-white/50 hover:text-white/80' }} transition">
-                <span class="font-bold uppercase text-sm tracking-wide">Home</span>
-            </a>
-            <a href="{{ route('clothes') }}"
-                class="{{ request()->routeIs('clothes', 'product_detail.clothes') ? 'text-white' : 'text-white/50 hover:text-white/80' }} transition">
-                <span class="font-bold uppercase text-sm tracking-wide">clothes</span>
-            </a>
-            <a href="{{ route('accessoris') }}"
-                class="{{ request()->routeIs('accessoris', 'product_detail.accessories') ? 'text-white' : 'text-white/50 hover:text-white/80' }} transition">
-                <span class="font-bold uppercase text-sm tracking-wide">Accessories</span>
-            </a>
-        </div>
-    </div>
-
-    <!-- ===================== Search Bar (slides down under navbar, dipakai di semua ukuran layar) ===================== -->
-    <div id="searchBar"
-        class="fixed left-0 w-full bg-black text-white z-40 px-4 py-3
-        -translate-y-full opacity-0 transition-all duration-300">
-        <div class="flex items-center gap-3 bg-white/10 rounded-full px-4 py-2 lg:max-w-md lg:mx-auto">
-            <i class="bi bi-search text-lg" aria-hidden="true"></i>
-            <label for="searchInput" class="sr-only">Cari produk</label>
-            <input id="searchInput" type="text" placeholder="Clothes, Accessoris....."
-                class="bg-transparent outline-none placeholder-white/70 text-white w-full text-sm" autocomplete="off">
-        </div>
-
-        {{-- Hasil pencarian --}}
-        <div id="searchResults"
-            class="hidden lg:max-w-md lg:mx-auto mt-2 bg-[#0D0D0D] border border-white/10 rounded-xl overflow-hidden max-h-80 overflow-y-auto">
-        </div>
-    </div>
-
-    <!-- ===================== Mobile Menu Backdrop ===================== -->
-    <div id="menuBackdrop"
-        class="fixed inset-0 bg-black/50 z-55 opacity-0 pointer-events-none transition-opacity duration-300">
-    </div>
-
-    <!-- ===================== Mobile Half-Screen Drawer (Burger) ===================== -->
-    <div id="mobileMenu"
-        class="fixed top-0 left-0 h-full w-3/4 md:w-1/2 sm:w-2/5 bg-black text-white z-60
-        flex flex-col items-start justify-center gap-7 px-8
-        -translate-x-full transition-transform duration-300">
-        <button id="closeBtn" type="button" aria-label="Tutup menu navigasi" class="absolute top-5 right-5 text-3xl">
-            <i class="bi bi-x"></i>
-        </button>
-
-        @php
-            $drawerLinks = [
-                ['route' => route('home'), 'active' => request()->routeIs('home'), 'label' => 'Home'],
-                [
-                    'route' => route('clothes'),
-                    'active' => request()->routeIs('clothes', 'product_detail.clothes'),
-                    'label' => 'clothes',
-                ],
-                [
-                    'route' => route('accessoris'),
-                    'active' => request()->routeIs('accessoris', 'product_detail.accessories'),
-                    'label' => 'Accessories',
-                ],
-            ];
-        @endphp
-        @foreach ($drawerLinks as $link)
-            <a href="{{ $link['route'] }}" aria-current="{{ $link['active'] ? 'page' : 'false' }}"
-                class="menu-link flex items-center gap-2.5 {{ $link['active'] ? 'text-white' : 'text-white/50' }}">
-                @if ($link['active'])
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#5E0006] shrink-0"></span>
-                @endif
-                <span class="text-xl font-bold uppercase">{{ $link['label'] }}</span>
-            </a>
-        @endforeach
-
-        <!-- Akun (selalu tampil, mobile only) -->
-        @php($accountActive = request()->routeIs('account', 'account.*'))
-        <a href="{{ route('account') }}" aria-current="{{ $accountActive ? 'page' : 'false' }}"
-            class="menu-link inline-flex lg:hidden items-center gap-2.5 {{ $accountActive ? 'text-white' : 'text-white/50' }}">
-            @if ($accountActive)
-                <span class="w-1.5 h-1.5 rounded-full bg-[#5E0006] shrink-0"></span>
-            @endif
-            <i class="bi {{ $accountActive ? 'bi-person-fill' : 'bi-person' }} text-xl" aria-hidden="true"></i>
-            <span class="text-xl font-bold uppercase">Akun Saya</span>
+        <a href="{{ route('dashboard.orders') }}"
+            class="group relative flex items-center justify-center w-12 h-12 rounded-xl text-white/85 hover:text-white hover:bg-white/10 text-xl transition {{ request()->routeIs('dashboard.orders') ? 'text-[#B71C1C] bg-[#B71C1C]/20' : '' }}">
+            <i class="bi bi-box-seam"></i>
+            <span
+                class="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition">
+                Orders
+            </span>
         </a>
-    </div>
+    @endif
+
+    @if ($canVisitors)
+        <div class="w-px h-6 bg-white/10 mx-1"></div>
+
+        <a href="{{ route('dashboard.visitors') }}"
+            class="group relative flex items-center justify-center w-12 h-12 rounded-xl text-white/85 hover:text-white hover:bg-white/10 text-xl transition {{ request()->routeIs('dashboard.visitors') ? 'text-[#B71C1C] bg-[#B71C1C]/20' : '' }}">
+            <i class="bi bi-people-fill"></i>
+            <span
+                class="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition">
+                Pengunjung
+            </span>
+        </a>
+    @endif
+
+    @if ($canProduk)
+        {{-- Divider cuma dipasang kalau Produk adalah item pertama yang muncul
+            (Orders & Pengunjung disembunyikan) — biar gak ada divider dobel/nyangkut --}}
+        @if (!$canOrders && !$canVisitors)
+            <div class="w-px h-6 bg-white/10 mx-1"></div>
+        @endif
+
+        {{-- Input Produk (1 halaman, gabungan Clothes/Accessories lewat dropdown kategori) --}}
+        <a href="{{ route('dashboard.produk') }}"
+            class="group relative flex items-center justify-center w-12 h-12 rounded-xl text-white/85 hover:text-white hover:bg-white/10 text-xl transition {{ request()->routeIs('dashboard.produk') ? 'text-[#B71C1C] bg-[#B71C1C]/20' : '' }}">
+            <i class="bi bi-bag-plus-fill"></i>
+            <span
+                class="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition">
+                Input Produk
+            </span>
+        </a>
+    @endif
+
+    <div class="w-px h-6 bg-white/10 mx-1"></div>
+
+    <a href="{{ route('dashboard.import-export') }}"
+        class="group relative flex items-center justify-center w-12 h-12 rounded-xl text-white/85 hover:text-white hover:bg-white/10 text-xl transition {{ request()->routeIs('dashboard.import-export') ? 'text-[#B71C1C] bg-[#B71C1C]/20' : '' }}">
+        <i class="bi bi-file-earmark-excel"></i>
+        <span
+            class="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition">
+            Import & Export
+        </span>
+    </a>
+
+    <div class="w-px h-6 bg-white/10 mx-1"></div>
+
+    <a href="{{ route('crew.logout') }}" onclick="event.preventDefault(); confirmCrewLogout();"
+        class="group relative flex items-center justify-center w-12 h-12 rounded-xl text-[#B71C1C] hover:text-[#891212] hover:bg-[#B71C1C]/5 text-xl transition">
+        <i class="bi bi-box-arrow-right"></i>
+        <span
+            class="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition">
+            Logout
+        </span>
+    </a>
+</div>
+{{-- ↑ DESKTOP DITUTUP DI SINI, sebelum blok mobile dimulai --}}
+
+
+{{-- Mobile trigger --}}
+<button id="dashOpenBtn"
+    class="fixed z-80 bottom-5 right-5 lg:hidden flex justify-center items-center h-14 w-14 rounded-full bg-[#1A1A1B] text-[#F5F1E6] text-2xl shadow-lg">
+    <i class="bi bi-list"></i>
+</button>
+
+{{-- Overlay penutup sisa dashboard --}}
+<div id="dashMobileOverlay"
+    class="fixed inset-0 bg-black/50 z-80
+    opacity-0 pointer-events-none transition-opacity duration-300 lg:hidden">
+</div>
+
+{{-- Mobile Fullscreen --}}
+<div id="dashMobileMenu"
+    class="fixed top-0 right-0 h-full w-1/2 bg-[#0D0D0D] text-white z-80
+    flex flex-col items-center justify-center gap-6 border-r-gray-200
+    translate-x-full transition-transform duration-300 lg:hidden overflow-y-auto py-10">
+
+    <a href="{{ route('dashboard') }}"
+        class="relative flex flex-col items-center gap-1.5 {{ request()->routeIs('dashboard') ? 'text-[#B71C1C]' : 'text-white' }}">
+        <span class="relative inline-block">
+            <i class="bi bi-house-door-fill text-3xl"></i>
+            @if ($navLowStockCount > 0)
+                <span
+                    class="absolute -top-1 -right-2 flex items-center justify-center min-w-4 h-4 px-1 rounded-full bg-amber-400 text-black text-[9px] font-bold">
+                    {{ $navLowStockCount > 9 ? '9+' : $navLowStockCount }}
+                </span>
+            @endif
+        </span>
+        <span class="text-[10px] font-semibold uppercase tracking-wide">Dashboard</span>
+    </a>
+
+    @if ($canOrders)
+        <a href="{{ route('dashboard.orders') }}"
+            class="flex flex-col items-center gap-1.5 {{ request()->routeIs('dashboard.orders') ? 'text-[#B71C1C]' : 'text-white' }}">
+            <i class="bi bi-box-seam text-3xl"></i>
+            <span class="text-[10px] font-semibold uppercase tracking-wide">Orders</span>
+        </a>
+    @endif
+
+    @if ($canVisitors)
+        <a href="{{ route('dashboard.visitors') }}"
+            class="flex flex-col items-center gap-1.5 {{ request()->routeIs('dashboard.visitors') ? 'text-[#B71C1C]' : 'text-white' }}">
+            <i class="bi bi-people-fill text-3xl"></i>
+            <span class="text-[10px] font-semibold uppercase tracking-wide">Pengunjung</span>
+        </a>
+    @endif
+
+    @if ($canProduk)
+        <a href="{{ route('dashboard.produk') }}"
+            class="flex flex-col items-center gap-1.5 {{ request()->routeIs('dashboard.produk') ? 'text-[#B71C1C]' : 'text-white' }}">
+            <i class="bi bi-bag-plus-fill text-3xl"></i>
+            <span class="text-[10px] font-semibold uppercase tracking-wide">Input Produk</span>
+        </a>
+    @endif
+
+    <a href="{{ route('dashboard.import-export') }}"
+        class="flex flex-col items-center gap-1.5 {{ request()->routeIs('dashboard.import-export') ? 'text-[#B71C1C]' : 'text-white' }}">
+        <i class="bi bi-file-earmark-excel text-3xl"></i>
+        <span class="text-[10px] font-semibold uppercase tracking-wide">Import & Export</span>
+    </a>
+    <a href="{{ route('crew.logout') }}" onclick="event.preventDefault(); confirmCrewLogout();"
+        class="flex flex-col items-center gap-1.5 text-[#B71C1C] hover:text-[#891212]">
+        <i class="bi bi-box-arrow-right text-3xl"></i>
+        <span class="text-[10px] font-semibold uppercase tracking-wide">Logout</span>
+    </a>
+
+    <button id="dashCloseBtn"
+        class="fixed bottom-5 right-5 flex justify-center items-center h-14 w-14 rounded-full bg-white/10 border border-white/20 text-white text-3xl">
+        <i class="bi bi-x"></i>
+    </button>
 </div>
 
 <script>
-    const menuBtn = document.getElementById("menuBtn");
-    const closeBtn = document.getElementById("closeBtn");
-    const mobileMenu = document.getElementById("mobileMenu");
-    const menuBackdrop = document.getElementById("menuBackdrop");
-    const menuLinks = document.querySelectorAll(".menu-link");
+    const dashOpenBtn = document.getElementById('dashOpenBtn');
+    const dashCloseBtn = document.getElementById('dashCloseBtn');
+    const dashMobileMenu = document.getElementById('dashMobileMenu');
+    const dashMobileOverlay = document.getElementById('dashMobileOverlay');
 
-    const searchBar = document.getElementById("searchBar");
+    dashOpenBtn.addEventListener('click', () => {
+        dashMobileMenu.classList.remove('translate-x-full');
+        dashMobileOverlay.classList.remove('opacity-0', 'pointer-events-none');
+        document.body.classList.add('overflow-hidden');
+    });
 
-    let scrollPosition = 0;
-    let searchOpen = false;
+    dashCloseBtn.addEventListener('click', () => {
+        dashMobileMenu.classList.add('translate-x-full');
+        dashMobileOverlay.classList.add('opacity-0', 'pointer-events-none');
+        document.body.classList.remove('overflow-hidden');
+    });
 
-    // ---------- Mobile Burger Menu ----------
-    function openMenu() {
-        menuOpen = true;
-
-        scrollPosition = window.pageYOffset;
-
-        mobileMenu.classList.remove("-translate-x-full");
-        menuBackdrop.classList.remove("opacity-0", "pointer-events-none");
-        menuBackdrop.classList.add("opacity-100", "pointer-events-auto");
-
-        document.body.style.position = "fixed";
-        document.body.style.top = `-${scrollPosition}px`;
-        document.body.style.width = "100%";
-    }
-
-    function closeMenu() {
-        mobileMenu.classList.add("-translate-x-full");
-        menuBackdrop.classList.add("opacity-0", "pointer-events-none");
-        menuBackdrop.classList.remove("opacity-100", "pointer-events-auto");
-
-        document.body.style.position = "";
-        document.body.style.top = "";
-        document.body.style.width = "";
-
-        window.scrollTo({
-            top: scrollPosition,
-            behavior: "instant"
+    // ---- Konfirmasi sebelum logout staff, biar gak ke-tap gak sengaja ----
+    function confirmCrewLogout() {
+        Swal.fire({
+            icon: 'question',
+            title: 'Keluar dari dashboard?',
+            text: 'Kamu perlu login lagi untuk mengakses dashboard.',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, keluar',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#B71C1C',
+            cancelButtonColor: '#6b7280',
+            reverseButtons: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "{{ route('crew.logout') }}";
+            }
         });
-
-        lastScrollY = scrollPosition;
-
-        menuOpen = false;
     }
-
-    menuBtn.addEventListener("click", openMenu);
-    closeBtn.addEventListener("click", closeMenu);
-    menuBackdrop.addEventListener("click", closeMenu);
-
-    menuLinks.forEach(link => {
-        link.addEventListener("click", closeMenu);
-    });
-
-    // ---------- Search Bar (slide down under navbar, dipakai di semua ukuran layar) ----------
-    function positionSearchBar() {
-        const navbarHeight = document.getElementById("navbar").offsetHeight;
-        searchBar.style.top = `${navbarHeight}px`;
-    }
-
-    function toggleSearchBar() {
-        positionSearchBar();
-        searchOpen = !searchOpen;
-
-        if (searchOpen) {
-            searchBar.classList.remove("-translate-y-full", "opacity-0");
-        } else {
-            searchBar.classList.add("-translate-y-full", "opacity-0");
-            searchResults.classList.add("hidden");
-        }
-    }
-
-    document.querySelectorAll(".search-toggle-btn").forEach(btn => {
-        btn.addEventListener("click", toggleSearchBar);
-    });
-    window.addEventListener("resize", positionSearchBar);
-
-    // ---------- Live Search ----------
-    const searchInput = document.getElementById("searchInput");
-    const searchResults = document.getElementById("searchResults");
-    let searchTimeout = null;
-
-    searchInput.addEventListener("input", () => {
-        const query = searchInput.value.trim();
-
-        clearTimeout(searchTimeout);
-
-        if (query.length < 2) {
-            searchResults.classList.add("hidden");
-            searchResults.innerHTML = "";
-            return;
-        }
-
-        // Debounce 300ms, biar gak fetch tiap ketukan huruf
-        searchTimeout = setTimeout(() => {
-            fetch(`{{ route('search') }}?q=${encodeURIComponent(query)}`)
-                .then(res => res.json())
-                .then(data => renderSearchResults(data.results))
-                .catch(() => {
-                    searchResults.innerHTML =
-                        `<p class="text-white/60 text-sm p-4">Terjadi kesalahan, coba lagi.</p>`;
-                    searchResults.classList.remove("hidden");
-                });
-        }, 300);
-    });
-
-    function renderSearchResults(results) {
-        if (results.length === 0) {
-            searchResults.innerHTML = `<p class="text-white/60 text-sm p-4">Produk tidak ditemukan.</p>`;
-            searchResults.classList.remove("hidden");
-            return;
-        }
-
-        searchResults.innerHTML = results.map(item => `
-            <a href="${item.url}" class="flex items-center gap-3 p-3 hover:bg-white/5 transition border-b border-white/5 last:border-0">
-                <div class="w-12 h-12 rounded-md overflow-hidden bg-black shrink-0 flex items-center justify-center">
-                    ${item.image
-                        ? `<img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover object-center">`
-                        : `<i class="bi bi-image text-white/20"></i>`
-                    }
-                </div>
-                <div class="flex flex-col">
-                    <span class="text-sm font-semibold text-white">${item.name}</span>
-                    <span class="text-xs text-white/60">${item.category} · ${item.price}</span>
-                </div>
-            </a>
-        `).join('');
-
-        searchResults.classList.remove("hidden");
-    }
-
-    // Klik di luar search bar → sembunyikan hasil
-    document.addEventListener("click", (e) => {
-        if (!searchBar.contains(e.target) && !e.target.closest(".search-toggle-btn")) {
-            searchResults.classList.add("hidden");
-        }
-    });
-
-    // Tutup search bar sepenuhnya + reset input
-    function closeSearchBar() {
-        searchOpen = false;
-        searchBar.classList.add("-translate-y-full", "opacity-0");
-        searchResults.classList.add("hidden");
-        searchResults.innerHTML = "";
-        searchInput.value = "";
-    }
-
-    // Klik di luar search bar → tutup search bar & reset
-    document.addEventListener("click", (e) => {
-        if (searchOpen && !searchBar.contains(e.target) && !e.target.closest(".search-toggle-btn")) {
-            closeSearchBar();
-        }
-    });
 </script>
