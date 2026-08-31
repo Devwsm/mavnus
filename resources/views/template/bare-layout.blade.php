@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="bg-black">
 
 <head>
     <meta charset="UTF-8">
@@ -11,8 +11,8 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="flex flex-col w-full">
-    <div class="flex flex-col justify-center items-center">
+<body class="bg-black flex flex-col w-full min-h-screen">
+    <div class="flex flex-col justify-center items-center min-h-screen">
         @yield('content')
     </div>
 </body>
