@@ -150,9 +150,21 @@
             }
 
             destinationSearchTimeout = setTimeout(() => {
-                fetch(`{{ route('shipping.search') }}?keyword=${encodeURIComponent(keyword)}`)
+                fetch(`{{ route('shipping.search') }}?keyword=${encodeURIComponent(keyword)}`, {
+                        headers: {
+                            'Accept': 'application/json',
+                        },
+                    })
                     .then(res => res.json())
-                    .then(data => renderDestinationResults(data.data))
+                    .then(data => {
+                        if (data.error) {
+                            destinationResults.innerHTML =
+                                `<p class="text-sm text-red-500 p-3">${data.error}</p>`;
+                            destinationResults.classList.remove('hidden');
+                            return;
+                        }
+                        renderDestinationResults(data.data);
+                    })
                     .catch(() => {
                         destinationResults.innerHTML =
                             '<p class="text-sm text-gray-400 p-3">Terjadi kesalahan, coba lagi.</p>';
@@ -216,6 +228,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                     },
                     body: JSON.stringify({
@@ -224,7 +237,14 @@
                     }),
                 })
                 .then(res => res.json())
-                .then(data => renderShippingOptions(data.data))
+                .then(data => {
+                    if (data.error) {
+                        shippingOptionsList.innerHTML =
+                            `<p class="text-sm text-red-500">${data.error}</p>`;
+                        return;
+                    }
+                    renderShippingOptions(data.data);
+                })
                 .catch(() => {
                     shippingOptionsList.innerHTML =
                         '<p class="text-sm text-red-500">Gagal menghitung ongkir. Coba pilih ulang tujuan.</p>';

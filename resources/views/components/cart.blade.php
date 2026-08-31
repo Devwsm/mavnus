@@ -61,9 +61,17 @@
         }
 
         function fetchCart() {
-            fetch('{{ route('cart.index') }}')
+            fetch('{{ route('cart.index') }}', {
+                    headers: {
+                        'Accept': 'application/json',
+                    },
+                })
                 .then(res => res.json())
-                .then(renderCart);
+                .then(renderCart)
+                .catch(() => {
+                    cartItemsWrapper.innerHTML =
+                        '<p class="text-white/60 text-sm text-center py-10">Gagal memuat keranjang. Coba lagi.</p>';
+                });
         }
 
         function renderCart(data) {
@@ -115,6 +123,7 @@
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                     },
                     body: JSON.stringify({
@@ -123,6 +132,14 @@
                 })
                 .then(res => res.json())
                 .then(renderCart)
+                .catch(() => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal mengubah jumlah',
+                        text: 'Terjadi kesalahan, coba lagi.',
+                        confirmButtonColor: '#B71C1C',
+                    });
+                })
                 .finally(() => {
                     cartRequestInProgress = false;
                 });
@@ -137,11 +154,20 @@
             fetch(`/cart/${id}`, {
                     method: 'DELETE',
                     headers: {
+                        'Accept': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                     },
                 })
                 .then(res => res.json())
                 .then(renderCart)
+                .catch(() => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal menghapus item',
+                        text: 'Terjadi kesalahan, coba lagi.',
+                        confirmButtonColor: '#B71C1C',
+                    });
+                })
                 .finally(() => {
                     cartRequestInProgress = false;
                 });

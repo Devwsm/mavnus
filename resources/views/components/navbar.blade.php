@@ -225,7 +225,11 @@
 
         // Debounce 300ms, biar gak fetch tiap ketukan huruf
         searchTimeout = setTimeout(() => {
-            fetch(`{{ route('search') }}?q=${encodeURIComponent(query)}`)
+            fetch(`{{ route('search') }}?q=${encodeURIComponent(query)}`, {
+                    headers: {
+                        'Accept': 'application/json',
+                    },
+                })
                 .then(res => res.json())
                 .then(data => renderSearchResults(data.results))
                 .catch(() => {

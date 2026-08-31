@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\RajaOngkirException;
 use App\Services\RajaOngkirService;
 use Illuminate\Http\Request;
 
@@ -21,7 +22,12 @@ class ShippingController extends Controller
             return response()->json(['data' => []]);
         }
 
-        $results = $this->rajaOngkir->searchDestination($keyword);
+        try {
+            $results = $this->rajaOngkir->searchDestination($keyword);
+        } catch (RajaOngkirException $e) {
+            return response()->json(['data' => [], 'error' => $e->getMessage()], 503);
+        }
+
         return response()->json(['data' => $results]);
     }
 
@@ -36,10 +42,14 @@ class ShippingController extends Controller
             'weight'          => 'required|integer|min:1',
         ]);
 
-        $costs = $this->rajaOngkir->calculateCost(
-            $validated['destination_id'],
-            $validated['weight']
-        );
+        try {
+            $costs = $this->rajaOngkir->calculateCost(
+                $validated['destination_id'],
+                $validated['weight']
+            );
+        } catch (RajaOngkirException $e) {
+            return response()->json(['data' => [], 'error' => $e->getMessage()], 503);
+        }
 
         return response()->json(['data' => $costs]);
     }
