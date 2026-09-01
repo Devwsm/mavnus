@@ -68,19 +68,30 @@
                         </div>
                     </div>
 
-                    <div class="pt-4 mt-1 border-t border-gray-100">
-                        <label for="current_password" class="block text-sm font-semibold mb-1.5">Password Saat Ini</label>
-                        <div class="relative">
-                            <i class="bi bi-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                            <input type="password" id="current_password" name="current_password"
-                                class="w-full bg-gray-50 border border-transparent rounded-xl pl-11 pr-4 py-3.5 text-sm focus:outline-none focus:bg-white focus:ring-2 focus:ring-black/80 focus:border-black transition"
-                                placeholder="Konfirmasi buat simpan perubahan">
+                    @if (!$user->google_id)
+                        <div class="pt-4 mt-1 border-t border-gray-100">
+                            <label for="current_password" class="block text-sm font-semibold mb-1.5">Password Saat
+                                Ini</label>
+                            <div class="relative">
+                                <i class="bi bi-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                <input type="password" id="current_password" name="current_password"
+                                    class="w-full bg-gray-50 border border-transparent rounded-xl pl-11 pr-4 py-3.5 text-sm focus:outline-none focus:bg-white focus:ring-2 focus:ring-black/80 focus:border-black transition"
+                                    placeholder="Konfirmasi buat simpan perubahan">
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1.5">
+                                <i class="bi bi-shield-lock mr-1"></i>
+                                Demi keamanan, masukin password kamu tiap mau nyimpen perubahan.
+                            </p>
                         </div>
-                        <p class="text-xs text-gray-400 mt-1.5">
-                            <i class="bi bi-shield-lock mr-1"></i>
-                            Demi keamanan, masukin password kamu tiap mau nyimpen perubahan.
-                        </p>
-                    </div>
+                    @else
+                        <div class="pt-4 mt-1 border-t border-gray-100">
+                            <p class="text-xs text-gray-400">
+                                <i class="bi bi-google mr-1"></i>
+                                Akun ini terhubung lewat Google, jadi gak perlu konfirmasi password buat nyimpen
+                                perubahan.
+                            </p>
+                        </div>
+                    @endif
 
                     {{-- Tombol simpan: dalam form buat desktop --}}
                     <button type="submit"
@@ -88,9 +99,82 @@
                         <i class="bi bi-check2-circle"></i> Simpan Perubahan
                     </button>
                 </form>
+
+                {{-- Danger zone: hapus akun --}}
+                <div class="bg-white rounded-2xl shadow-sm shadow-black/5 p-4 sm:p-6 mt-4 flex flex-col gap-2">
+                    <h2 class="text-sm font-bold text-[#B71C1C]">Hapus Akun</h2>
+                    <p class="text-xs text-gray-500">
+                        Akun & data profil kamu bakal dihapus permanen dan gak bisa dibalikin. Riwayat pesanan tetap
+                        tersimpan buat catatan toko, tapi udah gak nyantol ke akun kamu lagi.
+                    </p>
+                    <form id="deleteAccountForm" action="{{ route('account.destroy') }}" method="POST" class="hidden">
+                        @csrf
+                        @method('DELETE')
+                        @if (!$user->google_id)
+                            <input type="hidden" name="password" id="deleteAccountPasswordField">
+                        @endif
+                    </form>
+                    <button type="button" onclick="confirmDeleteAccount()"
+                        class="self-start flex items-center gap-2 text-xs font-semibold text-[#B71C1C] hover:underline mt-1">
+                        <i class="bi bi-trash3"></i> Hapus akun saya
+                    </button>
+                </div>
             </div>
         </div>
     </section>
+
+    @once
+        <script>
+            function confirmDeleteAccount() {
+                @if ($user->google_id)
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Hapus akun kamu?',
+                        text: 'Semua data profil bakal dihapus permanen dan gak bisa dibalikin.',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, hapus akun',
+                        cancelButtonText: 'Batal',
+                        confirmButtonColor: '#B71C1C',
+                        cancelButtonColor: '#6b7280',
+                        reverseButtons: true,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            document.getElementById('deleteAccountForm').submit();
+                        }
+                    });
+                @else
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Hapus akun kamu?',
+                        text: 'Semua data profil bakal dihapus permanen dan gak bisa dibalikin.',
+                        input: 'password',
+                        inputPlaceholder: 'Masukin password buat konfirmasi',
+                        inputAttributes: {
+                            autocapitalize: 'off',
+                            autocomplete: 'current-password',
+                        },
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, hapus akun',
+                        cancelButtonText: 'Batal',
+                        confirmButtonColor: '#B71C1C',
+                        cancelButtonColor: '#6b7280',
+                        reverseButtons: true,
+                        preConfirm: (password) => {
+                            if (!password) {
+                                Swal.showValidationMessage('Password wajib diisi.');
+                            }
+                            return password;
+                        },
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            document.getElementById('deleteAccountPasswordField').value = result.value;
+                            document.getElementById('deleteAccountForm').submit();
+                        }
+                    });
+                @endif
+            }
+        </script>
+    @endonce
 
     {{-- Tombol simpan sticky di mobile, gaya app e-commerce --}}
     <div class="lg:hidden fixed bottom-0 inset-x-0 bg-white border-t border-gray-100 p-3 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] z-40"

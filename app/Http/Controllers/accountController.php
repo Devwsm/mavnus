@@ -40,12 +40,18 @@ class accountController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
+        // Akun yang daftar/login lewat Google gak punya password yang
+        // mereka tau (diisi random di belakang layar, lihat authController),
+        // jadi konfirmasi "password saat ini" cuma diwajibkan buat akun
+        // yang emang daftar manual pakai email & password.
+        $requiresPasswordConfirmation = ! $user->google_id;
+
         $validated = $request->validate([
             'name'             => 'required|string|max:255',
             'email'            => 'required|email|max:255|unique:users,email,' . $user->id,
             'phone'            => 'nullable|string|max:20',
             'address'          => 'nullable|string|max:1000',
-            'current_password' => 'required|string',
+            'current_password' => $requiresPasswordConfirmation ? 'required|string' : 'nullable|string',
         ], [
             'name.required'             => 'Nama wajib diisi.',
             'email.required'            => 'Email wajib diisi.',
@@ -57,7 +63,7 @@ class accountController extends Controller
 
         // Konfirmasi password saat ini - biar perubahan data (apalagi ganti email)
         // gak bisa dilakuin sembarangan kalau sesi ke-hijack orang lain
-        if (! Hash::check($validated['current_password'], $user->password)) {
+        if ($requiresPasswordConfirmation && ! Hash::check($validated['current_password'], $user->password)) {
             return back()->withErrors(['current_password' => 'Password salah.'])->withInput();
         }
 
@@ -71,6 +77,36 @@ class accountController extends Controller
         // Balik ke halaman overview (bukan back(), biar konsisten abis simpan
         // selalu mendarat di halaman profil, bukan nyangkut di form edit)
         return redirect()->route('account')->with('success', 'Profil berhasil diperbarui.');
+    }
+
+    // Hapus akun sendiri. Orders yang udah dibuat TETAP disimpan (kolom
+    // user_id otomatis di-null-in lewat nullOnDelete di migration orders),
+    // jadi data buat rekap/laporan staff gak ikut ilang - cuma udah gak
+    // nyantol ke akun mana pun lagi (jadi mirip kayak pesanan guest).
+    public function destroy(Request $request)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        // Akun Google gak punya password yang mereka tau (lihat catatan
+        // yang sama di update()), jadi gak perlu konfirmasi password.
+        if (! $user->google_id) {
+            $validated = $request->validate([
+                'password' => 'required|string',
+            ], [
+                'password.required' => 'Masukin password buat konfirmasi hapus akun.',
+            ]);
+
+            if (! Hash::check($validated['password'], $user->password)) {
+                return back()->withErrors(['password' => 'Password salah.']);
+            }
+        }
+
+        Auth::logout();
+        $user->delete();
+        $request->session()->regenerate();
+
+        return redirect()->route('home')->with('success', 'Akun kamu berhasil dihapus. Sampai jumpa lagi!');
     }
 
     // Riwayat pesanan - cuma nampilin order milik akun yang lagi login.
