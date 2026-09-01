@@ -157,7 +157,7 @@
         <div class="flex flex-col w-full max-w-6xl gap-4 p-6 lg:p-14">
             <div class="flex items-center justify-between">
                 <h2 class="text-xl font-bold uppercase tracking-wide">Semua Produk</h2>
-                <span class="text-white/40 text-sm">{{ $products->count() }} produk</span>
+                <span class="text-white/40 text-sm">{{ $products->total() }} produk</span>
             </div>
             <div class="flex flex-col w-full">
                 @include('components/errors/alerts')
@@ -307,6 +307,12 @@
                     </div>
                 @endforelse
             </div>
+
+            @if ($products->hasPages())
+                <div class="mt-4">
+                    {{ $products->links() }}
+                </div>
+            @endif
         </div>
     </div>
 

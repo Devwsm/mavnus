@@ -19,12 +19,29 @@ class productController extends Controller
 {
     // Halaman "Input Produk" (satu halaman buat clothes & accessories,
     // field yang muncul nyesuain kategori yang dipilih di dropdown).
-    public function produk()
+    public function produk(Request $request)
     {
+        $perPage = 24;
+
+        // Kalau URL nunjuk ke produk tertentu lewat ?edit=ID (dari link
+        // "Stok Perlu Perhatian" / "Rilis Terjadwal" / "Produk Terbaru" di
+        // landing dashboard), otomatis lompat ke halaman yang beneran ada
+        // produk itu - biar deep-link gak nyasar selalu ke halaman 1.
+        if ($request->filled('edit') && !$request->filled('page')) {
+            $targetProduct = product::find($request->input('edit'));
+            if ($targetProduct) {
+                $position = product::whereIn('category', ['clothes', 'accessories'])
+                    ->where('created_at', '>', $targetProduct->created_at)
+                    ->count();
+                $request->query->set('page', intdiv($position, $perPage) + 1);
+            }
+        }
+
         $products = product::whereIn('category', ['clothes', 'accessories'])
             ->with(['images', 'clothes', 'accessories', 'variants'])
             ->latest()
-            ->get();
+            ->paginate($perPage)
+            ->withQueryString();
 
         // Varian clothes dengan stok menipis (1-3 pcs) dari produk yang masih aktif
         $lowStockVariants = ProductVariant::with('product.images')
