@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\product;
 use App\Models\ProductVariant;
 use App\Models\Visit;
@@ -103,6 +104,60 @@ class dashboardController extends Controller
             ->take(5)
             ->get();
 
+        // Omzet 6 bulan terakhir (termasuk bulan berjalan) - dihitung dari
+        // pesanan completed aja, biar sejalan sama $omzetBulanIni di atas.
+        // Dipakai buat liat tren bulan-ke-bulan, bukan cuma snapshot bulan ini.
+        $omzetPerBulan = collect();
+        for ($i = 5; $i >= 0; $i--) {
+            $bulan = now()->subMonths($i);
+            $omzetPerBulan->push([
+                'label' => $bulan->translatedFormat('M Y'),
+                'total' => Order::where('status', 'completed')
+                    ->whereMonth('created_at', $bulan->month)
+                    ->whereYear('created_at', $bulan->year)
+                    ->sum('total'),
+            ]);
+        }
+        $omzetPerBulanMax = max(1, $omzetPerBulan->max('total'));
+
+        // Breakdown omzet bulan ini per kategori (clothes vs accessories) -
+        // join ke order_items lalu ke products buat tau kategori tiap item.
+        // Item yang produknya udah dihapus (product_id null) otomatis kelewat
+        // dari breakdown ini, tapi tetep kehitung di $omzetBulanIni di atas.
+        $omzetPerKategoriRaw = OrderItem::query()
+            ->join('orders', 'order_items.order_id', '=', 'orders.id_order')
+            ->join('products', 'order_items.product_id', '=', 'products.id_product')
+            ->where('orders.status', 'completed')
+            ->whereMonth('orders.created_at', now()->month)
+            ->whereYear('orders.created_at', now()->year)
+            ->select('products.category', DB::raw('SUM(order_items.subtotal) as total'))
+            ->groupBy('products.category')
+            ->pluck('total', 'category');
+
+        $omzetPerKategori = [
+            'clothes'      => (int) ($omzetPerKategoriRaw['clothes'] ?? 0),
+            'accessories'  => (int) ($omzetPerKategoriRaw['accessories'] ?? 0),
+        ];
+        $omzetPerKategoriTotal = max(1, array_sum($omzetPerKategori));
+
+        // Produk terlaris sepanjang waktu, diurut dari omzet paling besar.
+        // Pakai snapshot product_name/product_image yang tersimpan di
+        // order_items (bukan join ke products), jadi tetep kebaca walau
+        // produk aslinya udah diedit atau dihapus.
+        $topProduk = OrderItem::query()
+            ->join('orders', 'order_items.order_id', '=', 'orders.id_order')
+            ->where('orders.status', 'completed')
+            ->select(
+                'order_items.product_name',
+                'order_items.product_image',
+                DB::raw('SUM(order_items.quantity) as total_qty'),
+                DB::raw('SUM(order_items.subtotal) as total_omzet')
+            )
+            ->groupBy('order_items.product_name', 'order_items.product_image')
+            ->orderByDesc('total_omzet')
+            ->take(5)
+            ->get();
+
         return view('pages.dashboard.landing-owner', compact(
             'totalProdukAktif',
             'lowStockCount',
@@ -118,6 +173,11 @@ class dashboardController extends Controller
             'ordersTrend',
             'ordersTrendMax',
             'criticalVariants',
+            'omzetPerBulan',
+            'omzetPerBulanMax',
+            'omzetPerKategori',
+            'omzetPerKategoriTotal',
+            'topProduk',
         ));
     }
 
