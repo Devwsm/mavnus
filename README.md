@@ -57,7 +57,7 @@ Selain itu ada juga aksi `POST /account` (update profil), `DELETE /account` (hap
 
 **Dashboard staff**
 
-- Landing dashboard beda konten sesuai role yang login (ringkasan berbeda buat owner/admin produk/staff pesanan)
+- Landing dashboard beda konten sesuai role yang login (ringkasan berbeda buat owner/admin produk/staff pesanan); landing owner sekarang juga nampilin omzet 6 bulan terakhir, breakdown omzet per kategori (clothes vs accessories) bulan berjalan, dan produk terlaris sepanjang waktu — semuanya dihitung dari pesanan berstatus `completed`
 - CRUD produk (upload multi-foto otomatis dikonversi ke WebP, atur varian ukuran & stok per kategori)
 - Kelola status pesanan (update status: pending → processing → shipped → completed)
 - Statistik pengunjung situs (device type, browser, halaman yang paling sering dibuka) — dicatat otomatis lewat middleware, tanpa package analytics eksternal
