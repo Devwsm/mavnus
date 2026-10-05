@@ -54,6 +54,8 @@
         </button>
     </div>
 </nav>
+{{-- Logout harus POST (bukan link GET) biar gak bisa dipicu lewat <img>/link dari situs lain --}}
+<form id="logoutFormMobile" method="POST" action="{{ route('logout') }}" class="hidden">@csrf</form>
 @once
     <script>
         function confirmLogoutMobile() {
@@ -69,7 +71,7 @@
                 reverseButtons: true,
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.location.href = "{{ route('logout') }}";
+                    document.getElementById('logoutFormMobile').submit();
                 }
             });
         }

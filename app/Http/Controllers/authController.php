@@ -57,16 +57,17 @@ class authController extends Controller
 
         $user = User::where('email', $validated['email'])->first();
 
+        // Pesan SENGAJA sama untuk "email gak terdaftar" dan "password salah", biar
+        // login gak bisa dipakai buat ngecek email mana yang punya akun. Kalau email
+        // gak ada, tetap jalanin hashing sekali supaya waktu responsnya mirip (kalau
+        // enggak, respons yang lebih cepat = email gak terdaftar).
         if (! $user) {
-            // Email belum kedaftar sama sekali. Sengaja dibedain dari pesan
-            // "password salah" (bukan digeneralisir) karena celah ini udah
-            // ada duluan di form Daftar (pesan 'email ini udah kepake'),
-            // jadi info ini emang udah bisa dicek orang lewat sana.
-            return back()->withErrors(['login' => 'Email ini belum terdaftar. Yuk, daftar dulu.'])->onlyInput('email');
+            Hash::make($validated['password']);
+            return back()->withErrors(['login' => 'Email atau password salah, coba lagi.'])->onlyInput('email');
         }
 
         if (! Hash::check($validated['password'], $user->password)) {
-            return back()->withErrors(['login' => 'Password salah, coba lagi.'])->onlyInput('email');
+            return back()->withErrors(['login' => 'Email atau password salah, coba lagi.'])->onlyInput('email');
         }
 
         Auth::login($user, $request->boolean('remember'));

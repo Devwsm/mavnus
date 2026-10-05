@@ -30,20 +30,38 @@ class cartController extends Controller
 
         // Produk yang masih dijadwalkan gak boleh masuk cart walau product_id-nya ketebak
         $product = \App\Models\product::find($validated['product_id']);
-        if ($product && $product->is_scheduled) {
+        if ($product->is_scheduled) {
             return response()->json([
                 'message' => 'Produk ini belum resmi rilis.',
             ], 422);
+        }
+
+        // Varian harus nyambung ke produknya: clothes wajib pilih varian (ukuran) milik
+        // produk itu sendiri, accessories gak punya varian sama sekali. Tanpa cek ini,
+        // variant_id produk lain bisa nyelip dan stok/harga jadi gak sinkron.
+        $variantId = $validated['variant_id'] ?? null;
+        $variant = null;
+
+        if ($product->category === 'clothes') {
+            $variant = $variantId ? ProductVariant::find($variantId) : null;
+            if (! $variant || $variant->product_id !== $product->id_product) {
+                return response()->json(['message' => 'Pilih ukuran yang tersedia untuk produk ini.'], 422);
+            }
+        } elseif ($variantId) {
+            return response()->json(['message' => 'Produk ini tidak punya pilihan ukuran.'], 422);
+        }
+
+        // accessories gak punya varian, stoknya langsung dari produk
+        $maxStock = $variant ? $variant->stock : (int) $product->stock;
+
+        if ($maxStock < 1) {
+            return response()->json(['message' => 'Stok produk ini habis.'], 422);
         }
 
         $existing = CartItem::where('session_id', session()->getId())
             ->where('product_id', $validated['product_id'])
             ->where('variant_id', $validated['variant_id'] ?? null)
             ->first();
-
-        $maxStock = isset($validated['variant_id'])
-            ? ProductVariant::find($validated['variant_id'])->stock
-            : $product->stock; // accessories gak punya varian, stoknya langsung dari produk
 
         if ($existing) {
             $existing->quantity = min($existing->quantity + $validated['quantity'], $maxStock);

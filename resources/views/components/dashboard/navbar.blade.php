@@ -95,7 +95,7 @@
 
     <div class="w-px h-6 bg-white/10 mx-1"></div>
 
-    <a href="{{ route('crew.logout') }}" onclick="event.preventDefault(); confirmCrewLogout();"
+    <a href="#" role="button" onclick="event.preventDefault(); confirmCrewLogout();"
         class="group relative flex items-center justify-center w-12 h-12 rounded-xl text-[#B71C1C] hover:text-[#891212] hover:bg-[#B71C1C]/5 text-xl transition">
         <i class="bi bi-box-arrow-right"></i>
         <span
@@ -168,7 +168,7 @@
         <i class="bi bi-file-earmark-excel text-3xl"></i>
         <span class="text-[10px] font-semibold uppercase tracking-wide">Import & Export</span>
     </a>
-    <a href="{{ route('crew.logout') }}" onclick="event.preventDefault(); confirmCrewLogout();"
+    <a href="#" role="button" onclick="event.preventDefault(); confirmCrewLogout();"
         class="flex flex-col items-center gap-1.5 text-[#B71C1C] hover:text-[#891212]">
         <i class="bi bi-box-arrow-right text-3xl"></i>
         <span class="text-[10px] font-semibold uppercase tracking-wide">Logout</span>
@@ -179,6 +179,9 @@
         <i class="bi bi-x"></i>
     </button>
 </div>
+
+{{-- Logout harus POST (bukan link GET) biar gak bisa dipicu lewat <img>/link dari situs lain --}}
+<form id="crewLogoutForm" method="POST" action="{{ route('crew.logout') }}" class="hidden">@csrf</form>
 
 <script>
     const dashOpenBtn = document.getElementById('dashOpenBtn');
@@ -212,7 +215,7 @@
             reverseButtons: true,
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = "{{ route('crew.logout') }}";
+                document.getElementById('crewLogoutForm').submit();
             }
         });
     }

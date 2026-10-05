@@ -10,13 +10,19 @@ class searchController extends Controller
     //
     public function search(Request $request)
     {
+        // ?q[]=x (array) bikin strlen() error 500, jadi cuma terima string
         $query = $request->input('q', '');
+        $query = is_string($query) ? trim(mb_substr($query, 0, 100)) : '';
 
-        if (strlen($query) < 2) {
+        if (mb_strlen($query) < 2) {
             return response()->json(['results' => []]);
         }
 
-        $products = product::where('name', 'like', "%{$query}%")
+        // Escape \ % _ biar karakter itu dicari apa adanya, bukan dianggap wildcard LIKE
+        // (tanpa ini "%" atau "_" cocok ke semua produk)
+        $escaped = addcslashes($query, '\\%_');
+
+        $products = product::where('name', 'like', "%{$escaped}%")
             ->active()
             ->with('images')
             ->limit(8)

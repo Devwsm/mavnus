@@ -23,7 +23,7 @@ Route::prefix('/')->group(function () {
     Route::get('/register', [authController::class, 'register'])->name('register');
     Route::post('/register', [authController::class, 'processRegister'])->name('register.proses')->middleware('throttle:5,1,register');
 
-    Route::get('/logout', [authController::class, 'logout'])->name('logout');
+    Route::post('/logout', [authController::class, 'logout'])->name('logout');
 
     // Halaman akun customer - kalau belum login otomatis dilempar ke /login,
     // abis berhasil login balik lagi ke sini (bawaan Laravel, gak perlu logic tambahan)
@@ -37,7 +37,7 @@ Route::prefix('/')->group(function () {
     // Login STAFF/crew - fungsional, otentikasi ke tabel accounts. Gak dilink di halaman customer.
     Route::get('/crew-portal', [loginController::class, 'crewLogin'])->name('crew.login');
     Route::post('/crew-portal', [loginController::class, 'prosesLogin'])->name('crew.login.proses')->middleware('throttle:5,1,crew-login');
-    Route::get('/crew-portal/logout', [loginController::class, 'logout'])->name('crew.logout');
+    Route::post('/crew-portal/logout', [loginController::class, 'logout'])->name('crew.logout');
 });
 
 Route::prefix('/dashboard')->middleware('cekLogin')->group(function () {

@@ -43,12 +43,13 @@
             class="flex items-center gap-3 px-5 py-3.5 text-sm font-semibold tracking-wide transition {{ $active === 'orders' ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-50' }}">
             <i class="bi bi-bag-fill"></i> Riwayat Pesanan
         </a>
-        <a href="{{ route('logout') }}" onclick="event.preventDefault(); confirmLogoutDesktop()"
+        <a href="#" role="button" onclick="event.preventDefault(); confirmLogoutDesktop()"
             class="flex items-center gap-3 px-5 py-3.5 text-sm font-semibold tracking-wide hover:bg-gray-50 transition text-gray-400">
             <i class="bi bi-box-arrow-right"></i> Keluar
         </a>
     </nav>
 </div>
+<form id="logoutFormDesktop" method="POST" action="{{ route('logout') }}" class="hidden">@csrf</form>
 @once
     <script>
         // Konfirmasi dulu sebelum logout dari sidebar desktop, biar konsisten
@@ -66,7 +67,7 @@
                 reverseButtons: true,
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.location.href = "{{ route('logout') }}";
+                    document.getElementById('logoutFormDesktop').submit();
                 }
             });
         }
