@@ -52,7 +52,9 @@
                         <label for="phone" class="block text-sm font-semibold mb-1.5">Nomor HP</label>
                         <div class="relative">
                             <i class="bi bi-telephone absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                            <input type="text" id="phone" name="phone" value="{{ old('phone', $user->phone) }}"
+                            <input type="tel" id="phone" name="phone" inputmode="numeric" pattern="[0-9]{9,15}"
+                                minlength="9" maxlength="15" autocomplete="tel" data-digits-only
+                                value="{{ old('phone', preg_replace('/\D/', '', $user->phone ?? '')) }}"
                                 class="w-full bg-gray-50 border border-transparent rounded-xl pl-11 pr-4 py-3.5 text-sm focus:outline-none focus:bg-white focus:ring-2 focus:ring-black/80 focus:border-black transition"
                                 placeholder="08xxxxxxxxxx">
                         </div>

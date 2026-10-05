@@ -49,7 +49,7 @@ class accountController extends Controller
         $validated = $request->validate([
             'name'             => 'required|string|max:255',
             'email'            => 'required|email|max:255|unique:users,email,' . $user->id,
-            'phone'            => 'nullable|string|max:20',
+            'phone'            => ['nullable', 'regex:/^[0-9]{9,15}$/'],
             'address'          => 'nullable|string|max:1000',
             'current_password' => $requiresPasswordConfirmation ? 'required|string' : 'nullable|string',
         ], [
@@ -57,7 +57,7 @@ class accountController extends Controller
             'email.required'            => 'Email wajib diisi.',
             'email.email'               => 'Format email tidak valid.',
             'email.unique'               => 'Email ini udah dipake akun lain.',
-            'phone.max'                 => 'Nomor HP maksimal 20 karakter.',
+            'phone.regex'               => 'Nomor HP harus berupa angka saja (9-15 digit), tanpa spasi atau simbol.',
             'current_password.required' => 'Masukin password saat ini buat konfirmasi perubahan.',
         ]);
 

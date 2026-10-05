@@ -13,8 +13,9 @@
                     class="group flex flex-col bg-black gap-4 p-5 rounded-2xl overflow-hidden border border-white/5 hover:border-white/15 hover:bg-black/80 transition-all duration-300">
                     <div class="w-full aspect-square overflow-hidden rounded-lg">
                         @if ($product->images->first())
-                            <img src="{{ Storage::url($product->images->first()->image_path) }}" loading="lazy"
-                                decoding="async" alt="{{ $product->name }}"
+                            <img src="{{ Storage::url($product->images->first()->image_path) }}"
+                                loading="{{ $loop->index < 8 ? 'eager' : 'lazy' }}" decoding="async"
+                                alt="{{ $product->name }}"
                                 class="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105">
                         @else
                             <div class="w-full h-full flex items-center justify-center bg-white/5">

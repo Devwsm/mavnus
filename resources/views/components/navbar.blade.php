@@ -20,10 +20,11 @@
             <!-- Logo (center, always) -->
             <div class="w-1/3 flex justify-center">
                 <a href="{{ route('home') }}">
-                    <img src="{{ asset('aset/logo/Whisnu-Santika_Logo-2025-White.png') }}" loading="lazy"
-                        decoding="async" alt="whisnu-santika" class="object-cover hidden md:block w-52 rounded-lg">
-                    <img src="{{ asset('aset/logo/Whisnu-Santika_Logo-2025-2-White.png') }}" loading="lazy"
-                        decoding="async" alt="whisnu-santika" class="object-cover md:hidden w-52 rounded-lg">
+                    {{-- Logo selalu di atas fold: jangan di-lazy-load biar gak muncul telat pas refresh --}}
+                    <img src="{{ asset('aset/logo/Whisnu-Santika_Logo-2025-White.png') }}" fetchpriority="high"
+                        alt="whisnu-santika" class="object-cover hidden md:block w-52 rounded-lg">
+                    <img src="{{ asset('aset/logo/Whisnu-Santika_Logo-2025-2-White.png') }}" fetchpriority="high"
+                        alt="whisnu-santika" class="object-cover md:hidden w-52 rounded-lg">
                 </a>
             </div>
 

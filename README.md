@@ -2,233 +2,123 @@
 
 E-commerce untuk merchandise resmi Whisnu Santika (clothing & accessories). Ada storefront buat customer dan dashboard internal buat tim (owner, admin produk, staff pesanan).
 
-## Halaman yang Bisa Diakses
-
-### Customer (publik / tanpa login, kecuali disebutkan)
-
-| Halaman                                                      | Route                     |
-| ------------------------------------------------------------ | ------------------------- |
-| Beranda                                                      | `/`                       |
-| Daftar produk Clothes (dengan filter harga & pagination)     | `/clothes`                |
-| Detail produk Clothes                                        | `/clothes/{slug}`         |
-| Daftar produk Accessories (dengan filter harga & pagination) | `/accessoris`             |
-| Keranjang belanja                                            | `/cart`                   |
-| Checkout                                                     | `/order/checkout`         |
-| Halaman sukses pesanan                                       | `/order/{order}/success`  |
-| Info / halaman footer                                        | `/info`                   |
-| Login / daftar akun customer                                 | `/login`, `/register`     |
-| Akun saya _(login)_                                          | `/account`                |
-| Edit profil _(login)_                                        | `/account/edit`           |
-| Riwayat pesanan saya _(login)_                               | `/account/orders`         |
-| Detail pesanan saya _(login)_                                | `/account/orders/{order}` |
-| Sitemap XML                                                  | `/sitemap.xml`            |
-
-Selain itu ada juga aksi `POST /account` (update profil), `DELETE /account` (hapus akun sendiri — order lama tetap disimpan tapi `user_id`-nya jadi null, jadi ke depannya tercatat seperti pesanan guest) dan `GET/POST /login/google` (lihat catatan di bawah, **belum jalan**).
-
-### Staff / internal (login lewat `/crew-portal`, role-based)
-
-| Halaman                               | Route                       | Role yang bisa akses                                           |
-| ------------------------------------- | --------------------------- | -------------------------------------------------------------- |
-| Login staff                           | `/crew-portal`              | —                                                              |
-| Dashboard (landing beda tiap role)    | `/dashboard`                | owner, admin_produk, staff_pesanan                             |
-| Kelola pesanan                        | `/dashboard/orders`         | owner, staff_pesanan                                           |
-| Detail pesanan                        | `/dashboard/orders/{order}` | owner, staff_pesanan                                           |
-| Kelola produk (clothes & accessories) | `/dashboard/produk`         | owner, admin_produk                                            |
-| Statistik pengunjung                  | `/dashboard/visitors`       | owner                                                          |
-| Statistik pengunjung — per halaman    | `/dashboard/visitors/pages` | owner                                                          |
-| Import/Export data                    | `/dashboard/import-export`  | owner, admin_produk, staff_pesanan (isi tombol beda tiap role) |
-
-3 role staff: **Owner** (akses penuh), **Admin Produk** (kelola produk & stok), **Staff Pesanan** (kelola pesanan). Role & hak akses diatur lewat middleware `role:...` di `routes/web.php`, dicek dari data session yang diisi pas login lewat `/crew-portal`.
-
 ## Fitur
 
 **Storefront (customer)**
 
-- Katalog produk 2 kategori: Clothes (dengan varian ukuran S/M/L/XL) dan Accessories (keychain, sticker, totebag)
-- Filter produk berdasarkan rentang harga
-- Live search suggestion (`/search`, rate-limited)
+- Katalog 2 kategori: Clothes (varian ukuran S/M/L/XL) dan Accessories (keychain, sticker, totebag)
+- Filter produk berdasarkan rentang harga, plus live search suggestion (`/search`, rate-limited)
 - Keranjang belanja berbasis session
-- Checkout dengan hitung ongkos kirim otomatis (integrasi RajaOngkir: cari tujuan + hitung biaya)
-- Riwayat & status pesanan customer (kalau login), termasuk edit profil dan hapus akun sendiri (pesanan lama tetap tersimpan buat rekap staff, cuma dilepas dari akunnya)
-- Produk bisa dijadwalkan rilisnya (`published_at`) — otomatis muncul begitu waktunya tiba, tanpa perlu ubah manual
-- Status stok produk otomatis sinkron (produk otomatis "habis" kalau stok/varian habis)
-- Pesanan `pending` yang gak dibayar dalam waktu tertentu otomatis dibatalkan & dihapus (jalan "ambient" lewat middleware, gak butuh cron)
+- Checkout dengan hitung ongkos kirim otomatis lewat RajaOngkir (cari tujuan + hitung biaya). Nomor HP wajib angka saja, 9-15 digit
+- Akun customer (opsional): riwayat & status pesanan, edit profil, hapus akun. Pesanan lama tetap tersimpan buat rekap staff, cuma dilepas dari akunnya (`user_id` jadi `null`, jadi tercatat seperti pesanan guest)
+- Jadwal rilis produk (`published_at`): otomatis muncul begitu waktunya tiba
+- Status stok sinkron otomatis (produk jadi "habis" kalau stok/varian habis)
+- Pesanan `pending` yang gak dibayar dalam waktu tertentu otomatis dibatalkan & dihapus (jalan lewat middleware, gak butuh cron)
 - Sitemap XML otomatis
 
 **Dashboard staff**
 
-- Landing dashboard beda konten sesuai role yang login (ringkasan berbeda buat owner/admin produk/staff pesanan); landing owner sekarang juga nampilin omzet 6 bulan terakhir, breakdown omzet per kategori (clothes vs accessories) bulan berjalan, dan produk terlaris sepanjang waktu — semuanya dihitung dari pesanan berstatus `completed`
-- CRUD produk (upload multi-foto otomatis dikonversi ke WebP, atur varian ukuran & stok per kategori)
-- Kelola status pesanan (update status: pending → processing → shipped → completed)
-- Statistik pengunjung situs (device type, browser, halaman yang paling sering dibuka) — dicatat otomatis lewat middleware, tanpa package analytics eksternal
-- Export data: pesanan (Excel), invoice pesanan (PDF), data produk (SQL), backup database & storage (khusus owner)
-- Autentikasi staff terpisah dari customer (tabel `accounts`, bukan `users`), dengan rate limiting di endpoint login
+- Landing beda tiap role. Landing owner nampilin omzet 6 bulan terakhir, omzet per kategori bulan berjalan, dan produk terlaris (dihitung dari pesanan `completed`)
+- CRUD produk: upload multi-foto otomatis dikonversi ke WebP, atur varian ukuran & stok per kategori
+- Kelola status pesanan: pending → processing → shipped → completed
+- Statistik pengunjung (device, browser, halaman terbanyak), dicatat lewat middleware tanpa analytics eksternal
+- Export: pesanan (Excel), invoice pesanan (PDF), data produk (SQL), backup database & storage (khusus owner)
+- Login staff terpisah dari customer (tabel `accounts`, bukan `users`) dengan rate limiting
 
-## Tech Stack & Library
+## Route
+
+### Customer
+
+| Halaman                     | Route                                        | Login |
+| --------------------------- | -------------------------------------------- | ----- |
+| Beranda                     | `/`                                          | -     |
+| Daftar & detail Clothes     | `/clothes`, `/clothes/{slug}`                | -     |
+| Daftar & detail Accessories | `/accessoris`, `/accessoris/{slug}`          | -     |
+| Keranjang                   | `/cart`                                      | -     |
+| Checkout & sukses pesanan   | `/order/checkout`, `/order/{order}/success`  | -     |
+| Info footer                 | `/info`                                      | -     |
+| Login / daftar              | `/login`, `/register`                        | -     |
+| Akun, edit profil           | `/account`, `/account/edit`                  | ya    |
+| Riwayat & detail pesanan    | `/account/orders`, `/account/orders/{order}` | ya    |
+| Sitemap                     | `/sitemap.xml`                               | -     |
+
+### Staff (login lewat `/crew-portal`)
+
+| Halaman              | Route                                              | Role                               |
+| -------------------- | -------------------------------------------------- | ---------------------------------- |
+| Dashboard            | `/dashboard`                                       | semua role staff                   |
+| Pesanan              | `/dashboard/orders`, `/dashboard/orders/{order}`   | owner, staff_pesanan               |
+| Produk               | `/dashboard/produk`                                | owner, admin_produk                |
+| Statistik pengunjung | `/dashboard/visitors`, `/dashboard/visitors/pages` | owner                              |
+| Import/Export        | `/dashboard/import-export`                         | semua role (tombol beda tiap role) |
+
+Role dicek lewat middleware `role:...` di `routes/web.php`, berdasarkan data session yang diisi saat login.
+
+## Tech Stack
 
 **Backend**
 
-- [Laravel 13](https://laravel.com/docs) (PHP 8.3+)
-- MySQL (lihat `.env` — `DB_CONNECTION=mysql`, database `mavnus_DB`)
-- Laravel bawaan: Auth (tabel `users`, buat customer), Queue (database driver), Cache (database driver), Session (database driver)
-
-**Package Composer tambahan**
-
-- `barryvdh/laravel-dompdf` — generate PDF (invoice pesanan)
-- `maatwebsite/excel` — export data ke Excel/CSV (data pesanan & produk)
-- `intervention/image` + `intervention/image-laravel` — proses & convert gambar produk ke WebP
-- `laravel/tinker` — REPL/debugging
-- Dev only: `laravel/pail` (log viewer), `laravel/pint` (code style), `fakerphp/faker`, `mockery`, `phpunit`
+- Laravel 13 (PHP 8.3+), MySQL
+- Auth bawaan Laravel (tabel `users`) buat customer; session, cache, dan queue pakai driver `database`
+- `barryvdh/laravel-dompdf` (invoice PDF), `maatwebsite/excel` (export Excel), `intervention/image` + `intervention/image-laravel` (konversi gambar ke WebP)
 
 **Frontend**
 
-- Blade (server-rendered, gak pakai React/Vue)
-- [Tailwind CSS v4](https://tailwindcss.com/) lewat `@tailwindcss/vite`
-- [Vite](https://vitejs.dev/) sebagai build tool
-- `bootstrap-icons` — icon set
-- `sweetalert2` — dialog konfirmasi (misal konfirmasi logout, hapus produk)
-- Vanilla JS (gak ada framework JS), style di-embed per halaman/komponen Blade
+- Blade (server-rendered) + vanilla JS, tanpa framework JS
+- Tailwind CSS v4 (`@tailwindcss/vite`) dan Vite
+- `bootstrap-icons` (icon) dan `sweetalert2` (dialog konfirmasi)
 
 **Layanan eksternal**
 
-- RajaOngkir API (lewat `App\Services\RajaOngkirService`) — pencarian tujuan & hitung ongkos kirim
-- Pembayaran (Midtrans) — kolom sudah disiapkan di tabel `orders` (`midtrans_order_id`, `midtrans_transaction_id`) tapi integrasinya **belum diimplementasikan**; checkout saat ini masih placeholder/manual.
-- Login Google (Laravel Socialite) — **belum diimplementasikan**. Tombol "Masuk dengan Google" di halaman login cuma UI (`href="#"`, gak nge-link kemana-mana), dan route `/login/google` + `/login/google/callback` udah didaftarin di `routes/web.php` tapi nunjuk ke method `redirectToGoogle`/`handleGoogleCallback` yang **gak ada** di `authController` — kalau route ini diakses langsung bakal error. Package `laravel/socialite` juga belum ke-install. `accountController` juga udah nyiapin logic yang ngecek `$user->google_id` (buat skip konfirmasi password pas edit/hapus akun), tapi kolom `google_id` itu sendiri belum ada di migration/tabel `users`, jadi kondisinya selalu `null` (dianggap akun non-Google). Kalau mau lanjutin fitur ini: install Socialite, tambah kolom `google_id` ke `users`, dan implementasikan dua method di atas.
+- RajaOngkir (Komerce) lewat `App\Services\RajaOngkirService`: cari tujuan & hitung ongkir
 
-## Setup
+## Belum Diimplementasikan
 
-```bash
-composer install
-cp .env.example .env
-```
+- **Pembayaran Midtrans.** Kolom `midtrans_order_id` & `midtrans_transaction_id` sudah ada di tabel `orders`, tapi integrasinya belum dibuat. Checkout saat ini masih placeholder/manual.
+- **Login Google.** Tombol "Masuk dengan Google" di halaman login cuma UI. Route `/login/google` dan `/login/google/callback` sudah terdaftar tapi method `redirectToGoogle` / `handleGoogleCallback` belum ada di `authController`, jadi kalau diakses langsung hasilnya error 500. Package `laravel/socialite` belum ter-install dan kolom `google_id` (dicek di `accountController`) belum ada di tabel `users`.
 
-Lalu isi kredensial MySQL di `.env` (`DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` — `.env.example` masih default ke SQLite, jadi bagian ini perlu diganti manual) dan buat database-nya, baru lanjut:
 
-```bash
-php artisan key:generate
-php artisan migrate --seed
-npm install
-npm run dev
-```
+Env var tambahan yang dipakai kode tapi belum ada di `.env.example`:
 
-Env var tambahan yang dipakai kode tapi belum ada di `.env.example` (isi manual di `.env`):
+| Variabel                         | Keterangan                                                           |
+| -------------------------------- | -------------------------------------------------------------------- |
+| `RAJAONGKIR_API_KEY`             | wajib, buat hitung ongkir                                            |
+| `RAJAONGKIR_BASE_URL`            | wajib, mis. `https://rajaongkir.komerce.id/api/v1`                   |
+| `RAJAONGKIR_ORIGIN_ID`           | wajib, ID lokasi asal pengiriman                                     |
+| `ORDER_EXPIRE_MINUTES`           | opsional, default 60. Batas waktu pesanan pending sebelum dibatalkan |
+| `ORDER_CLEANUP_THROTTLE_MINUTES` | opsional, default 5. Jarak minimal antar-proses cleanup              |
 
-- `RAJAONGKIR_API_KEY`, `RAJAONGKIR_BASE_URL`, `RAJAONGKIR_ORIGIN_ID` — wajib buat fitur hitung ongkir
-- `ORDER_EXPIRE_MINUTES` (default 60) — batas waktu sebelum pesanan pending dibatalkan otomatis
-- `ORDER_CLEANUP_THROTTLE_MINUTES` (default 5) — jarak minimal antar-jalan proses cleanup
+Seeder bikin 3 akun staff contoh: `owner@mavnus.com` (Owner), `admin@mavnus.com` (Admin Produk), `staff@mavnus.com` (Staff Pesanan). Password awalnya ada di `database/seeders/accountSeeder.php`, **wajib diganti** sebelum dipakai di production. Login lewat `/crew-portal` (terpisah dari `/login` buat customer).
 
-Setelah migrate + seed, akun staff contoh (lihat `accountSeeder.php`, password sama untuk semua: `manage@mavnus`):
+Untuk production: set `APP_ENV=production` dan `APP_DEBUG=false`, lalu jalankan `npm run build`.
 
-- `owner.mavnus` — role Owner
-- `admin.mavnus` — role Admin Produk
-- `staff.mavnus` — role Staff Pesanan
-
-Login staff lewat `/crew-portal` (terpisah dari `/login` yang untuk customer).
-
-## Struktur File
+## Struktur Folder
 
 ```
 app/
-├── Exports/
-│   └── OrdersExport.php            # Definisi kolom & format export pesanan ke Excel
+├── Exceptions/       # RajaOngkirException
+├── Exports/          # Export pesanan ke Excel
 ├── Http/
-│   ├── Controllers/
-│   │   ├── accountController.php       # Halaman akun customer: profil, edit, riwayat pesanan
-│   │   ├── authController.php          # Register/login/logout customer (tabel users)
-│   │   ├── cartController.php          # CRUD keranjang belanja (session-based)
-│   │   ├── dashboardController.php     # Landing dashboard, beda konten tiap role
-│   │   ├── homeController.php          # Beranda, listing clothes & accessories
-│   │   ├── importExportController.php  # Semua endpoint export (Excel, PDF, SQL, backup)
-│   │   ├── loginController.php         # Login/logout staff (tabel accounts, /crew-portal)
-│   │   ├── orderController.php         # Checkout, pembuatan pesanan, kelola status pesanan
-│   │   ├── productController.php       # CRUD produk (clothes & accessories) + detail produk
-│   │   ├── searchController.php        # Live search suggestion
-│   │   ├── ShippingController.php      # Integrasi RajaOngkir: cari tujuan & hitung ongkir
-│   │   ├── SitemapController.php       # Generate sitemap.xml
-│   │   └── visitorController.php       # Statistik pengunjung buat dashboard owner
-│   └── Middleware/
-│       ├── AutoCancelExpiredOrders.php # Trigger pembatalan pesanan expired tiap request
-│       ├── cekLogin.php                # Guard halaman dashboard: wajib login staff
-│       ├── cekRole.php                 # Guard halaman dashboard: batasi per role staff
-│       └── TrackVisit.php              # Catat kunjungan halaman ke tabel visits
-├── Models/
-│   ├── accessoris.php              # Detail produk kategori accessories (tipe: keychain/sticker/totebag)
-│   ├── account.php                 # Akun staff (owner/admin_produk/staff_pesanan)
-│   ├── CartItem.php                # Item di keranjang belanja
-│   ├── clothes.php                 # Detail produk kategori clothes (warna, material)
-│   ├── Order.php                   # Pesanan customer
-│   ├── OrderItem.php                # Item per pesanan (snapshot produk saat dibeli)
-│   ├── product.php                 # Model produk utama (relasi ke clothes/accessories/varian/gambar)
-│   ├── ProductImage.php             # Foto produk (multi-image, urut sesuai sort_order)
-│   ├── ProductVariant.php           # Varian ukuran (S/M/L/XL) + stok, khusus clothes
-│   ├── User.php                    # Akun customer (Laravel Auth bawaan)
-│   └── Visit.php                   # Log kunjungan halaman (buat statistik)
-├── Providers/
-│   └── AppServiceProvider.php      # Service provider bawaan Laravel (belum ada kustomisasi)
-├── Services/
-│   └── RajaOngkirService.php       # Wrapper HTTP client ke API RajaOngkir
-└── Support/
-    └── OrderCleanup.php            # Logic pembatalan & hapus pesanan pending yang expired
+│   ├── Controllers/  # Satu controller per area: account, auth, cart, dashboard, home,
+│   │                 #   importExport, login (staff), order, product, search, shipping,
+│   │                 #   sitemap, visitor
+│   └── Middleware/   # cekLogin & cekRole (guard staff), AutoCancelExpiredOrders, TrackVisit
+├── Models/           # product (+ clothes / accessoris / ProductVariant / ProductImage),
+│                     #   Order & OrderItem, CartItem, User (customer), account (staff), Visit
+├── Services/         # RajaOngkirService
+└── Support/          # OrderCleanup (pembatalan pesanan pending yang expired)
 
-database/
-├── database.sqlite                 # Peninggalan setup awal (SQLite) — koneksi aktif sekarang MySQL, file ini gak dipakai
-├── factories/
-│   └── UserFactory.php             # Factory buat testing/seeding user
-├── migrations/                     # Urut sesuai riwayat perubahan skema (users, accounts, products, dst.)
-└── seeders/
-    ├── accountSeeder.php           # Seed 3 akun staff contoh (owner, admin produk, staff pesanan)
-    └── DatabaseSeeder.php          # Entry point seeding, panggil accountSeeder
-
+database/             # migrations, seeders, factories
 resources/
-├── css/app.css                     # Entry point CSS (import Tailwind)
-├── js/app.js                       # Entry point JS
+├── css/app.css       # entry Tailwind
+├── js/app.js         # SweetAlert2 + helper input angka (data-digits-only)
 └── views/
-    ├── components/                 # Komponen Blade yang dipakai berulang
-    │   ├── account/                # bottom-nav & menu khusus halaman akun customer
-    │   ├── dashboard/               # navbar, role-header, form field produk, modal edit, dsb
-    │   │   └── field/               # Sub-komponen form input produk (dinamis per kategori)
-    │   ├── errors/alerts.blade.php  # Komponen tampilan pesan error/success
-    │   ├── banner.blade.php         # Banner beranda
-    │   ├── merch.blade.php          # Grid produk unggulan di beranda
-    │   ├── navbar.blade.php         # Navbar utama storefront
-    │   ├── footer.blade.php         # Footer storefront
-    │   ├── cart.blade.php           # Komponen isi keranjang
-    │   ├── clothes.blade.php / accessoris.blade.php  # Card produk per kategori
-    │   ├── product-detail.blade.php # Layout detail produk
-    │   ├── filters.blade.php / price-filter-form.blade.php  # Filter harga listing produk
-    │   └── pagination-light.blade.php  # Style pagination custom
-    ├── errors/                     # Halaman error kustom (404, 429, 500, 503)
-    ├── exports/
-    │   └── orders-invoice.blade.php # Template invoice PDF pesanan
-    ├── pages/
-    │   ├── home.blade.php / clothes.blade.php / accessoris.blade.php / product_detail.blade.php  # Storefront
-    │   ├── login.blade.php / register.blade.php / crew-login.blade.php  # Autentikasi
-    │   ├── account.blade.php / account-edit.blade.php / account-orders.blade.php  # Akun customer
-    │   ├── checkout.blade.php / order-success.blade.php  # Alur pemesanan
-    │   ├── footer-info.blade.php    # Halaman info
-    │   └── dashboard/                # Semua halaman staff (landing per role, produk, pesanan, visitor, import-export)
-    ├── template/                    # Layout dasar (layout, bare-layout, account-layout, dashboard/layout)
-    └── vendor/pagination/           # Override view pagination bawaan Laravel
-
-routes/
-├── console.php                     # Command Artisan kustom
-└── web.php                         # Semua route web (storefront, akun, dashboard)
-
-scripts/
-└── patch-bootstrap-icons.cjs       # Script postinstall npm buat patch package bootstrap-icons
-
-public/aset/                        # Gambar statis (logo, banner, gambar maintenance)
-storage/app/public/products/        # Foto produk hasil upload (clothes & accessories)
+    ├── components/   # card produk, navbar, footer, cart, filter, field form dashboard, dll
+    ├── pages/        # storefront, akun, checkout, dan pages/dashboard/* buat staff
+    ├── template/     # layout dasar (layout, bare-layout, account-layout, dashboard/layout)
+    ├── errors/       # 404, 429, 500, 503
+    └── exports/      # template invoice PDF
+routes/web.php        # semua route web
+scripts/              # patch-bootstrap-icons.cjs (jalan otomatis saat npm install)
+public/aset/          # gambar statis (logo, banner, halaman maintenance)
 ```
-
-## Catatan Hasil Pengecekan
-
-Sudah dicek: semua controller, method, komponen Blade, halaman, middleware, service, dan model yang didaftarkan di atas **masih dipakai** — gak ada file/fungsi mati yang perlu dihapus. Sisa referensi ke "album" cuma ada di riwayat migration (`albums_migration.php`, `remove_album_category_and_add_stock.php`), itu memang riwayat perubahan skema, bukan kode aktif — aman dibiarkan.
-
-Pengecualian: 2 route (`/login/google`, `/login/google/callback`) **terdaftar tapi nunjuk ke method yang gak ada** di `authController` — lihat catatan Login Google di bagian Layanan Eksternal di atas. Ini bukan dead code (route-nya aktif kalau diakses), tapi fitur setengah jadi yang bisa bikin error 500 kalau kepencet/diakses langsung.
-
-Hal lain yang perlu diperhatikan (bukan dead code, tapi worth di-tracking):
-
-- Integrasi pembayaran Midtrans belum diimplementasikan meski kolomnya sudah ada di tabel `orders` dan disebut sebagai placeholder di `checkout.blade.php`.
-- Login Google belum diimplementasikan (lihat detail di atas) — kolom `google_id` yang dicek di `accountController` juga belum ada di skema `users`.
-- `database/database.sqlite` masih ada di repo tapi gak terpakai karena koneksi database aktifnya MySQL — aman dihapus kalau mau beres-beres, atau dibiarkan sebagai fallback lokal.

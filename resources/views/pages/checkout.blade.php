@@ -75,10 +75,13 @@
                     </div>
                     <div>
                         <label for="customer_phone" class="block text-sm font-semibold mb-1.5">Nomor HP</label>
-                        <input type="text" id="customer_phone" name="customer_phone"
-                            value="{{ old('customer_phone', auth()->user()->phone ?? '') }}"
+                        <input type="tel" id="customer_phone" name="customer_phone" inputmode="numeric"
+                            pattern="[0-9]{9,15}" minlength="9" maxlength="15" autocomplete="tel" data-digits-only required
+                            value="{{ old('customer_phone', preg_replace('/\D/', '', auth()->user()->phone ?? '')) }}"
                             class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black"
                             placeholder="08xxxxxxxxxx">
+                        <p class="text-xs text-gray-400 mt-1.5">Angka saja, 9-15 digit (tanpa spasi, +, atau tanda hubung).
+                        </p>
                     </div>
                     <div class="relative">
                         <label for="destinationSearch" class="block text-sm font-semibold mb-1.5">Kecamatan / Kota

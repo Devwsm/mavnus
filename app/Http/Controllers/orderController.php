@@ -70,7 +70,7 @@ class orderController extends Controller
     {
         $validated = $request->validate([
             'customer_name'      => 'required|string|max:255',
-            'customer_phone'     => 'required|string|max:20',
+            'customer_phone'     => ['required', 'regex:/^[0-9]{9,15}$/'],
             'customer_address'   => 'required|string',
             'destination_id'     => 'required|integer',
             'destination_label'  => 'required|string',
@@ -80,6 +80,7 @@ class orderController extends Controller
         ], [
             'customer_name.required'    => 'Nama wajib diisi.',
             'customer_phone.required'   => 'Nomor HP wajib diisi.',
+            'customer_phone.regex'      => 'Nomor HP harus berupa angka saja (9-15 digit), tanpa spasi atau simbol.',
             'customer_address.required' => 'Alamat wajib diisi.',
             'destination_id.required'   => 'Silakan pilih kecamatan/kota tujuan.',
             'shipping_courier.required' => 'Silakan pilih kurir pengiriman.',
