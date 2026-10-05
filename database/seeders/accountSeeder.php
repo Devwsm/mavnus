@@ -16,21 +16,21 @@ class accountSeeder extends Seeder
     {
         //
         account::create([
-            'username' => 'owner.mavnus',
+            'username' => 'owner@mavnus.com',
             'name' => 'Owner',
             'password' => Hash::make('manage@mavnus'),
             'role' => 'owner',
             'is_active' => true,
         ]);
         account::create([
-            'username' => 'admin.mavnus',
+            'username' => 'admin@mavnus.com',
             'name' => 'Admin',
             'password' => Hash::make('manage@mavnus'),
             'role' => 'admin_produk',
             'is_active' => true,
         ]);
         account::create([
-            'username' => 'staff.mavnus',
+            'username' => 'staff@mavnus.com',
             'name' => 'Staff',
             'password' => Hash::make('manage@mavnus'),
             'role' => 'staff_pesanan',
