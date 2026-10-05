@@ -62,6 +62,8 @@ class cartController extends Controller
 
     public function update(Request $request, CartItem $cartItem)
     {
+        $this->ensureOwnedBySession($cartItem);
+
         $validated = $request->validate([
             'quantity' => 'required|integer|min:1',
         ]);
@@ -76,8 +78,17 @@ class cartController extends Controller
 
     public function destroy(CartItem $cartItem)
     {
+        $this->ensureOwnedBySession($cartItem);
+
         $cartItem->delete();
         return $this->index();
+    }
+
+    // Item cart cuma boleh diubah/dihapus oleh session yang punya. Tanpa ini, siapa pun
+    // bisa nebak id_cart_item (angka urut) lalu ngubah/hapus keranjang orang lain.
+    private function ensureOwnedBySession(CartItem $cartItem): void
+    {
+        abort_if($cartItem->session_id !== session()->getId(), 404);
     }
 
     private function formatItem(CartItem $item): array

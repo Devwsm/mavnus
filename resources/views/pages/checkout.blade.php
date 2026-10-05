@@ -1,6 +1,7 @@
 @extends('template.layout')
 @section('content')
     <section id="main-content" class="flex flex-col w-full bg-white gap-10 p-6 lg:p-14 pt-28 md:pt-22 lg:pt-32">
+        @include('components/errors/alerts')
         <div>
             <h1 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">Checkout</h1>
             <p class="text-sm text-gray-500 mt-2">Lengkapi data pengiriman untuk menyelesaikan pesanan.</p>
@@ -112,7 +113,8 @@
                 </div>
                 <input type="hidden" name="shipping_courier" id="shippingCourier">
                 <input type="hidden" name="shipping_service" id="shippingService">
-                <input type="hidden" name="shipping_cost" id="shippingCost" value="0">
+                {{-- Cuma buat tampilan total di browser, gak ikut dikirim. Ongkir asli dihitung server. --}}
+                <input type="hidden" id="shippingCost" value="0">
 
                 {{-- Placeholder payment — nanti diisi Midtrans --}}
                 <div class="flex flex-col gap-2 border border-black/10 rounded-xl p-6 bg-gray-50">
@@ -219,7 +221,6 @@
         const shippingService = document.getElementById('shippingService');
         const shippingCost = document.getElementById('shippingCost');
 
-        const cartTotalWeight = {{ $cartItems->sum(fn($i) => $i->product->weight * $i->quantity) }};
         const cartSubtotal = {{ $cartItems->sum(fn($i) => $i->product->price * $i->quantity) }};
 
         function fetchShippingCost(destinationIdValue) {
@@ -236,7 +237,6 @@
                     },
                     body: JSON.stringify({
                         destination_id: destinationIdValue,
-                        weight: cartTotalWeight,
                     }),
                 })
                 .then(res => res.json())

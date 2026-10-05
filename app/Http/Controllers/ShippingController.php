@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\RajaOngkirException;
+use App\Models\CartItem;
 use App\Services\RajaOngkirService;
 use Illuminate\Http\Request;
 
@@ -33,19 +34,28 @@ class ShippingController extends Controller
 
     /**
      * Endpoint AJAX: hitung ongkir berdasarkan tujuan yang dipilih pembeli
-     * dan total berat barang di cart.
+     * dan total berat barang di cart. Berat dihitung dari cart di server,
+     * bukan dari input browser.
      */
     public function calculateCost(Request $request)
     {
         $validated = $request->validate([
             'destination_id' => 'required|integer',
-            'weight'          => 'required|integer|min:1',
         ]);
+
+        $grams = CartItem::where('session_id', session()->getId())
+            ->with('product')
+            ->get()
+            ->sum(fn($item) => $item->product->weight * $item->quantity);
+
+        if ($grams <= 0) {
+            return response()->json(['data' => [], 'error' => 'Keranjang kamu masih kosong.'], 422);
+        }
 
         try {
             $costs = $this->rajaOngkir->calculateCost(
-                $validated['destination_id'],
-                $validated['weight']
+                (int) $validated['destination_id'],
+                max(1, (int) ceil($grams))
             );
         } catch (RajaOngkirException $e) {
             return response()->json(['data' => [], 'error' => $e->getMessage()], 503);

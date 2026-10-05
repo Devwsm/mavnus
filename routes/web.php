@@ -23,10 +23,6 @@ Route::prefix('/')->group(function () {
     Route::get('/register', [authController::class, 'register'])->name('register');
     Route::post('/register', [authController::class, 'processRegister'])->name('register.proses')->middleware('throttle:5,1,register');
 
-    // Login pakai Google (customer) - lewat Laravel Socialite
-    Route::get('/login/google', [authController::class, 'redirectToGoogle'])->name('login.google');
-    Route::get('/login/google/callback', [authController::class, 'handleGoogleCallback'])->name('login.google.callback');
-
     Route::get('/logout', [authController::class, 'logout'])->name('logout');
 
     // Halaman akun customer - kalau belum login otomatis dilempar ke /login,

@@ -9,7 +9,8 @@ E-commerce untuk merchandise resmi Whisnu Santika (clothing & accessories). Ada 
 - Katalog 2 kategori: Clothes (varian ukuran S/M/L/XL) dan Accessories (keychain, sticker, totebag)
 - Filter produk berdasarkan rentang harga, plus live search suggestion (`/search`, rate-limited)
 - Keranjang belanja berbasis session
-- Checkout dengan hitung ongkos kirim otomatis lewat RajaOngkir (cari tujuan + hitung biaya). Nomor HP wajib angka saja, 9-15 digit
+- Checkout dengan hitung ongkos kirim otomatis lewat RajaOngkir (cari tujuan + hitung biaya). Ongkir dihitung ulang di server saat pesanan dibuat (angka dari browser tidak dipakai), dan stok dikunci selama transaksi biar tidak oversell. Nomor HP wajib angka saja, 9-15 digit
+- Halaman sukses pesanan hanya bisa dibuka browser yang membuat pesanan itu (tercatat di session) atau pemilik akunnya
 - Akun customer (opsional): riwayat & status pesanan, edit profil, hapus akun. Pesanan lama tetap tersimpan buat rekap staff, cuma dilepas dari akunnya (`user_id` jadi `null`, jadi tercatat seperti pesanan guest)
 - Jadwal rilis produk (`published_at`): otomatis muncul begitu waktunya tiba
 - Status stok sinkron otomatis (produk jadi "habis" kalau stok/varian habis)
@@ -75,8 +76,24 @@ Role dicek lewat middleware `role:...` di `routes/web.php`, berdasarkan data ses
 ## Belum Diimplementasikan
 
 - **Pembayaran Midtrans.** Kolom `midtrans_order_id` & `midtrans_transaction_id` sudah ada di tabel `orders`, tapi integrasinya belum dibuat. Checkout saat ini masih placeholder/manual.
-- **Login Google.** Tombol "Masuk dengan Google" di halaman login cuma UI. Route `/login/google` dan `/login/google/callback` sudah terdaftar tapi method `redirectToGoogle` / `handleGoogleCallback` belum ada di `authController`, jadi kalau diakses langsung hasilnya error 500. Package `laravel/socialite` belum ter-install dan kolom `google_id` (dicek di `accountController`) belum ada di tabel `users`.
+- **Login Google.** Belum ada. Route dan tombolnya sudah dihapus. `accountController` masih mengecek `$user->google_id` (selalu `null` karena kolomnya belum ada di tabel `users`). Kalau fitur ini dilanjutkan: install `laravel/socialite`, tambah kolom `google_id`, buat route + method di `authController`.
 
+## Setup
+
+```bash
+composer install
+cp .env.example .env
+```
+
+Edit `.env`: `.env.example` default-nya SQLite, ganti ke MySQL (`DB_CONNECTION=mysql`, `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`) lalu buat database-nya. Setelah itu:
+
+```bash
+php artisan key:generate
+php artisan migrate --seed
+php artisan storage:link
+npm install
+npm run dev
+```
 
 Env var tambahan yang dipakai kode tapi belum ada di `.env.example`:
 

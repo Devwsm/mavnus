@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\product;
+use App\Models\ProductVariant;
+use App\Exceptions\RajaOngkirException;
+use App\Services\RajaOngkirService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -66,8 +70,10 @@ class orderController extends Controller
         return view('pages.checkout', compact('cartItems'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request, RajaOngkirService $rajaOngkir)
     {
+        // shipping_cost SENGAJA gak divalidasi/dipakai dari form: angka itu cuma buat
+        // tampilan di browser. Ongkir asli dihitung ulang di server (lihat di bawah).
         $validated = $request->validate([
             'customer_name'      => 'required|string|max:255',
             'customer_phone'     => ['required', 'regex:/^[0-9]{9,15}$/'],
@@ -76,7 +82,6 @@ class orderController extends Controller
             'destination_label'  => 'required|string',
             'shipping_courier'   => 'required|string',
             'shipping_service'   => 'required|string',
-            'shipping_cost'      => 'required|integer|min:0',
         ], [
             'customer_name.required'    => 'Nama wajib diisi.',
             'customer_phone.required'   => 'Nomor HP wajib diisi.',
@@ -84,101 +89,194 @@ class orderController extends Controller
             'customer_address.required' => 'Alamat wajib diisi.',
             'destination_id.required'   => 'Silakan pilih kecamatan/kota tujuan.',
             'shipping_courier.required' => 'Silakan pilih kurir pengiriman.',
+            'shipping_service.required' => 'Silakan pilih layanan pengiriman.',
         ]);
 
-        $cartItems = CartItem::where('session_id', session()->getId())
-            ->with(['product', 'variant'])
-            ->get();
+        $sessionId = session()->getId();
 
-        if ($cartItems->isEmpty()) {
+        // ---- 1. Hitung ongkir di server (jangan percaya angka dari browser) ----
+        $previewCart = CartItem::where('session_id', $sessionId)->with('product')->get();
+
+        if ($previewCart->isEmpty()) {
             return redirect()->route('home')->with('error', 'Keranjang kamu masih kosong.');
         }
 
-        // Validasi ulang stok sebelum diproses
-        foreach ($cartItems as $item) {
-            $availableStock = $item->variant ? $item->variant->stock : $item->product->stock;
-            if ($item->quantity > $availableStock) {
-                return redirect()->route('cart.index')
-                    ->with('error', "Stok {$item->product->name} tidak mencukupi. Sisa stok: {$availableStock}.");
-            }
+        $quotedWeight = $this->cartWeight($previewCart->sum(fn($item) => $item->product->weight * $item->quantity));
+
+        try {
+            $options = $rajaOngkir->calculateCost((int) $validated['destination_id'], $quotedWeight);
+        } catch (RajaOngkirException $e) {
+            return back()->withInput()->with('error', $e->getMessage());
         }
 
-        $order = DB::transaction(function () use ($validated, $cartItems) {
-            $subtotal = $cartItems->sum(fn($item) => $item->product->price * $item->quantity);
-            $totalWeight = $cartItems->sum(fn($item) => $item->product->weight * $item->quantity);
+        $selected = collect($options)->first(
+            fn($opt) => strcasecmp((string) ($opt['name'] ?? ''), $validated['shipping_courier']) === 0
+                && strcasecmp((string) ($opt['service'] ?? ''), $validated['shipping_service']) === 0
+        );
 
-            // 1. Buat order (header)
-            $order = Order::create([
-                'order_number'      => Order::generateOrderNumber(),
-                // Kalau lagi login, order otomatis kesambung ke akun & muncul di riwayat pesanan.
-                // Kalau checkout sebagai guest, tetep null - gak masalah, order tetep kebuat normal.
-                'user_id'           => Auth::id(),
-                'customer_name'     => $validated['customer_name'],
-                'customer_phone'    => $validated['customer_phone'],
-                'customer_address'  => $validated['customer_address'] . ', ' . $validated['destination_label'],
-                'shipping_courier'  => $validated['shipping_courier'],
-                'shipping_service'  => $validated['shipping_service'],
-                'shipping_cost'     => $validated['shipping_cost'],
-                'subtotal'          => $subtotal,
-                'total'             => $subtotal + $validated['shipping_cost'],
-                'total_weight'      => $totalWeight,
-                'status'            => 'pending',
-                'payment_status'    => 'unpaid',
-            ]);
+        if (! $selected) {
+            return back()->withInput()->with('error', 'Layanan pengiriman yang dipilih tidak tersedia untuk tujuan ini. Silakan pilih ulang kurir.');
+        }
 
-            // 2. Pindahkan tiap item cart jadi order_items (snapshot data produk)
-            foreach ($cartItems as $item) {
-                $snapshotImagePath = null;
-                $originalImage = $item->product->images->first();
-                if ($originalImage && Storage::disk('public')->exists($originalImage->image_path)) {
-                    $snapshotImagePath = 'orders/' . $order->order_number . '/' . Str::uuid() . '.webp';
-                    Storage::disk('public')->makeDirectory('orders/' . $order->order_number);
-                    Storage::disk('public')->copy($originalImage->image_path, $snapshotImagePath);
+        $shippingCost = (int) $selected['cost'];
+
+        // ---- 2. Buat pesanan. Semua pengecekan stok + pengurangan stok ada DI DALAM
+        // transaksi dan memakai row lock, jadi dua checkout bersamaan gak bisa
+        // sama-sama lolos cek lalu bikin stok minus. ----
+        try {
+            $order = DB::transaction(function () use ($validated, $sessionId, $quotedWeight, $selected, $shippingCost) {
+                // Kunci baris cart milik session ini dulu. Efek sampingnya: kalau tombol
+                // "Buat Pesanan" kepencet 2x, request kedua nunggu, lalu ketemu cart kosong
+                // (gak bikin pesanan ganda).
+                $cartItems = CartItem::where('session_id', $sessionId)
+                    ->orderBy('id_cart_item')
+                    ->lockForUpdate()
+                    ->get();
+
+                if ($cartItems->isEmpty()) {
+                    throw new \DomainException('Keranjang kamu masih kosong.');
                 }
 
-                OrderItem::create([
-                    'order_id'      => $order->id_order,
-                    'product_id'    => $item->product_id,
-                    'variant_id'    => $item->variant_id,
-                    'product_name'  => $item->product->name,
-                    'product_image' => $snapshotImagePath,
-                    'variant_label' => $item->variant->label ?? null,
-                    'weight'        => $item->product->weight,
-                    'price'         => $item->product->price,
-                    'quantity'      => $item->quantity,
-                    'subtotal'      => $item->product->price * $item->quantity,
+                // Urutan kunci selalu sama (produk, lalu varian, diurutkan by id)
+                // biar dua transaksi gak saling nunggu (deadlock).
+                $products = product::with('images')
+                    ->whereIn('id_product', $cartItems->pluck('product_id')->unique())
+                    ->orderBy('id_product')
+                    ->lockForUpdate()
+                    ->get()
+                    ->keyBy('id_product');
+
+                $variantIds = $cartItems->pluck('variant_id')->filter()->unique();
+                $variants = $variantIds->isEmpty()
+                    ? collect()
+                    : ProductVariant::whereIn('id_variant', $variantIds)
+                    ->orderBy('id_variant')
+                    ->lockForUpdate()
+                    ->get()
+                    ->keyBy('id_variant');
+
+                // Hitung subtotal & berat dari data produk yang sudah dikunci
+                $subtotal = 0;
+                $totalWeight = 0;
+                foreach ($cartItems as $item) {
+                    $prod = $products->get($item->product_id);
+                    if (! $prod) {
+                        throw new \DomainException('Ada produk di keranjang yang sudah tidak tersedia.');
+                    }
+                    $subtotal += $prod->price * $item->quantity;
+                    $totalWeight += $prod->weight * $item->quantity;
+                }
+
+                // Kalau isi cart berubah sejak ongkir dihitung, ongkirnya udah gak valid
+                if ($this->cartWeight($totalWeight) !== $quotedWeight) {
+                    throw new \DomainException('Isi keranjang berubah. Silakan pilih ulang kurir pengiriman.');
+                }
+
+                $order = Order::create([
+                    'order_number'      => Order::generateOrderNumber(),
+                    // Kalau lagi login, order otomatis kesambung ke akun & muncul di riwayat pesanan.
+                    // Kalau checkout sebagai guest, tetep null - gak masalah, order tetep kebuat normal.
+                    'user_id'           => Auth::id(),
+                    'customer_name'     => $validated['customer_name'],
+                    'customer_phone'    => $validated['customer_phone'],
+                    'customer_address'  => $validated['customer_address'] . ', ' . $validated['destination_label'],
+                    // Nama kurir/layanan diambil dari hasil API, bukan dari input browser
+                    'shipping_courier'  => $selected['name'],
+                    'shipping_service'  => $selected['service'],
+                    'shipping_cost'     => $shippingCost,
+                    'subtotal'          => $subtotal,
+                    'total'             => $subtotal + $shippingCost,
+                    'total_weight'      => $totalWeight,
+                    'status'            => 'pending',
+                    'payment_status'    => 'unpaid',
                 ]);
 
-                // 3. Kurangi stok yang dipesan - clothes dari variant-nya,
-                // accessories langsung dari kolom stock di produknya sendiri
-                // (accessories gak punya varian ukuran).
-                if ($item->variant) {
-                    $item->variant->decrement('stock', $item->quantity);
-                    $item->variant->product->syncActiveStatus();
-                } else {
-                    $item->product->decrement('stock', $item->quantity);
-                    $item->product->syncActiveStatus();
-                }
-            }
+                foreach ($cartItems as $item) {
+                    $prod = $products->get($item->product_id);
+                    $variant = $item->variant_id ? $variants->get($item->variant_id) : null;
 
-            // 4. Bersihkan cart setelah semua dipindahkan ke order
-            CartItem::where('session_id', session()->getId())->delete();
-            return $order;
-        });
+                    if ($item->variant_id && (! $variant || $variant->product_id !== $prod->id_product)) {
+                        throw new \DomainException("Varian {$prod->name} di keranjang tidak valid. Silakan hapus lalu tambahkan lagi.");
+                    }
+
+                    // Cek stok TERBARU (sudah terkunci). Dicek sambil dikurangi satu-satu,
+                    // jadi kalau ada 2 baris cart untuk produk yang sama, totalnya tetap kehitung.
+                    $available = $variant ? $variant->stock : (int) $prod->stock;
+                    if ($item->quantity > $available) {
+                        throw new \DomainException("Stok {$prod->name} tidak mencukupi. Sisa stok: {$available}.");
+                    }
+
+                    // Snapshot foto produk (biar riwayat order gak ikut berubah kalau produk diedit/dihapus)
+                    $snapshotImagePath = null;
+                    $originalImage = $prod->images->first();
+                    if ($originalImage && Storage::disk('public')->exists($originalImage->image_path)) {
+                        $snapshotImagePath = 'orders/' . $order->order_number . '/' . Str::uuid() . '.webp';
+                        Storage::disk('public')->makeDirectory('orders/' . $order->order_number);
+                        Storage::disk('public')->copy($originalImage->image_path, $snapshotImagePath);
+                    }
+
+                    OrderItem::create([
+                        'order_id'      => $order->id_order,
+                        'product_id'    => $item->product_id,
+                        'variant_id'    => $item->variant_id,
+                        'product_name'  => $prod->name,
+                        'product_image' => $snapshotImagePath,
+                        'variant_label' => $variant->label ?? null,
+                        'weight'        => $prod->weight,
+                        'price'         => $prod->price,
+                        'quantity'      => $item->quantity,
+                        'subtotal'      => $prod->price * $item->quantity,
+                    ]);
+
+                    // Kurangi stok - clothes dari variant-nya, accessories langsung dari
+                    // kolom stock di produknya (accessories gak punya varian ukuran).
+                    if ($variant) {
+                        $variant->decrement('stock', $item->quantity);
+                    } else {
+                        $prod->decrement('stock', $item->quantity);
+                    }
+                    $prod->syncActiveStatus();
+                }
+
+                CartItem::where('session_id', $sessionId)->delete();
+
+                return $order;
+            }, 3); // maks 3x percobaan kalau kena deadlock database
+        } catch (\DomainException $e) {
+            // Pesan sengaja ditampilkan apa adanya (isinya stok/keranjang, bukan data sensitif)
+            return redirect()->route('order.checkout')->with('error', $e->getMessage());
+        }
+
+        // Catat di session bahwa pesanan ini dibuat oleh browser ini. Dipakai buat
+        // ngizinin halaman sukses (lihat success()) - penting buat pembeli guest.
+        $owned = $request->session()->get('owned_orders', []);
+        $owned[] = $order->order_number;
+        $request->session()->put('owned_orders', array_slice(array_values(array_unique($owned)), -20));
 
         return redirect()->route('order.success', $order)->with('success', 'Pesanan berhasil dibuat.');
     }
 
-    public function success(Order $order)
+    public function success(Request $request, Order $order)
     {
-        // Order yang kesambung ke akun cuma boleh diliat pemiliknya sendiri.
-        // Order guest (user_id null) tetep bisa diakses siapa aja yang punya link-nya,
-        // soalnya emang gak ada akun yang bisa dicocokin.
-        if ($order->user_id && $order->user_id !== Auth::id()) {
-            abort(403);
+        // Halaman ini isinya nama, nomor HP, dan alamat pembeli, jadi cuma boleh dibuka:
+        // (a) browser yang bikin pesanan ini (tercatat di session saat checkout), atau
+        // (b) pemilik akunnya kalau pesanan ini kesambung ke akun.
+        // Selain itu 404 (bukan 403) biar nomor order gak bisa dicek ada/enggaknya.
+        $madeInThisSession = in_array($order->order_number, $request->session()->get('owned_orders', []), true);
+        $ownedByUser = $order->user_id !== null && Auth::check() && (int) $order->user_id === (int) Auth::id();
+
+        if (! $madeInThisSession && ! $ownedByUser) {
+            abort(404);
         }
 
         $order->load('items');
         return view('pages.order-success', compact('order'));
+    }
+
+    // Berat dalam gram, minimal 1 (syarat API ongkir). Dipakai di hitung ongkir & di dalam transaksi
+    // biar keduanya pakai aturan pembulatan yang sama.
+    private function cartWeight($grams): int
+    {
+        return max(1, (int) ceil($grams));
     }
 }
