@@ -145,7 +145,7 @@ class accountController extends Controller
     // (beda dari orderController::success yang juga ngizinin guest lewat link).
     public function orderDetail(Order $order)
     {
-        if ($order->user_id !== Auth::id()) {
+        if ((int) $order->user_id !== (int) Auth::id()) {
             abort(403);
         }
 

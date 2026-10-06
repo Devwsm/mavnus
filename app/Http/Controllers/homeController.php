@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\product;
-use Illuminate\Http\Request;
 
 class homeController extends Controller
 {
@@ -32,8 +31,8 @@ class homeController extends Controller
         $products = product::clothesCategory()
             ->active()
             ->with(['images', 'clothes', 'variants'])
-            ->when(request('price_min'), fn($query, $min) => $query->where('price', '>=', $min))
-            ->when(request('price_max'), fn($query, $max) => $query->where('price', '<=', $max))
+            ->when($this->priceParam('price_min'), fn($query, $min) => $query->where('price', '>=', $min))
+            ->when($this->priceParam('price_max'), fn($query, $max) => $query->where('price', '<=', $max))
             ->latest()
             ->paginate(12)
             ->withQueryString();
@@ -45,8 +44,8 @@ class homeController extends Controller
         $products = product::accessoriesCategory()
             ->active()
             ->with('images')
-            ->when(request('price_min'), fn($query, $min) => $query->where('price', '>=', $min))
-            ->when(request('price_max'), fn($query, $max) => $query->where('price', '<=', $max))
+            ->when($this->priceParam('price_min'), fn($query, $min) => $query->where('price', '>=', $min))
+            ->when($this->priceParam('price_max'), fn($query, $max) => $query->where('price', '<=', $max))
             ->latest()
             ->paginate(12)
             ->withQueryString();
@@ -56,5 +55,13 @@ class homeController extends Controller
     public function footerInfo()
     {
         return view('pages.footer-info');
+    }
+
+    // ?price_min[]=1 (array) atau ?price_min=abc bikin query error 500 — cuma terima angka biasa
+    private function priceParam(string $key): ?int
+    {
+        $value = request()->query($key);
+
+        return is_string($value) && ctype_digit($value) && strlen($value) <= 12 ? (int) $value : null;
     }
 }

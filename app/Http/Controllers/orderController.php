@@ -9,6 +9,8 @@ use App\Models\product;
 use App\Models\ProductVariant;
 use App\Exceptions\RajaOngkirException;
 use App\Services\RajaOngkirService;
+use App\Support\CartSession;
+use App\Support\OrderCleanup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -51,7 +53,35 @@ class orderController extends Controller
         $validated = $request->validate([
             'status' => 'required|in:pending,processing,shipped,completed,cancelled',
         ]);
-        $order->update(['status' => $validated['status']]);
+
+        $newStatus = $validated['status'];
+
+        // Hanya perpindahan status yang masuk akal yang boleh. Contoh yang dicegah:
+        // - membuka lagi pesanan 'cancelled' (stoknya sudah dikembalikan ke etalase)
+        // - balik ke 'pending' (pesanan lama langsung kena pembatalan otomatis)
+        if (! in_array($newStatus, Order::nextStatuses($order->status), true)) {
+            return redirect()
+                ->route('dashboard.orders.show', $order)
+                ->with('error', "Status \"{$order->status}\" tidak bisa diubah langsung ke \"{$newStatus}\".");
+        }
+
+        DB::transaction(function () use ($order, $newStatus) {
+            // Kunci baris pesanan & baca ulang statusnya, supaya dua staf yang klik bersamaan
+            // tidak bisa membatalkan (dan mengembalikan stok) pesanan yang sama dua kali.
+            $locked = Order::whereKey($order->getKey())->lockForUpdate()->first();
+
+            if (! in_array($newStatus, Order::nextStatuses($locked->status), true)) {
+                return;
+            }
+
+            // Pesanan dibatalkan staf -> stok barangnya dikembalikan (dulu stok hilang selamanya)
+            if ($newStatus === 'cancelled' && $locked->status !== 'cancelled') {
+                OrderCleanup::restock($locked->load('items.variant', 'items.product'));
+            }
+
+            $locked->update(['status' => $newStatus]);
+        });
+
         return redirect()
             ->route('dashboard.orders.show', $order)
             ->with('success', 'Status pesanan berhasil diperbarui.');
@@ -59,7 +89,7 @@ class orderController extends Controller
 
     public function checkout()
     {
-        $cartItems = CartItem::where('session_id', session()->getId())
+        $cartItems = CartItem::where('session_id', CartSession::key())
             ->with(['product.images', 'variant'])
             ->get();
 
@@ -77,22 +107,23 @@ class orderController extends Controller
         $validated = $request->validate([
             'customer_name'      => 'required|string|max:255',
             'customer_phone'     => ['required', 'regex:/^[0-9]{9,15}$/'],
-            'customer_address'   => 'required|string',
-            'destination_id'     => 'required|integer',
-            'destination_label'  => 'required|string',
-            'shipping_courier'   => 'required|string',
-            'shipping_service'   => 'required|string',
+            'customer_address'   => 'required|string|max:500',
+            'destination_id'     => 'required|integer|min:1',
+            'destination_label'  => 'required|string|max:255',
+            'shipping_courier'   => 'required|string|max:50',
+            'shipping_service'   => 'required|string|max:100',
         ], [
             'customer_name.required'    => 'Nama wajib diisi.',
             'customer_phone.required'   => 'Nomor HP wajib diisi.',
             'customer_phone.regex'      => 'Nomor HP harus berupa angka saja (9-15 digit), tanpa spasi atau simbol.',
+            'customer_address.max'      => 'Alamat maksimal 500 karakter.',
             'customer_address.required' => 'Alamat wajib diisi.',
             'destination_id.required'   => 'Silakan pilih kecamatan/kota tujuan.',
             'shipping_courier.required' => 'Silakan pilih kurir pengiriman.',
             'shipping_service.required' => 'Silakan pilih layanan pengiriman.',
         ]);
 
-        $sessionId = session()->getId();
+        $sessionId = CartSession::key();
 
         // ---- 1. Hitung ongkir di server (jangan percaya angka dari browser) ----
         $previewCart = CartItem::where('session_id', $sessionId)->with('product')->get();
@@ -275,7 +306,7 @@ class orderController extends Controller
 
     // Berat dalam gram, minimal 1 (syarat API ongkir). Dipakai di hitung ongkir & di dalam transaksi
     // biar keduanya pakai aturan pembulatan yang sama.
-    private function cartWeight($grams): int
+    private function cartWeight(int|float|string $grams): int
     {
         return max(1, (int) ceil($grams));
     }

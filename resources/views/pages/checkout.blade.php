@@ -20,6 +20,7 @@
                                     class="w-14 h-14 rounded-lg overflow-hidden bg-gray-100 shrink-0 flex items-center justify-center">
                                     @if ($item->product->images->first())
                                         <img src="{{ Storage::url($item->product->images->first()->image_path) }}"
+                                            alt="{{ $item->product->name }}" width="56" height="56" loading="lazy"
                                             class="w-full h-full object-cover object-center">
                                     @else
                                         <i class="bi bi-image text-gray-300"></i>
@@ -66,8 +67,8 @@
                     <h2 class="text-sm font-bold uppercase tracking-widest text-black/50">Data Penerima</h2>
                     <div>
                         <label for="customer_name" class="block text-sm font-semibold mb-1.5">Nama Lengkap</label>
-                        <input type="text" id="customer_name" name="customer_name"
-                            value="{{ old('customer_name', auth()->user()->name ?? '') }}"
+                        <input type="text" id="customer_name" name="customer_name" autocomplete="name" required
+                            maxlength="255" value="{{ old('customer_name', auth()->user()->name ?? '') }}"
                             class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black"
                             placeholder="Nama penerima">
                         @auth
@@ -87,7 +88,8 @@
                     <div class="relative">
                         <label for="destinationSearch" class="block text-sm font-semibold mb-1.5">Kecamatan / Kota
                             Tujuan</label>
-                        <input type="text" id="destinationSearch" autocomplete="off"
+                        <input type="text" id="destinationSearch" autocomplete="off" role="combobox"
+                            aria-autocomplete="list" aria-controls="destinationResults"
                             class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black"
                             placeholder="Ketik nama kecamatan, kota, atau kode pos...">
                         <input type="hidden" name="destination_id" id="destinationId" value="{{ old('destination_id') }}">
@@ -100,7 +102,8 @@
                     </div>
                     <div>
                         <label for="customer_address" class="block text-sm font-semibold mb-1.5">Alamat Detail</label>
-                        <textarea id="customer_address" name="customer_address" rows="3"
+                        <textarea id="customer_address" name="customer_address" rows="3" required maxlength="500"
+                            autocomplete="street-address"
                             class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black"
                             placeholder="Nama jalan, nomor rumah, RT/RW, patokan">{{ old('customer_address', auth()->user()->address ?? '') }}</textarea>
                     </div>
@@ -123,7 +126,7 @@
                 </div>
 
                 <button type="submit" id="checkoutSubmitBtn"
-                    class="bg-black hover:bg-black/80 text-white uppercase font-bold tracking-widest py-3.5 rounded-lg transition">
+                    class="bg-black hover:bg-black/80 disabled:opacity-60 text-white uppercase font-bold tracking-widest py-3.5 rounded-lg transition">
                     Buat Pesanan
                 </button>
             </form>
@@ -162,9 +165,11 @@
                     })
                     .then(res => res.json())
                     .then(data => {
+                        if (destinationSearch.value.trim() !== keyword)
+                    return; // sudah mengetik hal lain
                         if (data.error) {
                             destinationResults.innerHTML =
-                                `<p class="text-sm text-red-500 p-3">${data.error}</p>`;
+                                `<p class="text-sm text-red-500 p-3">${escapeHtml(data.error)}</p>`;
                             destinationResults.classList.remove('hidden');
                             return;
                         }
@@ -188,8 +193,8 @@
             destinationResults.innerHTML = results.map(item => `
                 <button type="button"
                     class="destination-option w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 border-b border-black/5 last:border-0"
-                    data-id="${item.id}" data-label="${item.label}">
-                    ${item.label}
+                    data-id="${escapeHtml(item.id)}" data-label="${escapeHtml(item.label)}">
+                    ${escapeHtml(item.label)}
                 </button>
             `).join('');
 
@@ -243,7 +248,7 @@
                 .then(data => {
                     if (data.error) {
                         shippingOptionsList.innerHTML =
-                            `<p class="text-sm text-red-500">${data.error}</p>`;
+                            `<p class="text-sm text-red-500">${escapeHtml(data.error)}</p>`;
                         return;
                     }
                     renderShippingOptions(data.data);
@@ -266,13 +271,13 @@
                     <div class="flex items-center gap-3">
                         <input type="radio" name="shipping_option" value="${index}"
                             class="shipping-radio accent-black"
-                            data-courier="${opt.name}" data-service="${opt.service}" data-cost="${opt.cost}">
+                            data-courier="${escapeHtml(opt.name)}" data-service="${escapeHtml(opt.service)}" data-cost="${Number(opt.cost) || 0}">
                         <div class="flex flex-col">
-                            <span class="text-sm font-semibold">${opt.name} - ${opt.service}</span>
-                            <span class="text-xs text-gray-500">${opt.description}${opt.etd ? ' · ' + opt.etd : ''}</span>
+                            <span class="text-sm font-semibold">${escapeHtml(opt.name)} - ${escapeHtml(opt.service)}</span>
+                            <span class="text-xs text-gray-500">${escapeHtml(opt.description)}${opt.etd ? ' · ' + escapeHtml(opt.etd) : ''}</span>
                         </div>
                     </div>
-                    <span class="text-sm font-bold">Rp${opt.cost.toLocaleString('id-ID')}</span>
+                    <span class="text-sm font-bold">Rp${(Number(opt.cost) || 0).toLocaleString('id-ID')}</span>
                 </label>
             `).join('');
 
@@ -296,7 +301,8 @@
         }
 
         // ---- Validasi sebelum submit ----
-        document.querySelector('form[action="{{ route('order.store') }}"]').addEventListener('submit', (e) => {
+        const checkoutForm = document.querySelector('form[action="{{ route('order.store') }}"]');
+        checkoutForm.addEventListener('submit', (e) => {
             if (!destinationId.value) {
                 e.preventDefault();
                 Swal.fire({
@@ -315,7 +321,21 @@
                     text: 'Silakan pilih kurir pengiriman terlebih dahulu.',
                     confirmButtonColor: '#B77B1C',
                 });
+                return;
             }
+
+            // Cegah klik ganda "Buat Pesanan" selama request berjalan
+            const submitBtn = document.getElementById('checkoutSubmitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Memproses...';
+        });
+
+        // Tombol Back (bfcache) memulihkan halaman dengan tombol masih terkunci — buka lagi
+        window.addEventListener('pageshow', (e) => {
+            if (!e.persisted) return;
+            const submitBtn = document.getElementById('checkoutSubmitBtn');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Buat Pesanan';
         });
     </script>
 @endsection

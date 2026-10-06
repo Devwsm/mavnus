@@ -5,12 +5,17 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "postinstall": "node scripts/patch-bootstrap-icons.cjs"
+        "icons": "node scripts/build-icons.cjs",
+        "images": "node scripts/optimize-images.cjs",
+        "predev": "npm run icons && npm run images",
+        "prebuild": "npm run icons && npm run images"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",
         "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^3.1",
+        "sharp": "^0.35.5",
+        "subset-font": "^2.9.0",
         "tailwindcss": "^4.0.0",
         "vite": "^8.0.0"
     },

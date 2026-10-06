@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exceptions\RajaOngkirException;
 use App\Models\CartItem;
 use App\Services\RajaOngkirService;
+use App\Support\CartSession;
 use Illuminate\Http\Request;
 
 class ShippingController extends Controller
@@ -18,8 +19,10 @@ class ShippingController extends Controller
      */
     public function searchDestination(Request $request)
     {
+        // ?keyword[]=x (array) bikin strlen() error 500, jadi cuma terima string
         $keyword = $request->input('keyword', '');
-        if (strlen($keyword) < 3) {
+        $keyword = is_string($keyword) ? trim(mb_substr($keyword, 0, 100)) : '';
+        if (mb_strlen($keyword) < 3) {
             return response()->json(['data' => []]);
         }
 
@@ -40,10 +43,10 @@ class ShippingController extends Controller
     public function calculateCost(Request $request)
     {
         $validated = $request->validate([
-            'destination_id' => 'required|integer',
+            'destination_id' => 'required|integer|min:1',
         ]);
 
-        $grams = CartItem::where('session_id', session()->getId())
+        $grams = CartItem::where('session_id', CartSession::key())
             ->with('product')
             ->get()
             ->sum(fn($item) => $item->product->weight * $item->quantity);

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class product extends Model
@@ -52,7 +53,8 @@ class product extends Model
     public function variants()
     {
         return $this->hasMany(ProductVariant::class, 'product_id', 'id_product')
-            ->orderByRaw("FIELD(label, 'S', 'M', 'L', 'XL')");
+            // CASE (bukan FIELD()) supaya jalan di MySQL maupun SQLite
+            ->orderByRaw("CASE label WHEN 'S' THEN 1 WHEN 'M' THEN 2 WHEN 'L' THEN 3 WHEN 'XL' THEN 4 ELSE 5 END");
     }
 
     // Sync status
@@ -73,7 +75,7 @@ class product extends Model
     // Scope: filter produk yang statusnya aktif (stok tersedia) DAN udah lewat waktu rilisnya
     // (dipakai di semua query storefront - home, listing, search, sitemap - jadi produk
     // yang masih dijadwalkan otomatis kesembunyi tanpa perlu ubah tiap controller)
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true)
             ->whereNotNull('published_at')
@@ -87,13 +89,13 @@ class product extends Model
     }
 
     // Scope: filter produk yang kategorinya "clothes" saja
-    public function scopeClothesCategory($query)
+    public function scopeClothesCategory(Builder $query): Builder
     {
         return $query->where('category', 'clothes');
     }
 
     // Scope: filter produk yang kategorinya "accessoris" saja
-    public function scopeAccessoriesCategory($query)
+    public function scopeAccessoriesCategory(Builder $query): Builder
     {
         return $query->where('category', 'accessories');
     }

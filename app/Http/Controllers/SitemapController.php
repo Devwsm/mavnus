@@ -8,8 +8,36 @@ use Illuminate\Http\Response;
 class SitemapController extends Controller
 {
     /**
-     * Generate sitemap.xml secara dinamis: halaman statis + tiap produk clothes
-     * (satu-satunya kategori yang punya halaman detail publik saat ini).
+     * robots.txt dibuat dinamis supaya baris Sitemap berisi URL ABSOLUT. Spesifikasinya
+     * mewajibkan URL penuh (https://domain/sitemap.xml); versi file statis dengan
+     * "/sitemap.xml" ditandai tidak valid oleh Lighthouse & diabaikan sebagian crawler.
+     * File public/robots.txt harus dihapus supaya route ini yang melayani.
+     */
+    public function robots(): Response
+    {
+        $body = implode("\n", [
+            'User-agent: *',
+            'Allow: /',
+            'Disallow: /dashboard',
+            'Disallow: /crew-portal',
+            'Disallow: /login',
+            'Disallow: /register',
+            'Disallow: /account',
+            'Disallow: /cart',
+            'Disallow: /order',
+            'Disallow: /search',
+            'Disallow: /shipping',
+            '',
+            'Sitemap: ' . route('sitemap'),
+            '',
+        ]);
+
+        return response($body, 200)->header('Content-Type', 'text/plain; charset=UTF-8');
+    }
+
+    /**
+     * Generate sitemap.xml secara dinamis: halaman statis + tiap produk
+     * (clothes & accessories, keduanya punya halaman detail publik).
      */
     public function index(): Response
     {
@@ -20,12 +48,13 @@ class SitemapController extends Controller
             ['url' => route('footer'), 'priority' => '0.3', 'changefreq' => 'monthly'],
         ];
 
-        $productUrls = product::clothesCategory()
+        $productUrls = product::query()
+            ->whereIn('category', ['clothes', 'accessories'])
             ->active()
-            ->select('slug', 'updated_at')
+            ->select('slug', 'category', 'updated_at')
             ->get()
             ->map(fn($product) => [
-                'url'        => route('product_detail.clothes', $product->slug),
+                'url'        => route($product->category === 'clothes' ? 'product_detail.clothes' : 'product_detail.accessories', $product->slug),
                 'priority'   => '0.8',
                 'changefreq' => 'weekly',
                 'lastmod'    => $product->updated_at?->toAtomString(),

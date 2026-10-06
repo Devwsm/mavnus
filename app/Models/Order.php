@@ -49,6 +49,22 @@ class Order extends Model
         return $this->belongsTo(\App\Models\User::class, 'user_id');
     }
 
+    /**
+     * Status tujuan yang boleh dipilih dari status sekarang (termasuk status itu sendiri).
+     * 'cancelled' tidak bisa dibuka lagi (stok sudah dikembalikan), dan tidak ada jalan
+     * balik ke 'pending' karena pesanan pending lama langsung kena pembatalan otomatis.
+     */
+    public static function nextStatuses(string $current): array
+    {
+        return match ($current) {
+            'pending'    => ['pending', 'processing', 'cancelled'],
+            'processing' => ['processing', 'shipped', 'cancelled'],
+            'shipped'    => ['shipped', 'processing', 'completed'],
+            'completed'  => ['completed', 'shipped'],
+            default      => [$current], // cancelled & status tak dikenal: terkunci
+        };
+    }
+
     public static function generateOrderNumber(): string
     {
         return 'MVN-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));

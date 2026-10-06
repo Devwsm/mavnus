@@ -26,6 +26,8 @@ class TrackVisit
         'search',
         'shipping',
         'sitemap.xml',
+        'robots.txt',
+        'newsletter',
     ];
 
     public function handle(Request $request, Closure $next): Response

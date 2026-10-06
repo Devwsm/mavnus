@@ -83,17 +83,18 @@ class productController extends Controller
             ],
 
             // Clothes
-            'color'                 => 'required_if:category,clothes|string|max:100',
+            // Warna dipakai langsung di atribut style judul produk, jadi huruf/angka/spasi/#(),.% saja
+            'color'                 => ['required_if:category,clothes', 'string', 'max:100', 'regex:/^[\p{L}\p{N}\s#(),.%\/-]+$/u'],
             'material'              => 'required_if:category,clothes|string|max:100',
             'variants'              => 'required_if:category,clothes|array|min:1',
-            'variants.*.size'       => 'required_if:category,clothes|in:S,M,L,XL',
+            'variants.*.size'       => 'required_if:category,clothes|in:S,M,L,XL|distinct',
             'variants.*.stock'      => 'required_if:category,clothes|integer|min:0',
 
             // Accessories
             'accessory_type'        => 'required_if:category,accessories|in:keychain,sticker,totebag',
             'stock'                 => 'required_if:category,accessories|integer|min:0',
 
-            'images'                => 'nullable|array',
+            'images'                => 'nullable|array|max:8',
             'images.*'              => 'image|max:5120',
         ], [
             'category.required'     => 'Kategori wajib dipilih.',
@@ -111,6 +112,9 @@ class productController extends Controller
             'weight.min'            => 'Berat minimal 1 gram.',
 
             'color.required_if'     => 'Warna wajib diisi.',
+            'color.regex'           => 'Warna hanya boleh huruf, angka, dan karakter # ( ) , . % -',
+            'images.max'            => 'Maksimal 8 foto per produk.',
+            'variants.*.size.distinct' => 'Ukuran tidak boleh dobel.',
             'color.max'             => 'Warna maksimal 100 karakter.',
 
             'material.required_if'  => 'Material wajib diisi.',
@@ -188,7 +192,9 @@ class productController extends Controller
                     $filename = Str::uuid() . '.webp';
                     $folder   = 'products/' . $validated['category'];
                     Storage::disk('public')->makeDirectory($folder);
-                    $encoded = Image::decode($file)->encode(new WebpEncoder(quality: 80));
+                    // Sisi terpanjang dibatasi 1600px: foto kamera/HP (3000-4000px) tanpa dikecilkan bikin
+                    // halaman produk berat. scaleDown() tidak pernah membesarkan foto yang sudah kecil.
+                    $encoded = Image::decode($file)->scaleDown(width: 1600, height: 1600)->encode(new WebpEncoder(quality: 80));
                     Storage::disk('public')->put("{$folder}/{$filename}", (string) $encoded);
                     ProductImage::create([
                         'product_id' => $product->id_product,
@@ -249,17 +255,18 @@ class productController extends Controller
             ],
 
             // Clothes
-            'color'                 => 'required_if:category,clothes|string|max:100',
+            // Warna dipakai langsung di atribut style judul produk, jadi huruf/angka/spasi/#(),.% saja
+            'color'                 => ['required_if:category,clothes', 'string', 'max:100', 'regex:/^[\p{L}\p{N}\s#(),.%\/-]+$/u'],
             'material'              => 'required_if:category,clothes|string|max:100',
             'variants'              => 'required_if:category,clothes|array|min:1',
-            'variants.*.size'       => 'required_if:category,clothes|in:S,M,L,XL',
+            'variants.*.size'       => 'required_if:category,clothes|in:S,M,L,XL|distinct',
             'variants.*.stock'      => 'required_if:category,clothes|integer|min:0',
 
             // Accessories
             'accessory_type'        => 'required_if:category,accessories|in:keychain,sticker,totebag',
             'stock'                 => 'required_if:category,accessories|integer|min:0',
 
-            'images'                => 'nullable|array',
+            'images'                => 'nullable|array|max:8',
             'images.*'              => 'image|max:5120',
 
             'delete_images'         => 'nullable|array',
@@ -273,6 +280,9 @@ class productController extends Controller
             'weight.min'            => 'Berat minimal 1 gram.',
 
             'color.required_if'     => 'Warna wajib diisi.',
+            'color.regex'           => 'Warna hanya boleh huruf, angka, dan karakter # ( ) , . % -',
+            'images.max'            => 'Maksimal 8 foto per produk.',
+            'variants.*.size.distinct' => 'Ukuran tidak boleh dobel.',
             'material.required_if'  => 'Material wajib diisi.',
 
             'release_mode.required'        => 'Pilih mau publish sekarang atau dijadwalkan.',
@@ -300,9 +310,11 @@ class productController extends Controller
                 'weight'       => $validated['weight'],
                 'description'  => $validated['description'] ?? null,
                 'stock'        => $category === 'accessories' ? $validated['stock'] : $product->stock,
+                // Produk yang sudah tayang tetap memakai tanggal rilis aslinya. Dulu tiap edit
+                // (ganti harga/foto) menimpa tanggal rilis jadi "sekarang".
                 'published_at' => $validated['release_mode'] === 'scheduled'
                     ? $validated['published_at']
-                    : now(),
+                    : ($product->published_at && $product->published_at->isPast() ? $product->published_at : now()),
             ]);
 
             // 2. Update detail sesuai kategori
@@ -312,15 +324,22 @@ class productController extends Controller
                     'material' => $validated['material'],
                 ]);
 
-                $oldVariantIds = $product->variants()->pluck('id_variant');
-                CartItem::whereIn('variant_id', $oldVariantIds)->delete();
-                $product->variants()->delete();
-                foreach ($validated['variants'] as $variant) {
-                    ProductVariant::create([
-                        'product_id' => $product->id_product,
-                        'label'      => $variant['size'],
-                        'stock'      => $variant['stock'],
-                    ]);
+                // Varian di-update di tempatnya (berdasarkan ukuran), TIDAK dihapus lalu dibuat ulang.
+                // Dulu semua varian dihapus: ID-nya berganti, keranjang pembeli ikut kosong, dan
+                // pesanan pending yang kedaluwarsa tidak bisa lagi mengembalikan stok ke varian itu.
+                $submitted = collect($validated['variants'])->keyBy('size');
+
+                $removedIds = $product->variants()->whereNotIn('label', $submitted->keys())->pluck('id_variant');
+                if ($removedIds->isNotEmpty()) {
+                    CartItem::whereIn('variant_id', $removedIds)->delete();
+                    ProductVariant::whereIn('id_variant', $removedIds)->delete();
+                }
+
+                foreach ($submitted as $size => $variant) {
+                    ProductVariant::updateOrCreate(
+                        ['product_id' => $product->id_product, 'label' => $size],
+                        ['stock' => $variant['stock']],
+                    );
                 }
             } else {
                 $product->accessories->update([
@@ -346,7 +365,9 @@ class productController extends Controller
                     $filename = Str::uuid() . '.webp';
                     $folder   = 'products/' . $category;
                     Storage::disk('public')->makeDirectory($folder);
-                    $encoded = Image::decode($file)->encode(new WebpEncoder(quality: 80));
+                    // Sisi terpanjang dibatasi 1600px: foto kamera/HP (3000-4000px) tanpa dikecilkan bikin
+                    // halaman produk berat. scaleDown() tidak pernah membesarkan foto yang sudah kecil.
+                    $encoded = Image::decode($file)->scaleDown(width: 1600, height: 1600)->encode(new WebpEncoder(quality: 80));
                     Storage::disk('public')->put("{$folder}/{$filename}", (string) $encoded);
                     ProductImage::create([
                         'product_id' => $product->id_product,

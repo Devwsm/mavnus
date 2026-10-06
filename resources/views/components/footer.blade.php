@@ -22,14 +22,23 @@
             <div class="max-w-md mx-auto lg:mx-0 text-center lg:text-left">
                 <h2 class="font-bold uppercase tracking-wide mb-4">Subscribe To Our Emails</h2>
 
-                <form class="flex items-center border-b border-white/50 pb-2">
+                <form id="newsletterForm" action="{{ route('newsletter.subscribe') }}" method="POST" novalidate
+                    class="flex items-center border-b border-white/50 pb-2">
+                    @csrf
                     <label for="newsletterEmail" class="sr-only">Alamat email</label>
-                    <input type="email" id="newsletterEmail" name="email" placeholder="Email"
+                    <input type="email" id="newsletterEmail" name="email" placeholder="Email" autocomplete="email"
+                        required maxlength="255"
                         class="bg-transparent outline-none placeholder-white/60 text-white w-full text-sm">
-                    <button type="submit" aria-label="Berlangganan newsletter" class="text-xl shrink-0">
+                    {{-- Honeypot: manusia tidak melihatnya, bot biasanya mengisinya --}}
+                    <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"
+                        class="absolute left-[-9999px] h-0 w-0 opacity-0">
+                    <button type="submit" aria-label="Berlangganan newsletter"
+                        class="inline-flex min-h-11 min-w-11 items-center justify-center text-xl shrink-0">
                         <i class="bi bi-arrow-right" aria-hidden="true"></i>
                     </button>
                 </form>
+
+                <p id="newsletterMessage" role="status" aria-live="polite" class="text-xs mt-2 min-h-4"></p>
 
                 <p class="text-xs text-white/60 mt-4 leading-relaxed">
                     Get updates from <a href="{{ route('home') }}" class="underline hover:text-white">Mavnus</a>
@@ -44,12 +53,9 @@
                 <h2 class="font-bold uppercase tracking-wide mb-4">Country / Region</h2>
 
                 <div class="relative">
-                    <select
-                        class="w-full appearance-none bg-white/5 border border-white/30 rounded px-4 py-2 text-sm outline-none">
-                        <option aria-label="IDR" class="bg-black text-white">Indonesia | IDR Rp</option>
-                        <option aria-label="USD" class="bg-black text-white">United States | USD $</option>
-                        <option aria-label="AUD" class="bg-black text-white">Australia | AUD $</option>
-                    </select>
+                    {{-- Toko ini hanya melayani Indonesia & harga hanya dalam Rupiah. Dulu ada pilihan USD/AUD
+                         yang tidak melakukan apa-apa (menyesatkan) dan <select> tanpa label. --}}
+                    <p class="w-full bg-white/5 border border-white/30 rounded px-4 py-2 text-sm">Indonesia | IDR Rp</p>
                     <i
                         class="bi bi-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-sm pointer-events-none"></i>
                 </div>
@@ -66,13 +72,62 @@
             </p>
 
             <div class="flex items-center gap-5 text-lg">
-                <a href="https://www.instagram.com/whisnusantika/" target="_blank" aria-label="Instagram Whisnu Santika"
-                    class="hover:opacity-70 transition"><i class="bi bi-instagram" aria-hidden="true"></i></a>
-                <a href="https://www.youtube.com/@WhisnuSantika" target="_blank" aria-label="YouTube Whisnu Santika"
-                    class="hover:opacity-70 transition"><i class="bi bi-youtube" aria-hidden="true"></i></a>
-                <a href="https://open.spotify.com/artist/6gvsmDZKW5wRvjKCPnbHDh?si=7jt9_kpmTsCcL-pVJYnblQ" target="_blank" aria-label="Spotify Whisnu Santika"
-                    class="hover:opacity-70 transition"><i class="bi bi-spotify" aria-hidden="true"></i></a>
+                <a href="https://www.instagram.com/whisnusantika/" target="_blank" rel="noopener noreferrer"
+                    aria-label="Instagram Whisnu Santika"
+                    class="inline-flex min-h-11 min-w-11 items-center justify-center hover:opacity-70 transition"><i
+                        class="bi bi-instagram" aria-hidden="true"></i></a>
+                <a href="https://www.youtube.com/@WhisnuSantika" target="_blank" rel="noopener noreferrer"
+                    aria-label="YouTube Whisnu Santika"
+                    class="inline-flex min-h-11 min-w-11 items-center justify-center hover:opacity-70 transition"><i
+                        class="bi bi-youtube" aria-hidden="true"></i></a>
+                <a href="https://open.spotify.com/artist/6gvsmDZKW5wRvjKCPnbHDh?si=7jt9_kpmTsCcL-pVJYnblQ"
+                    target="_blank" rel="noopener noreferrer" aria-label="Spotify Whisnu Santika"
+                    class="inline-flex min-h-11 min-w-11 items-center justify-center hover:opacity-70 transition"><i
+                        class="bi bi-spotify" aria-hidden="true"></i></a>
             </div>
         </div>
     </div>
 </footer>
+
+<script>
+    // Kirim form newsletter lewat fetch supaya halaman tidak reload
+    (function() {
+        const form = document.getElementById('newsletterForm');
+        if (!form) return;
+        const message = document.getElementById('newsletterMessage');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            message.className = 'text-xs mt-2 min-h-4 text-white/70';
+            message.textContent = 'Mengirim...';
+
+            try {
+                const res = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                            .content,
+                    },
+                    body: new FormData(form),
+                });
+                const data = await res.json().catch(() => ({}));
+
+                if (res.ok) {
+                    message.className = 'text-xs mt-2 min-h-4 text-green-400';
+                    message.textContent = data.message || 'Terima kasih sudah berlangganan!';
+                    form.reset();
+                } else {
+                    const first = data.errors ? Object.values(data.errors)[0][0] : null;
+                    message.className = 'text-xs mt-2 min-h-4 text-red-400';
+                    message.textContent = first || (res.status === 429 ?
+                        'Terlalu banyak percobaan. Coba lagi sebentar.' :
+                        'Gagal berlangganan. Coba lagi.');
+                }
+            } catch (err) {
+                message.className = 'text-xs mt-2 min-h-4 text-red-400';
+                message.textContent = 'Gagal berlangganan. Periksa koneksi lalu coba lagi.';
+            }
+        });
+    })();
+</script>

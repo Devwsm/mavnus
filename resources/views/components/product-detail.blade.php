@@ -5,12 +5,13 @@
             <!-- Image gallery -->
             <div class="flex flex-col gap-4">
                 <!-- Main image -->
-                <button type="button" onclick="openGallery(0)"
+                <button type="button" onclick="openGallery(0)" aria-label="Lihat foto {{ $product->name }} lebih besar"
                     class="relative w-full aspect-square bg-gray-100 overflow-hidden rounded-lg cursor-zoom-in group">
                     <img id="mainImage"
                         src="{{ $product->images->first() ? Storage::url($product->images->first()->image_path) : '' }}"
-                        alt="{{ $product->name }}" class="absolute inset-0 w-full h-full object-contain" loading="eager"
-                        fetchpriority="high" />
+                        alt="{{ $product->name }}" width="800" height="800"
+                        class="absolute inset-0 w-full h-full object-contain" loading="eager" fetchpriority="high"
+                        decoding="async" />
                     <span
                         class="absolute bottom-3 right-3 bg-black/70 text-white text-[10px] font-semibold px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition">
                         <i class="bi bi-arrows-fullscreen"></i> Lihat semua foto
@@ -22,8 +23,11 @@
                     <div class="flex gap-4">
                         @foreach ($product->images->skip(1) as $index => $image)
                             <button type="button" onclick="openGallery({{ $index }})"
+                                aria-label="Lihat foto {{ $index + 1 }}"
                                 class="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden border border-transparent hover:border-gray-400">
-                                <img src="{{ Storage::url($image->image_path) }}" alt="{{ $product->name }}"
+                                <img src="{{ Storage::url($image->image_path) }}"
+                                    alt="{{ $product->name }} - foto {{ $index + 1 }}" width="80" height="80"
+                                    loading="lazy" decoding="async"
                                     class="absolute inset-0 w-full h-full object-contain" />
                             </button>
                         @endforeach
@@ -62,14 +66,14 @@
                                 <button type="button"
                                     onclick="toggleSize('{{ $variant->label }}', {{ $variant->stock }}, {{ $variant->id_variant }})"
                                     data-size="{{ $variant->label }}"
-                                    class="size-btn px-4 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm hover:border-gray-500 {{ $variant->stock === 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                    class="size-btn min-h-11 min-w-11 px-4 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm hover:border-gray-500 {{ $variant->stock === 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
                                     @disabled($variant->stock === 0)>
                                     {{ $variant->label }}
                                 </button>
                             @endforeach
                         </div>
-                        <p id="size-message" class="text-xs text-red-600"></p>
-                        <p id="stock-message" class="text-xs text-gray-500"></p>
+                        <p id="size-message" role="alert" class="text-xs text-red-600"></p>
+                        <p id="stock-message" aria-live="polite" class="text-xs text-gray-500"></p>
                     </div>
                     <!-- Sizes End -->
                 @else
@@ -93,14 +97,14 @@
                 <!-- Quantity + Add to cart -->
                 <div class="flex flex-col md:flex-row gap-4">
                     <div id="qty-wrapper" class="flex items-center justify-center w-fit border rounded-lg opacity-50">
-                        <button id="qty-minus" type="button" disabled
-                            class="px-3 py-2 text-gray-700 hover:text-black disabled:cursor-not-allowed">
+                        <button id="qty-minus" type="button" disabled aria-label="Kurangi jumlah"
+                            class="min-h-11 min-w-11 px-3 py-2 text-gray-700 hover:text-black disabled:cursor-not-allowed">
                             -
                         </button>
                         <input id="qty-input" type="number" min="1" max="1" value="1" disabled
-                            class="w-12 text-center outline-none disabled:cursor-not-allowed" />
-                        <button id="qty-plus" type="button" disabled
-                            class="px-3 py-2 text-gray-700 hover:text-black disabled:cursor-not-allowed">
+                            aria-label="Jumlah" class="w-12 text-center outline-none disabled:cursor-not-allowed" />
+                        <button id="qty-plus" type="button" disabled aria-label="Tambah jumlah"
+                            class="min-h-11 min-w-11 px-3 py-2 text-gray-700 hover:text-black disabled:cursor-not-allowed">
                             +
                         </button>
                     </div>
@@ -118,7 +122,8 @@
 
 {{-- Modal Galeri Foto --}}
 @if ($product->images->count() > 0)
-    <div id="galleryModal" class="hidden fixed inset-0 z-100 items-center justify-center p-4">
+    <div id="galleryModal" role="dialog" aria-modal="true" aria-label="Galeri foto {{ $product->name }}"
+        class="hidden fixed inset-0 z-100 items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/90" onclick="closeGallery()"></div>
 
         <button type="button" onclick="closeGallery()"
@@ -138,7 +143,8 @@
         @endif
 
         <div class="relative w-full max-w-3xl aspect-square">
-            <img id="galleryImage" src="" alt="{{ $product->name }}" class="w-full h-full object-contain">
+            <img id="galleryImage" src="" alt="{{ $product->name }}" width="800" height="800"
+                class="w-full h-full object-contain">
         </div>
 
         @if ($product->images->count() > 1)
@@ -290,13 +296,24 @@
     }
 
     // ---- Add to Cart ----
+    let addToCartBusy = false;
+
     addToCartBtn.addEventListener('click', () => {
         if (hasVariants && !selectedSize) return;
+        if (addToCartBusy) return; // cegah klik ganda = item ditambah dua kali
 
+        addToCartBusy = true;
+        addToCartBtn.disabled = true;
+        const sizeMessage = document.getElementById('size-message');
+        sizeMessage.textContent = '';
+
+        // 'Accept: application/json' WAJIB: tanpa itu, kalau validasi gagal Laravel membalas
+        // redirect HTML (bukan JSON), res.json() error, dan pembeli tidak melihat apa-apa.
         fetch('{{ route('cart.add') }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 },
                 body: JSON.stringify({
@@ -305,18 +322,28 @@
                     quantity: parseInt(qtyInput.value, 10),
                 }),
             })
-            .then(res => res.json())
-            .then(() => {
+            .then(async res => {
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    throw new Error(data.message || 'Gagal menambahkan ke keranjang. Coba lagi.');
+                }
+                return data;
+            })
+            .then((data) => {
+                renderCart(data); // badge & isi drawer langsung terbarui dari response
                 openCart();
+            })
+            .catch((err) => {
+                sizeMessage.textContent = err.message;
+            })
+            .finally(() => {
+                addToCartBusy = false;
+                addToCartBtn.disabled = qtyInput.disabled;
             });
     });
 
     // ---- Gallery modal ----
-    const galleryImages = [
-        @foreach ($product->images as $image)
-            '{{ Storage::url($image->image_path) }}',
-        @endforeach
-    ];
+    const galleryImages = @json($product->images->map(fn($image) => Storage::url($image->image_path))->values());
 
     let currentGalleryIndex = 0;
 
@@ -340,6 +367,7 @@
     }
 
     function renderGalleryImage() {
+        if (!galleryImages.length) return;
         document.getElementById('galleryImage').src = galleryImages[currentGalleryIndex];
 
         const counter = document.getElementById('galleryCounter');
@@ -350,7 +378,7 @@
 
     document.addEventListener('keydown', (e) => {
         const modal = document.getElementById('galleryModal');
-        if (modal.classList.contains('hidden')) return;
+        if (!modal || modal.classList.contains('hidden')) return;
 
         if (e.key === 'Escape') closeGallery();
         if (e.key === 'ArrowLeft') navigateGallery(-1);

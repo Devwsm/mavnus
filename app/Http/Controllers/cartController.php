@@ -4,15 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\CartItem;
 use App\Models\ProductVariant;
+use App\Support\CartSession;
 use Illuminate\Http\Request;
 
 class cartController extends Controller
 {
     public function index()
     {
-        $items = CartItem::where('session_id', session()->getId())
+        $items = CartItem::where('session_id', CartSession::key())
             ->with(['product.images', 'variant'])
-            ->get();
+            ->get()
+            // buang baris yatim (produknya sudah terhapus) supaya tidak bikin error 500
+            ->filter(fn($item) => $item->product !== null)
+            ->values();
+
         return response()->json([
             'items' => $items->map(fn($item) => $this->formatItem($item)),
             'total' => $items->sum(fn($item) => $item->product->price * $item->quantity),
@@ -25,7 +30,7 @@ class cartController extends Controller
         $validated = $request->validate([
             'product_id' => 'required|exists:products,id_product',
             'variant_id' => 'nullable|exists:product_variants,id_variant',
-            'quantity'   => 'required|integer|min:1',
+            'quantity'   => 'required|integer|min:1|max:99',
         ]);
 
         // Produk yang masih dijadwalkan gak boleh masuk cart walau product_id-nya ketebak
@@ -58,7 +63,9 @@ class cartController extends Controller
             return response()->json(['message' => 'Stok produk ini habis.'], 422);
         }
 
-        $existing = CartItem::where('session_id', session()->getId())
+        $cartKey = CartSession::key();
+
+        $existing = CartItem::where('session_id', $cartKey)
             ->where('product_id', $validated['product_id'])
             ->where('variant_id', $validated['variant_id'] ?? null)
             ->first();
@@ -68,7 +75,7 @@ class cartController extends Controller
             $existing->save();
         } else {
             CartItem::create([
-                'session_id' => session()->getId(),
+                'session_id' => $cartKey,
                 'product_id' => $validated['product_id'],
                 'variant_id' => $validated['variant_id'] ?? null,
                 'quantity'   => min($validated['quantity'], $maxStock),
@@ -83,11 +90,19 @@ class cartController extends Controller
         $this->ensureOwnedBySession($cartItem);
 
         $validated = $request->validate([
-            'quantity' => 'required|integer|min:1',
+            'quantity' => 'required|integer|min:1|max:99',
         ]);
-        $maxStock = $cartItem->variant_id
-            ? $cartItem->variant->stock
-            : $cartItem->product->stock; // accessories gak punya varian, stoknya langsung dari produk
+        $maxStock = (int) ($cartItem->variant_id
+            ? $cartItem->variant?->stock
+            : $cartItem->product?->stock); // accessories gak punya varian, stoknya langsung dari produk
+
+        if ($maxStock < 1) {
+            // stok sudah habis sejak item dimasukkan — buang dari keranjang, jangan simpan quantity 0
+            $cartItem->delete();
+
+            return $this->index();
+        }
+
         $cartItem->update([
             'quantity' => min($validated['quantity'], $maxStock),
         ]);
@@ -106,7 +121,7 @@ class cartController extends Controller
     // bisa nebak id_cart_item (angka urut) lalu ngubah/hapus keranjang orang lain.
     private function ensureOwnedBySession(CartItem $cartItem): void
     {
-        abort_if($cartItem->session_id !== session()->getId(), 404);
+        abort_if($cartItem->session_id !== CartSession::peek(), 404);
     }
 
     private function formatItem(CartItem $item): array

@@ -6,12 +6,13 @@
             <!-- Left -->
             <div class="w-1/3 flex items-center">
                 <!-- Burger (mobile/tablet only) -->
-                <button id="menuBtn" type="button" aria-label="Buka menu navigasi" class="text-3xl lg:hidden">
+                <button id="menuBtn" type="button" aria-label="Buka menu navigasi" aria-expanded="false"
+                    aria-controls="mobileMenu" class="inline-flex min-h-11 min-w-11 items-center text-3xl lg:hidden">
                     <i class="bi bi-list"></i>
                 </button>
                 <!-- Search (desktop only) -->
-                <button id="searchBtnDesktop" type="button"
-                    class="hidden lg:flex items-center gap-2 text-lg search-toggle-btn">
+                <button id="searchBtnDesktop" type="button" aria-expanded="false" aria-controls="searchBar"
+                    class="hidden lg:flex min-h-11 items-center gap-2 text-lg search-toggle-btn">
                     <i class="bi bi-search"></i>
                     <span class="uppercase text-sm font-semibold tracking-wide">Search</span>
                 </button>
@@ -19,12 +20,18 @@
 
             <!-- Logo (center, always) -->
             <div class="w-1/3 flex justify-center">
-                <a href="{{ route('home') }}">
-                    {{-- Logo selalu di atas fold: jangan di-lazy-load biar gak muncul telat pas refresh --}}
-                    <img src="{{ asset('aset/logo/Whisnu-Santika_Logo-2025-White.png') }}" fetchpriority="high"
-                        alt="whisnu-santika" class="object-cover hidden md:block w-52 rounded-lg">
-                    <img src="{{ asset('aset/logo/Whisnu-Santika_Logo-2025-2-White.png') }}" fetchpriority="high"
-                        alt="whisnu-santika" class="object-cover md:hidden w-52 rounded-lg">
+                <a href="{{ route('home') }}" class="inline-flex min-h-11 items-center">
+                    {{-- Logo selalu di atas fold: jangan di-lazy-load biar gak muncul telat pas refresh.
+                         <picture> = browser cuma mengunduh SATU versi (dulu dua PNG @90KB terunduh sekaligus,
+                         padahal salah satunya disembunyikan CSS). Versi webp ~8KB. --}}
+                    <picture>
+                        <source media="(min-width: 768px)"
+                            srcset="{{ \App\Support\Img::url('aset/logo/Whisnu-Santika_Logo-2025-White.webp', 'aset/logo/Whisnu-Santika_Logo-2025-White.png') }}"
+                            width="624" height="89">
+                        <img src="{{ \App\Support\Img::url('aset/logo/Whisnu-Santika_Logo-2025-2-White.webp', 'aset/logo/Whisnu-Santika_Logo-2025-2-White.png') }}"
+                            width="416" height="195" fetchpriority="high" alt="whisnu-santika"
+                            class="object-cover w-52 rounded-lg">
+                    </picture>
                 </a>
             </div>
 
@@ -32,13 +39,14 @@
             <div class="w-1/3 flex items-center justify-end gap-2 md:gap-4">
                 <!-- Account & Cart (selalu tampil) -->
                 <a href="{{ route('account') }}" aria-label="Akun Saya"
-                    class="hidden lg:inline-flex text-lg {{ request()->routeIs('account', 'account.*') ? 'text-white' : 'text-white/70 hover:text-white' }} transition">
+                    class="hidden lg:inline-flex min-h-11 min-w-11 items-center justify-center text-lg {{ request()->routeIs('account', 'account.*') ? 'text-white' : 'text-white/70 hover:text-white' }} transition">
                     <i class="bi {{ request()->routeIs('account', 'account.*') ? 'bi-person-fill' : 'bi-person' }}"
                         aria-hidden="true"></i>
                 </a>
                 <!-- Search (mobile/tablet saja, desktop pakai tombol di kiri) -->
-                <button id="searchBtnMobile" type="button" aria-label="Buka pencarian"
-                    class="text-lg lg:hidden search-toggle-btn">
+                <button id="searchBtnMobile" type="button" aria-label="Buka pencarian" aria-expanded="false"
+                    aria-controls="searchBar"
+                    class="inline-flex min-h-11 min-w-11 items-center justify-center text-lg lg:hidden search-toggle-btn">
                     <i class="bi bi-search"></i>
                 </button>
                 @include('components/cart')
@@ -142,10 +150,12 @@
 
     let scrollPosition = 0;
     let searchOpen = false;
+    let menuOpen = false;
 
     // ---------- Mobile Burger Menu ----------
     function openMenu() {
         menuOpen = true;
+        menuBtn.setAttribute("aria-expanded", "true");
 
         scrollPosition = window.pageYOffset;
 
@@ -159,6 +169,7 @@
     }
 
     function closeMenu() {
+        menuBtn.setAttribute("aria-expanded", "false");
         mobileMenu.classList.add("-translate-x-full");
         menuBackdrop.classList.add("opacity-0", "pointer-events-none");
         menuBackdrop.classList.remove("opacity-100", "pointer-events-auto");
@@ -171,8 +182,6 @@
             top: scrollPosition,
             behavior: "instant"
         });
-
-        lastScrollY = scrollPosition;
 
         menuOpen = false;
     }
@@ -194,9 +203,14 @@
     function toggleSearchBar() {
         positionSearchBar();
         searchOpen = !searchOpen;
+        document.querySelectorAll(".search-toggle-btn").forEach(btn => btn.setAttribute("aria-expanded", String(
+            searchOpen)));
 
         if (searchOpen) {
             searchBar.classList.remove("-translate-y-full", "opacity-0");
+            searchInput.focus({
+                preventScroll: true
+            });
         } else {
             searchBar.classList.add("-translate-y-full", "opacity-0");
             searchResults.classList.add("hidden");
@@ -212,6 +226,7 @@
     const searchInput = document.getElementById("searchInput");
     const searchResults = document.getElementById("searchResults");
     let searchTimeout = null;
+    let searchAbort = null; // batalkan request lama, supaya hasil lambat tidak menimpa hasil terbaru
 
     searchInput.addEventListener("input", () => {
         const query = searchInput.value.trim();
@@ -219,6 +234,7 @@
         clearTimeout(searchTimeout);
 
         if (query.length < 2) {
+            if (searchAbort) searchAbort.abort();
             searchResults.classList.add("hidden");
             searchResults.innerHTML = "";
             return;
@@ -226,14 +242,22 @@
 
         // Debounce 300ms, biar gak fetch tiap ketukan huruf
         searchTimeout = setTimeout(() => {
+            if (searchAbort) searchAbort.abort();
+            searchAbort = new AbortController();
+
             fetch(`{{ route('search') }}?q=${encodeURIComponent(query)}`, {
                     headers: {
                         'Accept': 'application/json',
                     },
+                    signal: searchAbort.signal,
                 })
-                .then(res => res.json())
-                .then(data => renderSearchResults(data.results))
-                .catch(() => {
+                .then(res => {
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    return res.json();
+                })
+                .then(data => renderSearchResults(data.results || []))
+                .catch((err) => {
+                    if (err.name === 'AbortError') return;
                     searchResults.innerHTML =
                         `<p class="text-white/60 text-sm p-4">Terjadi kesalahan, coba lagi.</p>`;
                     searchResults.classList.remove("hidden");
@@ -249,16 +273,16 @@
         }
 
         searchResults.innerHTML = results.map(item => `
-            <a href="${item.url}" class="flex items-center gap-3 p-3 hover:bg-white/5 transition border-b border-white/5 last:border-0">
+            <a href="${escapeHtml(item.url)}" class="flex items-center gap-3 p-3 hover:bg-white/5 transition border-b border-white/5 last:border-0">
                 <div class="w-12 h-12 rounded-md overflow-hidden bg-black shrink-0 flex items-center justify-center">
                     ${item.image
-                        ? `<img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover object-center">`
+                        ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}" width="48" height="48" loading="lazy" class="w-full h-full object-cover object-center">`
                         : `<i class="bi bi-image text-white/20"></i>`
                     }
                 </div>
                 <div class="flex flex-col">
-                    <span class="text-sm font-semibold text-white">${item.name}</span>
-                    <span class="text-xs text-white/60">${item.category} · ${item.price}</span>
+                    <span class="text-sm font-semibold text-white">${escapeHtml(item.name)}</span>
+                    <span class="text-xs text-white/60">${escapeHtml(item.category)} · ${escapeHtml(item.price)}</span>
                 </div>
             </a>
         `).join('');
@@ -276,6 +300,7 @@
     // Tutup search bar sepenuhnya + reset input
     function closeSearchBar() {
         searchOpen = false;
+        document.querySelectorAll(".search-toggle-btn").forEach(btn => btn.setAttribute("aria-expanded", "false"));
         searchBar.classList.add("-translate-y-full", "opacity-0");
         searchResults.classList.add("hidden");
         searchResults.innerHTML = "";
@@ -287,5 +312,13 @@
         if (searchOpen && !searchBar.contains(e.target) && !e.target.closest(".search-toggle-btn")) {
             closeSearchBar();
         }
+    });
+
+    // Escape menutup menu burger, pencarian, dan keranjang
+    document.addEventListener("keydown", (e) => {
+        if (e.key !== "Escape") return;
+        if (menuOpen) closeMenu();
+        if (searchOpen) closeSearchBar();
+        if (typeof closeCart === "function") closeCart();
     });
 </script>

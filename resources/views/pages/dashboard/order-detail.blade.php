@@ -103,7 +103,7 @@
                             </span>
                         </div>
                     </div>
-                    
+
                     <div class="bg-[#0D0D0D] border border-white/10 rounded-xl p-6 flex flex-col gap-3">
                         <h2 class="text-xs font-semibold uppercase tracking-widest text-[#B71C1C]">Update Status</h2>
                         <form action="{{ route('dashboard.orders.updateStatus', $order) }}" method="POST"
@@ -112,7 +112,7 @@
                             @method('PATCH')
                             <select name="status"
                                 class="w-full bg-black border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#B71C1C]">
-                                @foreach (['pending', 'processing', 'shipped', 'completed', 'cancelled'] as $statusOption)
+                                @foreach (\App\Models\Order::nextStatuses($order->status) as $statusOption)
                                     <option value="{{ $statusOption }}" @selected($order->status === $statusOption)>
                                         {{ ucfirst($statusOption) }}
                                     </option>

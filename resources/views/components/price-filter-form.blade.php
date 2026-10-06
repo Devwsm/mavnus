@@ -1,17 +1,24 @@
 <form method="GET" action="{{ route(request()->route()->getName()) }}" class="flex flex-col gap-4">
     <div class="flex items-center gap-3">
-        @php($idPrefix = $idPrefix ?? 'default')
+        @php
+            $idPrefix = $idPrefix ?? 'default';
+            // ?price_min[]=1 menghasilkan array -> htmlspecialchars() error 500. Tampilkan hanya angka biasa.
+            $priceMin =
+                is_string(request('price_min')) && ctype_digit(request('price_min')) ? request('price_min') : '';
+            $priceMax =
+                is_string(request('price_max')) && ctype_digit(request('price_max')) ? request('price_max') : '';
+        @endphp
         <div class="flex flex-col gap-1 flex-1">
             <label for="{{ $idPrefix }}_price_min"
                 class="text-xs font-semibold uppercase tracking-wide text-black/50">Min</label>
-            <input type="number" id="{{ $idPrefix }}_price_min" name="price_min" value="{{ request('price_min') }}"
+            <input type="number" id="{{ $idPrefix }}_price_min" name="price_min" value="{{ $priceMin }}"
                 placeholder="0"
                 class="w-full border border-black/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-black">
         </div>
         <div class="flex flex-col gap-1 flex-1">
             <label for="{{ $idPrefix }}_price_max"
                 class="text-xs font-semibold uppercase tracking-wide text-black/50">Max</label>
-            <input type="number" id="{{ $idPrefix }}_price_max" name="price_max" value="{{ request('price_max') }}"
+            <input type="number" id="{{ $idPrefix }}_price_max" name="price_max" value="{{ $priceMax }}"
                 placeholder="1000000"
                 class="w-full border border-black/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-black">
         </div>
@@ -22,7 +29,7 @@
             class="flex-1 bg-black hover:bg-black/80 text-white text-sm font-semibold uppercase tracking-wide px-4 py-2 rounded-lg transition">
             Terapkan
         </button>
-        @if (request('price_min') || request('price_max'))
+        @if ($priceMin !== '' || $priceMax !== '')
             <a href="{{ route(request()->route()->getName()) }}"
                 class="text-sm text-black/50 hover:text-black underline underline-offset-4 px-2 py-2 whitespace-nowrap">
                 Reset

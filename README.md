@@ -78,23 +78,6 @@ Role dicek lewat middleware `role:...` di `routes/web.php`, berdasarkan data ses
 - **Pembayaran Midtrans.** Kolom `midtrans_order_id` & `midtrans_transaction_id` sudah ada di tabel `orders`, tapi integrasinya belum dibuat. Checkout saat ini masih placeholder/manual.
 - **Login Google.** Belum ada. Route dan tombolnya sudah dihapus. `accountController` masih mengecek `$user->google_id` (selalu `null` karena kolomnya belum ada di tabel `users`). Kalau fitur ini dilanjutkan: install `laravel/socialite`, tambah kolom `google_id`, buat route + method di `authController`.
 
-## Setup
-
-```bash
-composer install
-cp .env.example .env
-```
-
-Edit `.env`: `.env.example` default-nya SQLite, ganti ke MySQL (`DB_CONNECTION=mysql`, `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`) lalu buat database-nya. Setelah itu:
-
-```bash
-php artisan key:generate
-php artisan migrate --seed
-php artisan storage:link
-npm install
-npm run dev
-```
-
 Env var tambahan yang dipakai kode tapi belum ada di `.env.example`:
 
 | Variabel                         | Keterangan                                                           |
@@ -136,6 +119,31 @@ resources/
     ├── errors/       # 404, 429, 500, 503
     └── exports/      # template invoice PDF
 routes/web.php        # semua route web
-scripts/              # patch-bootstrap-icons.cjs (jalan otomatis saat npm install)
+scripts/              # build-icons.cjs (font ikon subset) & optimize-images.cjs (WebP/favicon) — jalan otomatis sebelum npm run dev/build
 public/aset/          # gambar statis (logo, banner, halaman maintenance)
 ```
+
+## Testing
+
+Test ada di `tests/Feature` dan memakai SQLite in-memory (lihat `phpunit.xml`), jadi tidak menyentuh database MySQL kamu.
+
+```bash
+php artisan test
+# atau satu file saja:
+php artisan test tests/Feature/CheckoutTest.php
+```
+
+Test foto produk (resize ke WebP) otomatis di-skip kalau ekstensi PHP GD tidak terpasang.
+
+## Aset hasil generate (ikon & gambar)
+
+Font ikon (`resources/fonts/bootstrap-icons-subset.woff2`) dan gambar WebP/favicon di `public/aset` dibuat oleh script, bukan ditulis tangan:
+
+```bash
+npm install        # sekali saja (butuh paket subset-font & sharp)
+npm run icons      # font ikon subset + resources/css/icons.css
+npm run images     # logo/banner/maintenance .webp + favicon-192.png
+```
+
+Keduanya jalan otomatis sebelum `npm run dev` dan `npm run build`. Kalau menambah ikon `bi-*` baru di view, cukup jalankan `npm run dev`/`build` lagi. Kalau file `.webp` belum ada, view otomatis memakai gambar asli (`App\Support\Img`).
+

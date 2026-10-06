@@ -8,6 +8,7 @@ use App\Http\Controllers\dashboardController;
 use App\Http\Controllers\homeController;
 use App\Http\Controllers\importExportController;
 use App\Http\Controllers\loginController;
+use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\orderController;
 use App\Http\Controllers\searchController;
 use App\Http\Controllers\ShippingController;
@@ -134,4 +135,8 @@ Route::prefix('/')->group(function () {
     Route::get('/info', [homeController::class, 'footerInfo'])->name('footer');
 
     Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+    Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
+
+    // Langganan email dari footer. Dibatasi ketat karena publik & bisa dipakai untuk spam.
+    Route::post('/newsletter', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe')->middleware('throttle:5,1,newsletter');
 });

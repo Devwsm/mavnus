@@ -20,7 +20,11 @@ return new class extends Migration
         Schema::dropIfExists('albums');
 
         // Hilangin 'album' dari daftar kategori yang valid di kolom enum.
-        DB::statement("ALTER TABLE products MODIFY category ENUM('clothes', 'accessories') NOT NULL");
+        // ALTER ... MODIFY adalah sintaks MySQL/MariaDB. Di SQLite (dipakai test) kolom enum cuma
+        // string biasa, jadi langkah ini dilewati supaya `php artisan migrate` & test bisa jalan.
+        if (in_array(DB::getDriverName(), ['mysql', 'mariadb'], true)) {
+            DB::statement("ALTER TABLE products MODIFY category ENUM('clothes', 'accessories') NOT NULL");
+        }
 
         // Stok tunggal buat kategori yang gak butuh variant (accessories, dst).
         // Clothes tetap pakai product_variants seperti biasa — kolom ini dibiarkan
@@ -39,7 +43,9 @@ return new class extends Migration
             $table->dropColumn('stock');
         });
 
-        DB::statement("ALTER TABLE products MODIFY category ENUM('clothes', 'accessories', 'album') NOT NULL");
+        if (in_array(DB::getDriverName(), ['mysql', 'mariadb'], true)) {
+            DB::statement("ALTER TABLE products MODIFY category ENUM('clothes', 'accessories', 'album') NOT NULL");
+        }
 
         Schema::create('albums', function (Blueprint $table) {
             $table->id('id_album');

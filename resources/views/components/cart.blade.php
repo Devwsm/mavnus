@@ -1,7 +1,9 @@
-<button type="button" onclick="openCart()" aria-label="Buka keranjang belanja" class="relative inline-flex text-lg">
+<button type="button" onclick="openCart()" aria-label="Buka keranjang belanja"
+    class="relative inline-flex min-h-11 min-w-11 items-center justify-center text-lg">
     <i class="bi bi-bag" aria-hidden="true"></i>
+    {{-- Jumlah dirender server ($cartCount dari View composer), jadi tidak perlu fetch() tambahan tiap halaman dibuka --}}
     <span
-        class="cart-badge hidden absolute -top-2 -right-2 bg-[#B71C1C] text-white text-[10px] font-bold w-4 h-4 rounded-full items-center justify-center"></span>
+        class="cart-badge {{ ($cartCount ?? 0) > 0 ? 'flex' : 'hidden' }} absolute top-1 right-1 bg-[#B71C1C] text-white text-[10px] font-bold w-4 h-4 rounded-full items-center justify-center">{{ ($cartCount ?? 0) > 0 ? $cartCount : '' }}</span>
 </button>
 
 {{-- Cart Backdrop --}}
@@ -10,13 +12,14 @@
 </div>
 
 {{-- Cart Drawer (half-screen, dari kanan) --}}
-<div id="cartDrawer"
-    class="fixed top-0 right-0 h-full w-3/4 md:w-1/2 bg-black text-white z-80
+<div id="cartDrawer" role="dialog" aria-modal="true" aria-label="Keranjang belanja" aria-hidden="true"
+    class="fixed top-0 right-0 h-full w-3/4 md:w-1/2 bg-black text-white z-80 invisible
     flex flex-col translate-x-full transition-transform duration-300">
 
     <div class="flex items-center justify-between p-6 border-b border-white/10">
         <h2 class="text-xl font-bold uppercase tracking-wide">Cart</h2>
-        <button id="cartCloseBtn" type="button" aria-label="Tutup keranjang belanja" class="text-3xl">
+        <button id="cartCloseBtn" type="button" aria-label="Tutup keranjang belanja"
+            class="inline-flex min-h-11 min-w-11 items-center justify-center text-3xl">
             <i class="bi bi-x" aria-hidden="true"></i>
         </button>
     </div>
@@ -49,13 +52,20 @@
 
         function openCart() {
             fetchCart();
-            cartDrawer.classList.remove('translate-x-full');
+            cartDrawer.classList.remove('translate-x-full', 'invisible');
+            cartDrawer.setAttribute('aria-hidden', 'false');
             cartBackdrop.classList.remove('opacity-0', 'pointer-events-none');
             document.body.classList.add('overflow-hidden');
         }
 
         function closeCart() {
             cartDrawer.classList.add('translate-x-full');
+            // invisible ditunda sampai animasi geser selesai, supaya elemen di drawer yang
+            // tersembunyi tidak bisa difokus lewat keyboard (Tab)
+            setTimeout(() => {
+                if (cartDrawer.classList.contains('translate-x-full')) cartDrawer.classList.add('invisible');
+            }, 300);
+            cartDrawer.setAttribute('aria-hidden', 'true');
             cartBackdrop.classList.add('opacity-0', 'pointer-events-none');
             document.body.classList.remove('overflow-hidden');
         }
@@ -66,7 +76,10 @@
                         'Accept': 'application/json',
                     },
                 })
-                .then(res => res.json())
+                .then(res => {
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    return res.json();
+                })
                 .then(renderCart)
                 .catch(() => {
                     cartItemsWrapper.innerHTML =
@@ -87,22 +100,22 @@
             cartItemsWrapper.innerHTML = data.items.map(item => `
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="w-20 h-20 rounded-lg overflow-hidden bg-[#0D0D0D] shrink-0 flex items-center justify-center">
-                        ${item.image ? `<img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover object-center">` : `<i class="bi bi-image text-white/20 text-xl" aria-hidden="true"></i>`}
+                        ${item.image ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}" width="80" height="80" loading="lazy" class="w-full h-full object-cover object-center">` : `<i class="bi bi-image text-white/20 text-xl" aria-hidden="true"></i>`}
                     </div>
                     <div class="flex flex-col flex-1 gap-1.5">
-                        <span class="text-base font-semibold">${item.name}</span>
-                        ${item.size ? `<span class="text-sm text-white/60">Size: ${item.size}</span>` : ''}
+                        <span class="text-base font-semibold">${escapeHtml(item.name)}</span>
+                        ${item.size ? `<span class="text-sm text-white/60">Size: ${escapeHtml(item.size)}</span>` : ''}
                         <div class="flex items-center justify-between mt-1">
                             <div class="flex items-center gap-3 border border-white/10 rounded-lg">
-                                <button type="button" onclick="changeQty(${item.id}, ${item.quantity - 1})" aria-label="Kurangi jumlah ${item.name}" class="px-3 py-1.5 text-white/60 hover:text-white text-lg disabled:opacity-30">-</button>
-                                <span class="text-base" aria-live="polite">${item.quantity}</span>
-                                <button type="button" onclick="changeQty(${item.id}, ${item.quantity + 1})" ${item.quantity >= item.max ? 'disabled' : ''} aria-label="Tambah jumlah ${item.name}" class="px-3 py-1.5 text-white/60 hover:text-white text-lg disabled:opacity-30">+</button>
+                                <button type="button" onclick="changeQty(${Number(item.id)}, ${Number(item.quantity) - 1})" aria-label="Kurangi jumlah ${escapeHtml(item.name)}" class="min-h-11 min-w-11 px-3 py-1.5 text-white/60 hover:text-white text-lg disabled:opacity-30">-</button>
+                                <span class="text-base" aria-live="polite">${Number(item.quantity)}</span>
+                                <button type="button" onclick="changeQty(${Number(item.id)}, ${Number(item.quantity) + 1})" ${item.quantity >= item.max ? 'disabled' : ''} aria-label="Tambah jumlah ${escapeHtml(item.name)}" class="min-h-11 min-w-11 px-3 py-1.5 text-white/60 hover:text-white text-lg disabled:opacity-30">+</button>
                             </div>
-                            <button type="button" onclick="removeCartItem(${item.id})" aria-label="Hapus ${item.name} dari keranjang" class="text-white/60 hover:text-[#B71C1C] text-base disabled:opacity-30">
+                            <button type="button" onclick="removeCartItem(${Number(item.id)})" aria-label="Hapus ${escapeHtml(item.name)} dari keranjang" class="min-h-11 min-w-11 text-white/60 hover:text-[#B71C1C] text-base disabled:opacity-30">
                                 <i class="bi bi-trash" aria-hidden="true"></i>
                             </button>
                         </div>
-                        <span class="text-sm text-white/60">${item.subtotal}</span>
+                        <span class="text-sm text-white/60">${escapeHtml(item.subtotal)}</span>
                     </div>
                 </div>
             `).join('');
@@ -191,7 +204,10 @@
         cartCloseBtn.addEventListener('click', closeCart);
         cartBackdrop.addEventListener('click', closeCart);
 
-        // Muat jumlah item cart begitu halaman dibuka (untuk badge di navbar)
-        fetchCart();
+        // Badge sudah dirender server. Saat tombol Back memulihkan halaman dari cache browser (bfcache),
+        // angkanya bisa basi — baru di kasus itu kita fetch ulang.
+        window.addEventListener('pageshow', (e) => {
+            if (e.persisted) fetchCart();
+        });
     </script>
 @endonce

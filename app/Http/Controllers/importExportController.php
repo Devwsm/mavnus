@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Exports\OrdersExport;
 use App\Models\Order;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -31,9 +30,10 @@ class importExportController extends Controller
             $filename = 'mavnus-order-' . now()->format('Y-m-d_His') . '.xlsx';
             return Excel::download(new OrdersExport, $filename);
         } catch (\Throwable $e) {
+            report($e);
             return redirect()
                 ->route('dashboard.import-export')
-                ->with('error', 'Gagal export data order: ' . $e->getMessage());
+                ->with('error', 'Gagal export data order. Detail error tercatat di log server.');
         }
     }
 
@@ -60,9 +60,10 @@ class importExportController extends Controller
             $filename = 'mavnus-invoice-order-' . now()->format('Y-m-d_His') . '.pdf';
             return $pdf->download($filename);
         } catch (\Throwable $e) {
+            report($e);
             return redirect()
                 ->route('dashboard.import-export')
-                ->with('error', 'Gagal export invoice PDF: ' . $e->getMessage());
+                ->with('error', 'Gagal export invoice PDF. Detail error tercatat di log server.');
         }
     }
 
@@ -82,9 +83,10 @@ class importExportController extends Controller
                 ->header('Content-Type', 'application/sql')
                 ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
         } catch (\Throwable $e) {
+            report($e);
             return redirect()
                 ->route('dashboard.import-export')
-                ->with('error', 'Gagal export SQL produk: ' . $e->getMessage());
+                ->with('error', 'Gagal export SQL produk. Detail error tercatat di log server.');
         }
     }
 
@@ -101,9 +103,10 @@ class importExportController extends Controller
                 ->header('Content-Type', 'application/sql')
                 ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
         } catch (\Throwable $e) {
+            report($e);
             return redirect()
                 ->route('dashboard.import-export')
-                ->with('error', 'Gagal export SQL order: ' . $e->getMessage());
+                ->with('error', 'Gagal export SQL order. Detail error tercatat di log server.');
         }
     }
 
@@ -152,6 +155,11 @@ class importExportController extends Controller
      */
     public function exportDatabase()
     {
+        // Tabel ini cuma data sementara. Isinya (terutama `sessions`: ID & payload sesi login
+        // staf/customer) tidak boleh ikut ke file backup karena file bisa tersebar.
+        // Strukturnya tetap ikut di-backup, datanya saja yang dilewati.
+        $skipData = ['sessions', 'cache', 'cache_locks', 'jobs', 'job_batches', 'failed_jobs', 'password_reset_tokens'];
+
         try {
             $tables = DB::select('SHOW TABLES');
             $sql = "-- Mavnus Database Backup\n-- Generated: " . now() . "\n\n";
@@ -168,7 +176,7 @@ class importExportController extends Controller
                 $sql .= $createTable . ";\n\n";
 
                 // Simpan seluruh isi data tabel sebagai INSERT statement
-                $rows = DB::table($tableName)->get();
+                $rows = in_array($tableName, $skipData, true) ? collect() : DB::table($tableName)->get();
                 foreach ($rows as $row) {
                     $rowArray = (array) $row;
                     $columns = array_map(fn($col) => "`{$col}`", array_keys($rowArray));
@@ -190,9 +198,10 @@ class importExportController extends Controller
                 ->header('Content-Type', 'application/sql')
                 ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
         } catch (\Throwable $e) {
+            report($e);
             return redirect()
                 ->route('dashboard.import-export')
-                ->with('error', 'Gagal export database: ' . $e->getMessage());
+                ->with('error', 'Gagal export database. Detail error tercatat di log server.');
         }
     }
 
@@ -236,9 +245,10 @@ class importExportController extends Controller
             // biar tidak numpuk jadi sampah di storage server
             return response()->download($zipPath)->deleteFileAfterSend(true);
         } catch (\Throwable $e) {
+            report($e);
             return redirect()
                 ->route('dashboard.import-export')
-                ->with('error', 'Gagal export foto: ' . $e->getMessage());
+                ->with('error', 'Gagal export foto. Detail error tercatat di log server.');
         }
     }
 }

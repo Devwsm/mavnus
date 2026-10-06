@@ -18,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\cekRole::class,
         ]);
 
+        // Header keamanan (CSP, X-Frame-Options, HSTS saat HTTPS, dst.) untuk semua response
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+
         $middleware->web(append: [
             \App\Http\Middleware\TrackVisit::class,
             \App\Http\Middleware\AutoCancelExpiredOrders::class,
@@ -35,6 +38,6 @@ return Application::configure(basePath: dirname(__DIR__))
         // ngirim header Accept: application/json dibales JSON, apa pun
         // path-nya.
         $exceptions->shouldRenderJsonWhen(
-            fn(Request $request, \Throwable $e) => $request->is('api/*') || $request->expectsJson(),
+            fn(Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
     })->create();
