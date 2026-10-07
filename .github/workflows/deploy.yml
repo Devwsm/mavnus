@@ -1,0 +1,98 @@
+name: Deploy to cPanel
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer:v2
+
+      - name: Install PHP dependencies (production only)
+        run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      # Dipanggil langsung (bukan `npm run build`) karena script "prebuild"
+      # memanggil scripts/optimize-images.cjs yang tidak ada di repo.
+      - name: Build assets
+        run: |
+          npm run icons
+          npx vite build
+
+      - name: Setup SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "${{ secrets.SSH_PORT }}" -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Sync application files
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }}" \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='.env' \
+            --exclude='node_modules/' \
+            --exclude='tests/' \
+            --exclude='/storage/' \
+            --exclude='/bootstrap/cache/' \
+            --exclude='/public/' \
+            ./ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.APP_PATH }}/"
+
+      # index.php dan .htaccess di server tidak ditimpa (bisa jadi sudah kamu
+      # sesuaikan untuk struktur cPanel). Folder aset/uploads yang tidak ada
+      # di repo juga aman karena tidak memakai --delete.
+      - name: Sync public files
+        run: |
+          rsync -az \
+            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }}" \
+            --exclude='index.php' \
+            --exclude='.htaccess' \
+            --exclude='hot' \
+            --exclude='fonts-manifest.dev.json' \
+            public/ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.PUBLIC_PATH }}/"
+
+      - name: Run Laravel post-deploy commands
+        run: |
+          ssh -i ~/.ssh/deploy_key -p "${{ secrets.SSH_PORT }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" bash -s <<'EOF'
+          set -e
+          cd "${{ secrets.APP_PATH }}"
+          PHP=${PHP_BIN:-php}
+          mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cache
+          $PHP artisan migrate --force
+          $PHP artisan storage:link || true
+          $PHP artisan optimize:clear
+          $PHP artisan config:cache
+          $PHP artisan route:cache
+          $PHP artisan view:cache
+          EOF
+
+      - name: Cleanup SSH key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
