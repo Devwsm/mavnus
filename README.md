@@ -212,16 +212,89 @@ Salin `.github/workflows/deploy.yml`, lalu sesuaikan:
 
 ### Troubleshooting
 
-| Error di log Actions                                           | Penyebab dan solusi                                                                                                               |
-| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `Your lock file does not contain a compatible set of packages` | Versi PHP di workflow lebih rendah dari syarat `composer.lock`. Naikkan `php-version`.                                            |
-| `rsync: command not found`                                     | Server tidak punya rsync. Upload memakai `tar` lewat SSH (sudah begitu di workflow ini).                                          |
-| `Class "Laravel\Pail\PailServiceProvider" not found`           | Cache lama di `bootstrap/cache` masih memuat paket dev. Workflow menghapus `bootstrap/cache/*.php` sebelum menjalankan artisan.   |
-| `Permission denied (publickey)`                                | Key belum di-**Authorize** di cPanel, atau isi `SSH_PRIVATE_KEY` tidak lengkap.                                                   |
-| `Connection timed out`                                         | `SSH_PORT` salah, atau SSH dari luar diblokir hosting.                                                                            |
-| `php: command not found` / versi PHP server terlalu rendah     | Ubah versi PHP lewat MultiPHP Manager, atau isi path PHP spesifik (misalnya `/opt/cpanel/ea-php84/root/usr/bin/php`) di workflow. |
+| Error di log Actions                                           | Penyebab dan solusi                                                                                                                               |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Your lock file does not contain a compatible set of packages` | Versi PHP di workflow lebih rendah dari syarat `composer.lock`. Naikkan `php-version`.                                                            |
+| `rsync: command not found`                                     | Server tidak punya rsync. Upload memakai `tar` lewat SSH (sudah begitu di workflow ini).                                                          |
+| `Class "Laravel\Pail\PailServiceProvider" not found`           | Cache lama di `bootstrap/cache` masih memuat paket dev. Workflow menghapus `bootstrap/cache/*.php` sebelum menjalankan artisan.                   |
+| `Permission denied (publickey)`                                | Key belum di-**Authorize** di cPanel, atau isi `SSH_PRIVATE_KEY` tidak lengkap.                                                                   |
+| `Connection timed out`                                         | `SSH_PORT` salah, atau SSH dari luar diblokir hosting.                                                                                            |
+| Koneksi SSH putus di tengah proses (timeout)                   | Firewall hosting memblokir IP GitHub, atau perintah lama tanpa output. Tambah `-o ServerAliveInterval=30 -o ConnectTimeout=20` di perintah `ssh`. |
+| `php: command not found` / versi PHP server terlalu rendah     | Ubah versi PHP lewat MultiPHP Manager, atau isi path PHP spesifik (misalnya `/opt/cpanel/ea-php84/root/usr/bin/php`) di workflow.                 |
 
-### Catatan
+### Yang ter-upload dan yang tidak
 
-- `migrate --force` jalan otomatis di setiap deploy. Pastikan migration aman dan `.env` server mengarah ke database yang benar.
-- Jangan pernah meng-commit private key atau `.env`.
+| Ikut ter-upload otomatis                                            | Tidak ikut / tidak ditimpa                                  |
+| ------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `app/`, `config/`, `database/`, `resources/`, `routes/`, `scripts/` | `.env` (selalu dipertahankan di server)                     |
+| `vendor/` (tanpa paket dev)                                         | `storage/` (upload user, log, session, backup)              |
+| `composer.json`, `composer.lock`, `artisan`, `bootstrap/app.php`    | `bootstrap/cache/` (dihapus lalu dibuat ulang oleh Laravel) |
+| `public/build` (hasil build Vite), `public/aset`, `robots.txt`      | `public/index.php` dan `public/.htaccess`                   |
+| File kecil lain di root (README, `package.json`, dll.)              | `.git`, `.github`, `node_modules`, `tests`                  |
+
+Yang sering terlewat:
+
+- Perubahan `.env` harus diedit **manual di server**. Kalau kode memakai variabel `.env` baru, tambahkan juga di `.env` server, kalau tidak aplikasi error.
+- File yang dihapus dari repo **tidak ikut terhapus** di server.
+
+### Kelebihan dan kekurangan
+
+**Kelebihan**
+
+- Tidak perlu upload manual lewat File Manager, jadi lebih cepat dan tidak ada file yang lupa terupload.
+- Build selalu bersih dan sama setiap kali, tidak tergantung kondisi laptop.
+- Ada riwayat setiap deploy di tab Actions, lengkap dengan log kalau gagal.
+- Server tidak menyimpan kredensial GitHub, dan tidak butuh Composer atau Node.
+- `.env` dan data di `storage/` tidak tersentuh.
+- Bisa dipakai ulang di project lain.
+
+**Kekurangan**
+
+- Tidak ada rollback otomatis. Kalau deploy bermasalah, `git revert` lalu push lagi.
+- Tidak ada test sebelum deploy, jadi kode yang rusak tetap terkirim.
+- Tidak atomik: selama upload (sekitar 40 detik) situs bisa sebentar dalam kondisi setengah terupdate.
+- Folder `vendor` dikirim ulang setiap deploy, jadi upload relatif lama.
+- Migration jalan otomatis di setiap deploy.
+- Bergantung pada GitHub, port SSH, dan hosting.
+
+### Migrasi database
+
+`php artisan migrate --force` jalan otomatis di setiap deploy, jadi perhatikan hal berikut.
+
+**Umumnya aman:** tabel baru, kolom baru yang `nullable` atau punya `default`, index baru.
+
+**Berisiko:** `dropColumn`, `dropTable`, `renameColumn`, ubah tipe kolom, kolom `NOT NULL` tanpa default di tabel yang sudah berisi data, atau index unik di kolom yang datanya masih duplikat.
+
+Hal yang perlu diketahui:
+
+- **Kode baru naik dulu, migrasi menyusul.** Di jeda itu, kode baru bisa membaca skema database yang masih lama. Migrasi yang hanya menambah kolom biasanya lolos, tapi yang menghapus atau mengganti nama kolom bisa membuat halaman error sebentar.
+- **Tidak ada rollback otomatis.** Kalau migrasi gagal di tengah jalan, deploy berhenti. MySQL tidak bisa membatalkan perubahan struktur tabel di tengah migrasi, jadi tabel bisa tertinggal setengah berubah dan harus dibereskan manual lewat phpMyAdmin.
+- **Database yang dipakai adalah yang ada di `.env` server.** Pastikan mengarah ke database yang benar (preview atau production).
+
+Batasan dan kebiasaan yang disarankan:
+
+- Jangan mengedit migrasi lama yang sudah pernah jalan. Selalu buat file migrasi baru.
+- Backup database (export di phpMyAdmin) sebelum push migrasi yang mengubah atau menghapus data.
+- Pecah perubahan berbahaya jadi dua kali deploy. Contoh ganti nama kolom: deploy pertama menambah kolom baru dan kode memakai keduanya, deploy kedua baru menghapus kolom lama.
+- Uji di lokal dengan data yang mirip data asli.
+- Tabel besar (puluhan ribu baris ke atas) bisa lama saat diubah. Hosting shared punya batas CPU dan proses, jadi proses yang terlalu lama bisa dimatikan paksa.
+- Seeder tidak ikut jalan. Workflow hanya menjalankan `migrate`, bukan `db:seed`.
+- Jangan pernah memasukkan `migrate:fresh` atau `migrate:rollback` ke workflow.
+
+### Yang perlu diwaspadai
+
+- **Migration yang merusak data.** Lihat bagian di atas.
+- **Push ke `main` = langsung naik ke server.** Untuk production sungguhan, pakai workflow, branch, dan secrets terpisah dari preview.
+- **Private key SSH.** Jangan di-commit atau dikirim lewat chat. Kalau sempat bocor, hapus key itu di cPanel (SSH Access → Manage) dan buat yang baru.
+- **Versi PHP di hosting.** Kalau versi PHP domain diturunkan di cPanel (di bawah syarat `composer.lock`), situs bisa error 500 walau deploy hijau.
+- **`APP_DEBUG` dan `.env` production.** Pastikan `APP_DEBUG=false` sebelum dipakai sungguhan.
+- **Timeout SSH.** Bisa terjadi kalau IP GitHub diblokir firewall hosting, port SSH berubah, atau perintah artisan berjalan lama tanpa output.
+- **Runner GitHub.** `ubuntu-latest` pindah ke Ubuntu 26 mulai 19 Oktober 2026. Untuk menghindari kejutan, ganti `runs-on: ubuntu-latest` menjadi `ubuntu-24.04`.
+
+### Yang perlu dihindari
+
+- Mengedit file kode langsung di server lewat File Manager. Perubahannya akan tertimpa deploy berikutnya. Edit di lokal, lalu push.
+- Menghapus `.env` atau folder `storage` di server.
+- Mengubah atau menghapus secrets di GitHub tanpa memperbarui sisi cPanel, dan sebaliknya.
+- Lupa meng-commit `composer.lock`. Kalau tidak sesuai `composer.json`, composer gagal di Actions.
+- Meng-commit private key atau `.env`.
