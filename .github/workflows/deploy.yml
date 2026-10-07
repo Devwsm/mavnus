@@ -12,7 +12,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
@@ -50,32 +50,34 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -p "${{ secrets.SSH_PORT }}" -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
 
-      - name: Sync application files
+      # Server cPanel tidak punya rsync, jadi file dikirim dengan tar lewat SSH.
+      # Catatan: file yang sudah dihapus dari repo TIDAK ikut terhapus di server.
+      - name: Upload application files
         run: |
-          rsync -az --delete \
-            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }}" \
-            --exclude='.git/' \
-            --exclude='.github/' \
-            --exclude='.env' \
-            --exclude='node_modules/' \
-            --exclude='tests/' \
-            --exclude='/storage/' \
-            --exclude='/bootstrap/cache/' \
-            --exclude='/public/' \
-            ./ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.APP_PATH }}/"
+          tar -czf - --anchored \
+            --exclude='./.git' \
+            --exclude='./.github' \
+            --exclude='./.env' \
+            --exclude='./node_modules' \
+            --exclude='./tests' \
+            --exclude='./storage' \
+            --exclude='./bootstrap/cache' \
+            --exclude='./public' \
+            . | ssh -i ~/.ssh/deploy_key -p "${{ secrets.SSH_PORT }}" \
+              "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+              "mkdir -p '${{ secrets.APP_PATH }}' && tar -xzf - -m -C '${{ secrets.APP_PATH }}'"
 
-      # index.php dan .htaccess di server tidak ditimpa (bisa jadi sudah kamu
-      # sesuaikan untuk struktur cPanel). Folder aset/uploads yang tidak ada
-      # di repo juga aman karena tidak memakai --delete.
-      - name: Sync public files
+      # index.php dan .htaccess di server tidak ditimpa.
+      - name: Upload public files
         run: |
-          rsync -az \
-            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }}" \
-            --exclude='index.php' \
-            --exclude='.htaccess' \
-            --exclude='hot' \
-            --exclude='fonts-manifest.dev.json' \
-            public/ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.PUBLIC_PATH }}/"
+          tar -czf - -C public --anchored \
+            --exclude='./index.php' \
+            --exclude='./.htaccess' \
+            --exclude='./hot' \
+            --exclude='./fonts-manifest.dev.json' \
+            . | ssh -i ~/.ssh/deploy_key -p "${{ secrets.SSH_PORT }}" \
+              "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+              "mkdir -p '${{ secrets.PUBLIC_PATH }}' && tar -xzf - -m -C '${{ secrets.PUBLIC_PATH }}'"
 
       - name: Run Laravel post-deploy commands
         run: |
