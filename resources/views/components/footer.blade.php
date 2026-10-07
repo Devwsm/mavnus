@@ -69,6 +69,7 @@
             <p class="text-center lg:text-left">
                 &copy; {{ date('Y') }}, <a href="{{ route('home') }}" class="hover:text-white">Mavnus</a>.
                 All rights reserved.
+                <span class="block mt-1 text-white/40">Auto-deployed via GitHub Actions &#10003;</span>
             </p>
 
             <div class="flex items-center gap-5 text-lg">

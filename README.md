@@ -147,3 +147,81 @@ npm run images     # logo/banner/maintenance .webp + favicon-192.png
 
 Keduanya jalan otomatis sebelum `npm run dev` dan `npm run build`. Kalau menambah ikon `bi-*` baru di view, cukup jalankan `npm run dev`/`build` lagi. Kalau file `.webp` belum ada, view otomatis memakai gambar asli (`App\Support\Img`).
 
+## Auto Deploy ke cPanel via GitHub Actions + SSH
+
+Setiap `git push` ke branch `main`, GitHub otomatis build project lalu mengirim hasilnya ke hosting cPanel lewat SSH. Tidak perlu upload manual lewat File Manager lagi. Panduan ini ditulis supaya bisa dipakai ulang di project Laravel lain yang hostingnya cPanel.
+
+### Cara kerjanya
+
+1. GitHub menjalankan `composer install --no-dev` dan build aset Vite (`public/build` ada di `.gitignore`, jadi harus di-build di sini).
+2. File dikirim ke server lewat `tar` yang dialirkan ke SSH. Server cPanel (Rumahweb) tidak punya `rsync`, jadi `rsync` tidak dipakai.
+3. Lewat SSH, GitHub menjalankan perintah artisan di server: `migrate --force`, lalu cache config, route, dan view.
+
+Yang **tidak** ditimpa di server: `.env`, `storage/`, `bootstrap/cache/` (dihapus lalu dibuat ulang oleh Laravel), `public/index.php`, dan `public/.htaccess`. File yang dihapus dari repo **tidak ikut terhapus** di server.
+
+### Setup (sekali per project/hosting)
+
+**1. Buat SSH key di laptop.** Jalankan di PowerShell (bukan di folder project, supaya private key tidak ikut ter-commit):
+
+```powershell
+mkdir $HOME\.ssh -Force
+ssh-keygen -t ed25519 -f "$HOME\.ssh\nama_project_deploy" -N '""'
+```
+
+Tanda kutip `'""'` wajib persis begitu di PowerShell. Kalau ditulis `""` saja, `ssh-keygen` malah menampilkan daftar usage.
+
+**2. Pasang public key di cPanel.**
+
+1. Salin public key: `Get-Content "$HOME\.ssh\nama_project_deploy.pub" | Set-Clipboard`
+2. cPanel → **SSH Access** → **Manage SSH Keys** → **Import Key**.
+3. Isi nama key, tempel ke kolom **Public Key**, kolom private key dikosongkan, klik **Import**.
+4. Kembali ke daftar Public Keys → **Manage** pada key tadi → **Authorize**. Status harus berubah menjadi _authorized_.
+
+**3. Catat port SSH.** Port SSH hosting sering bukan 22 (di Rumahweb: `2223`). Cek di email hosting atau panduan SSH hostingnya.
+
+**4. Isi GitHub secrets.** Salin private key: `Get-Content "$HOME\.ssh\nama_project_deploy" | Set-Clipboard`. Lalu buka repo → Settings → Secrets and variables → Actions → **New repository secret**:
+
+| Secret            | Isi                                                                |
+| ----------------- | ------------------------------------------------------------------ |
+| `SSH_PRIVATE_KEY` | isi file private key lengkap, termasuk baris `BEGIN` dan `END`     |
+| `SSH_HOST`        | hostname server cPanel                                             |
+| `SSH_PORT`        | port SSH, misalnya `2223`                                          |
+| `SSH_USER`        | username cPanel                                                    |
+| `APP_PATH`        | folder aplikasi Laravel, misalnya `/home/<user>/nama_folder_app`   |
+| `PUBLIC_PATH`     | document root domain, misalnya `/home/<user>/public_html/<domain>` |
+
+Setelah private key tersimpan di GitHub, hapus file-nya dari laptop: `Remove-Item "$HOME\.ssh\nama_project_deploy"`.
+
+**5. Cek server sebelum deploy pertama.**
+
+- Backup folder `APP_PATH` dan `PUBLIC_PATH` lewat File Manager cPanel.
+- Versi PHP di server harus memenuhi syarat `composer.lock`. Cek lewat terminal cPanel dengan `php -v`, atau lewat **MultiPHP Manager**.
+- Buka `index.php` di `PUBLIC_PATH`. Path `vendor/autoload.php` dan `bootstrap/app.php` di dalamnya harus menunjuk ke `APP_PATH`.
+
+**6. Pasang workflow.** Taruh `deploy.yml` di `.github/workflows/deploy.yml` (nama folder harus persis `.github` dan `workflows`), commit, lalu push ke `main`. Pantau hasilnya di tab **Actions** repo. Workflow juga bisa dijalankan manual lewat tombol **Run workflow**.
+
+### Dipakai di project lain
+
+Salin `.github/workflows/deploy.yml`, lalu sesuaikan:
+
+- `php-version`: samakan dengan syarat di `composer.lock` (cek bagian `platform` / versi paket Symfony), bukan hanya `composer.json`.
+- `node-version` dan perintah build. Di project ini `npx vite build` dipanggil langsung karena script `prebuild` merujuk file yang tidak ada di repo.
+- Branch pemicu (`branches: [main]`). Untuk preview dan production yang berbeda, pakai dua workflow dengan branch dan secrets yang berbeda.
+- Daftar `--exclude` di step upload, sesuai folder yang tidak boleh ditimpa di server.
+- Buat key SSH baru dan secrets baru untuk tiap hosting.
+
+### Troubleshooting
+
+| Error di log Actions                                           | Penyebab dan solusi                                                                                                               |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `Your lock file does not contain a compatible set of packages` | Versi PHP di workflow lebih rendah dari syarat `composer.lock`. Naikkan `php-version`.                                            |
+| `rsync: command not found`                                     | Server tidak punya rsync. Upload memakai `tar` lewat SSH (sudah begitu di workflow ini).                                          |
+| `Class "Laravel\Pail\PailServiceProvider" not found`           | Cache lama di `bootstrap/cache` masih memuat paket dev. Workflow menghapus `bootstrap/cache/*.php` sebelum menjalankan artisan.   |
+| `Permission denied (publickey)`                                | Key belum di-**Authorize** di cPanel, atau isi `SSH_PRIVATE_KEY` tidak lengkap.                                                   |
+| `Connection timed out`                                         | `SSH_PORT` salah, atau SSH dari luar diblokir hosting.                                                                            |
+| `php: command not found` / versi PHP server terlalu rendah     | Ubah versi PHP lewat MultiPHP Manager, atau isi path PHP spesifik (misalnya `/opt/cpanel/ea-php84/root/usr/bin/php`) di workflow. |
+
+### Catatan
+
+- `migrate --force` jalan otomatis di setiap deploy. Pastikan migration aman dan `.env` server mengarah ke database yang benar.
+- Jangan pernah meng-commit private key atau `.env`.
