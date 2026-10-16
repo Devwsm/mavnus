@@ -28,26 +28,56 @@
                     <div>
                         <h2 class="text-lg font-bold uppercase tracking-wide">Invoice & Laporan Order</h2>
                         <p class="text-white/40 text-sm mt-1">
-                            Preview dulu untuk lihat tampilan invoice, atau langsung download sesuai kebutuhan.
+                            Pilih rentang tanggal dan status (boleh dikosongkan untuk semua pesanan), lalu preview atau
+                            download. Invoice satu pesanan ada di halaman detail pesanan.
                         </p>
                     </div>
-                    <div class="flex flex-col sm:flex-row gap-3">
-                        <a href="{{ route('export.orders.preview') }}" target="_blank"
-                            class="flex-1 flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-white text-sm font-semibold uppercase tracking-wide py-3 rounded-lg transition">
-                            <i class="bi bi-eye"></i>
-                            Preview Invoice
-                        </a>
-                        <a href="{{ route('export.orders.pdf') }}"
-                            class="flex-1 flex items-center justify-center gap-2 bg-[#B71C1C] hover:bg-[#891212] text-white text-sm font-semibold uppercase tracking-wide py-3 rounded-lg transition">
-                            <i class="bi bi-file-earmark-pdf"></i>
-                            Download PDF
-                        </a>
-                        <a href="{{ route('export.orders') }}"
-                            class="flex-1 flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-white text-sm font-semibold uppercase tracking-wide py-3 rounded-lg transition">
-                            <i class="bi bi-file-earmark-excel"></i>
-                            Download Excel
-                        </a>
-                    </div>
+                    <form method="GET" class="flex flex-col gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label for="export-from"
+                                    class="block text-white/40 text-[11px] uppercase tracking-wide mb-1.5">Dari
+                                    tanggal</label>
+                                <input type="date" id="export-from" name="from"
+                                    class="w-full bg-black border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#B71C1C] scheme-dark">
+                            </div>
+                            <div>
+                                <label for="export-to"
+                                    class="block text-white/40 text-[11px] uppercase tracking-wide mb-1.5">Sampai
+                                    tanggal</label>
+                                <input type="date" id="export-to" name="to"
+                                    class="w-full bg-black border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#B71C1C] scheme-dark">
+                            </div>
+                            <div>
+                                <label for="export-status"
+                                    class="block text-white/40 text-[11px] uppercase tracking-wide mb-1.5">Status</label>
+                                <select id="export-status" name="status"
+                                    class="w-full bg-black border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#B71C1C] scheme-dark">
+                                    <option value="">Semua status</option>
+                                    @foreach (\App\Models\Order::STATUSES as $statusOption)
+                                        <option value="{{ $statusOption }}">{{ ucfirst($statusOption) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <button type="submit" formaction="{{ route('export.orders.preview') }}" formtarget="_blank"
+                                class="flex-1 flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-white text-sm font-semibold uppercase tracking-wide py-3 rounded-lg transition">
+                                <i class="bi bi-eye"></i>
+                                Preview Invoice
+                            </button>
+                            <button type="submit" formaction="{{ route('export.orders.pdf') }}"
+                                class="flex-1 flex items-center justify-center gap-2 bg-[#B71C1C] hover:bg-[#891212] text-white text-sm font-semibold uppercase tracking-wide py-3 rounded-lg transition">
+                                <i class="bi bi-file-earmark-pdf"></i>
+                                Download PDF
+                            </button>
+                            <button type="submit" formaction="{{ route('export.orders') }}"
+                                class="flex-1 flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-white text-sm font-semibold uppercase tracking-wide py-3 rounded-lg transition">
+                                <i class="bi bi-file-earmark-excel"></i>
+                                Download Excel
+                            </button>
+                        </div>
+                    </form>
                 </div>
             @endif
 

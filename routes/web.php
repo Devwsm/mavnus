@@ -50,6 +50,9 @@ Route::prefix('/dashboard')->middleware('cekLogin')->group(function () {
     Route::prefix('/orders')->middleware('role:owner,staff_pesanan')->group(function () {
         Route::get('/', [orderController::class, 'dashboardIndex'])->name('dashboard.orders');
         Route::get('/{order}', [orderController::class, 'dashboardShow'])->name('dashboard.orders.show');
+        // Invoice satu pesanan (preview HTML & PDF)
+        Route::get('/{order}/invoice', [importExportController::class, 'orderInvoicePreview'])->name('dashboard.orders.invoice');
+        Route::get('/{order}/invoice/pdf', [importExportController::class, 'orderInvoicePdf'])->name('dashboard.orders.invoice.pdf');
         Route::patch('/{order}/status', [orderController::class, 'updateStatus'])->name('dashboard.orders.updateStatus');
     });
 

@@ -3,20 +3,27 @@
 namespace App\Exports;
 
 use App\Models\Order;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
 class OrdersExport implements FromCollection, WithHeadings, WithMapping
 {
+    private ?Collection $orders = null;
+
+    /** @param array $filters q, status, from, to (lihat Order::scopeFilter) */
+    public function __construct(private array $filters = []) {}
+
     public function collection()
     {
-        return Order::with('items')->latest()->get();
+        // Disimpan supaya pengecekan "hasil kosong" di controller tidak query dua kali
+        return $this->orders ??= Order::with('items')->filter($this->filters)->latest()->get();
     }
 
     public function headings(): array
     {
-        return ['No. Order', 'Nama Pembeli', 'No. HP', 'Alamat', 'Status', 'Status Bayar', 'Subtotal', 'Ongkir', 'Total', 'Tanggal', 'Rincian Barang'];
+        return ['No. Order', 'Nama Pembeli', 'No. HP', 'Email', 'Alamat', 'Status', 'Status Bayar', 'Subtotal', 'Ongkir', 'Total', 'Tanggal', 'Rincian Barang'];
     }
 
     public function map($order): array
@@ -28,8 +35,9 @@ class OrdersExport implements FromCollection, WithHeadings, WithMapping
             $order->order_number,
             $order->customer_name,
             $order->customer_phone,
+            $order->customer_email,
             $order->customer_address,
-            ucfirst($order->status),
+            $order->statusLabel(),
             ucfirst($order->payment_status),
             $order->subtotal,
             $order->shipping_cost,

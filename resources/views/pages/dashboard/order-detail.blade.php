@@ -24,7 +24,7 @@
                 @endphp
                 <span
                     class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide {{ $statusColor }}">
-                    {{ ucfirst($order->status) }}
+                    {{ $order->statusLabel() }}
                 </span>
             </div>
 
@@ -67,6 +67,8 @@
                         <h2 class="text-xs font-semibold uppercase tracking-widest text-[#B71C1C] mb-2">Data Penerima</h2>
                         <p class="text-sm"><span class="text-white/40">Nama:</span> {{ $order->customer_name }}</p>
                         <p class="text-sm"><span class="text-white/40">No. HP:</span> {{ $order->customer_phone }}</p>
+                        <p class="text-sm"><span class="text-white/40">Email:</span> {{ $order->customer_email ?: '-' }}
+                        </p>
                         <p class="text-sm"><span class="text-white/40">Alamat:</span> {{ $order->customer_address }}</p>
                     </div>
                 </div>
@@ -102,6 +104,20 @@
                                 {{ ucfirst($order->payment_status) }}
                             </span>
                         </div>
+                    </div>
+
+                    <div class="bg-[#0D0D0D] border border-white/10 rounded-xl p-6 flex flex-col gap-3">
+                        <h2 class="text-xs font-semibold uppercase tracking-widest text-[#B71C1C]">Invoice</h2>
+                        <a href="{{ route('dashboard.orders.invoice', $order) }}" target="_blank"
+                            class="flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-white text-sm font-semibold uppercase tracking-wide py-2.5 rounded-lg transition">
+                            <i class="bi bi-eye"></i>
+                            Lihat Invoice
+                        </a>
+                        <a href="{{ route('dashboard.orders.invoice.pdf', $order) }}"
+                            class="flex items-center justify-center gap-2 bg-[#B71C1C] hover:bg-[#891212] text-white text-sm font-semibold uppercase tracking-wide py-2.5 rounded-lg transition">
+                            <i class="bi bi-file-earmark-pdf"></i>
+                            Download PDF
+                        </a>
                     </div>
 
                     <div class="bg-[#0D0D0D] border border-white/10 rounded-xl p-6 flex flex-col gap-3">

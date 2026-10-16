@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\OrdersExport;
 use App\Models\Order;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -24,11 +25,17 @@ class importExportController extends Controller
      * Download data order sebagai Excel — format tabular sederhana untuk diolah,
      * bukan tampilan invoice.
      */
-    public function exportOrders()
+    public function exportOrders(Request $request)
     {
         try {
+            $export = new OrdersExport($this->orderFilters($request));
+
+            if ($export->collection()->isEmpty()) {
+                return $this->noOrdersFound();
+            }
+
             $filename = 'mavnus-order-' . now()->format('Y-m-d_His') . '.xlsx';
-            return Excel::download(new OrdersExport, $filename);
+            return Excel::download($export, $filename);
         } catch (\Throwable $e) {
             report($e);
             return redirect()
@@ -41,9 +48,14 @@ class importExportController extends Controller
      * Preview invoice semua order dalam bentuk HTML, dibuka di tab baru
      * sebelum staff memutuskan untuk download versi Excel-nya.
      */
-    public function ordersInvoicePreview()
+    public function ordersInvoicePreview(Request $request)
     {
-        $orders = Order::with('items')->latest()->get();
+        $orders = Order::with('items')->filter($this->orderFilters($request))->latest()->get();
+
+        if ($orders->isEmpty()) {
+            return $this->noOrdersFound();
+        }
+
         return view('exports.orders-invoice', compact('orders'));
     }
 
@@ -51,10 +63,15 @@ class importExportController extends Controller
      * Download invoice semua order sebagai PDF — hasilnya identik dengan preview,
      * karena sama-sama merender HTML/CSS yang sama.
      */
-    public function exportOrdersPdf()
+    public function exportOrdersPdf(Request $request)
     {
         try {
-            $orders = Order::with('items')->latest()->get();
+            $orders = Order::with('items')->filter($this->orderFilters($request))->latest()->get();
+
+            if ($orders->isEmpty()) {
+                return $this->noOrdersFound();
+            }
+
             $pdf = Pdf::loadView('exports.orders-invoice', compact('orders'))
                 ->setPaper('a4', 'portrait');
             $filename = 'mavnus-invoice-order-' . now()->format('Y-m-d_His') . '.pdf';
@@ -65,6 +82,50 @@ class importExportController extends Controller
                 ->route('dashboard.import-export')
                 ->with('error', 'Gagal export invoice PDF. Detail error tercatat di log server.');
         }
+    }
+
+    /**
+     * Preview invoice SATU pesanan (dibuka dari halaman detail pesanan).
+     */
+    public function orderInvoicePreview(Order $order)
+    {
+        $order->load('items');
+        $orders = collect([$order]);
+
+        return view('exports.orders-invoice', compact('orders'));
+    }
+
+    /**
+     * Download invoice SATU pesanan sebagai PDF (tampilan sama dengan preview).
+     */
+    public function orderInvoicePdf(Order $order)
+    {
+        try {
+            $order->load('items');
+            $orders = collect([$order]);
+
+            return Pdf::loadView('exports.orders-invoice', compact('orders'))
+                ->setPaper('a4', 'portrait')
+                ->download('mavnus-invoice-' . $order->order_number . '.pdf');
+        } catch (\Throwable $e) {
+            report($e);
+            return redirect()
+                ->route('dashboard.orders.show', $order)
+                ->with('error', 'Gagal membuat invoice PDF. Detail error tercatat di log server.');
+        }
+    }
+
+    /** Filter yang dipakai export pesanan: status, from, to (tanggal). Pencarian teks hanya untuk daftar pesanan. */
+    private function orderFilters(Request $request): array
+    {
+        return $request->only(['status', 'from', 'to']);
+    }
+
+    private function noOrdersFound()
+    {
+        return redirect()
+            ->route('dashboard.import-export')
+            ->with('error', 'Tidak ada pesanan pada rentang tanggal / status yang dipilih.');
     }
 
     /**

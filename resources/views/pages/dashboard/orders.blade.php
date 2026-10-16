@@ -1,5 +1,16 @@
 @extends('template.dashboard.layout')
 @section('content')
+    @php
+        // Link kartu ringkasan: ganti status saja, pencarian & tanggal tetap dibawa
+        $cardLink = fn(string $s) => route(
+            'dashboard.orders',
+            array_filter(array_merge($filters, ['status' => $s]), fn($v) => $v !== ''),
+        );
+        $filtersActive = collect($filters)->contains(fn($v) => $v !== '');
+        $inputClass =
+            'w-full bg-black border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#B71C1C] [color-scheme:dark]';
+        $labelClass = 'block text-white/40 text-[11px] uppercase tracking-wide mb-1.5';
+    @endphp
     <div class="flex flex-col items-center bg-black text-white w-full min-h-screen mb-24">
         @include('components/dashboard/navbar')
         <div class="flex flex-col items-center justify-center p-8 text-center">
@@ -12,35 +23,69 @@
         <div class="flex flex-col w-full max-w-6xl gap-5 p-6 lg:p-14">
             {{-- Ringkasan cepat (angka total asli, sekaligus tombol filter) --}}
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <a href="{{ route('dashboard.orders', ['status' => 'pending']) }}"
+                <a href="{{ $cardLink('pending') }}"
                     class="bg-[#0D0D0D] border rounded-2xl p-5 flex flex-col gap-1 transition {{ $status === 'pending' ? 'border-[#B77B1C]/60' : 'border-white/10 hover:border-white/20' }}">
                     <span class="text-[#B77B1C] text-2xl font-bold">{{ $statusCounts['pending'] }}</span>
                     <span class="text-white/40 text-xs uppercase tracking-wide">Pending</span>
                 </a>
-                <a href="{{ route('dashboard.orders', ['status' => 'processing']) }}"
+                <a href="{{ $cardLink('processing') }}"
                     class="bg-[#0D0D0D] border rounded-2xl p-5 flex flex-col gap-1 transition {{ $status === 'processing' ? 'border-[#1C1CB7]/60' : 'border-white/10 hover:border-white/20' }}">
                     <span class="text-[#1C1CB7] text-2xl font-bold">{{ $statusCounts['processing'] }}</span>
                     <span class="text-white/40 text-xs uppercase tracking-wide">Diproses</span>
                 </a>
-                <a href="{{ route('dashboard.orders', ['status' => 'shipped']) }}"
+                <a href="{{ $cardLink('shipped') }}"
                     class="bg-[#0D0D0D] border rounded-2xl p-5 flex flex-col gap-1 transition {{ $status === 'shipped' ? 'border-[#5E1C5E]/60' : 'border-white/10 hover:border-white/20' }}">
                     <span class="text-[#5E1C5E] text-2xl font-bold">{{ $statusCounts['shipped'] }}</span>
                     <span class="text-white/40 text-xs uppercase tracking-wide">Dikirim</span>
                 </a>
-                <a href="{{ route('dashboard.orders', ['status' => 'completed']) }}"
+                <a href="{{ $cardLink('completed') }}"
                     class="bg-[#0D0D0D] border rounded-2xl p-5 flex flex-col gap-1 transition {{ $status === 'completed' ? 'border-[#1C7B1C]/60' : 'border-white/10 hover:border-white/20' }}">
                     <span class="text-[#1C7B1C] text-2xl font-bold">{{ $statusCounts['completed'] }}</span>
                     <span class="text-white/40 text-xs uppercase tracking-wide">Selesai</span>
                 </a>
             </div>
 
-            @if ($status)
-                <div class="flex items-center gap-2 text-sm text-white/50">
-                    <span>Menampilkan status: <span class="text-white font-semibold">{{ ucfirst($status) }}</span></span>
-                    <a href="{{ route('dashboard.orders') }}" class="text-[#e05656] hover:underline">Tampilkan
-                        semua</a>
+            {{-- Cari & filter: nomor pesanan / nama / HP / email, status, rentang tanggal --}}
+            <form method="GET" action="{{ route('dashboard.orders') }}"
+                class="bg-[#0D0D0D] border border-white/10 rounded-2xl p-5 grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                <div class="md:col-span-4">
+                    <label for="filter-q" class="{{ $labelClass }}">Cari</label>
+                    <input type="search" id="filter-q" name="q" value="{{ $filters['q'] }}" maxlength="100"
+                        placeholder="No. pesanan, nama, HP, atau email" class="{{ $inputClass }}">
                 </div>
-            @endif
+                <div class="md:col-span-2">
+                    <label for="filter-status" class="{{ $labelClass }}">Status</label>
+                    <select id="filter-status" name="status" class="{{ $inputClass }}">
+                        <option value="">Semua</option>
+                        @foreach (\App\Models\Order::STATUSES as $statusOption)
+                            <option value="{{ $statusOption }}" @selected($filters['status'] === $statusOption)>
+                                {{ ucfirst($statusOption) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="md:col-span-2">
+                    <label for="filter-from" class="{{ $labelClass }}">Dari tanggal</label>
+                    <input type="date" id="filter-from" name="from" value="{{ $filters['from'] }}"
+                        class="{{ $inputClass }}">
+                </div>
+                <div class="md:col-span-2">
+                    <label for="filter-to" class="{{ $labelClass }}">Sampai tanggal</label>
+                    <input type="date" id="filter-to" name="to" value="{{ $filters['to'] }}"
+                        class="{{ $inputClass }}">
+                </div>
+                <div class="md:col-span-2 flex items-center gap-2">
+                    <button type="submit"
+                        class="flex-1 flex items-center justify-center gap-1.5 bg-[#B71C1C] hover:bg-[#891212] text-white text-sm font-semibold uppercase tracking-wide py-2.5 rounded-lg transition">
+                        <i class="bi bi-search"></i>
+                        Cari
+                    </button>
+                    @if ($filtersActive)
+                        <a href="{{ route('dashboard.orders') }}"
+                            class="text-[#e05656] hover:underline text-sm px-2 py-2.5">Reset</a>
+                    @endif
+                </div>
+            </form>
 
             {{-- Grid card order --}}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -68,7 +113,7 @@
                             <span
                                 class="inline-flex items-center gap-1.5 {{ $statusStyle[0] }} text-[10px] font-semibold uppercase tracking-wide px-2.5 py-1 rounded-full">
                                 <i class="bi {{ $statusStyle[1] }}"></i>
-                                {{ ucfirst($order->status) }}
+                                {{ $order->statusLabel() }}
                             </span>
                         </div>
 
@@ -114,7 +159,7 @@
                             <span
                                 class="w-1.5 h-1.5 rounded-full {{ $order->payment_status === 'paid' ? 'bg-[#1C7B1C]' : 'bg-white/20' }}"></span>
                             <span class="{{ $order->payment_status === 'paid' ? 'text-[#1C7B1C]' : 'text-white/40' }}">
-                                {{ $order->payment_status === 'paid' ? 'Sudah dibayar' : 'Menunggu pembayaran' }}
+                                {{ $order->payment_status === 'paid' ? 'Sudah dibayar' : ($order->isExpired() ? 'Pembayaran kedaluwarsa' : 'Menunggu pembayaran') }}
                             </span>
                         </div>
 
@@ -128,7 +173,9 @@
                 @empty
                     <div class="col-span-full flex flex-col items-center gap-2 py-20">
                         <i class="bi bi-receipt text-white/15 text-4xl"></i>
-                        <p class="text-white/30 text-sm">Belum ada pesanan masuk.</p>
+                        <p class="text-white/30 text-sm">
+                            {{ $filtersActive ? 'Tidak ada pesanan yang cocok dengan filter.' : 'Belum ada pesanan masuk.' }}
+                        </p>
                     </div>
                 @endforelse
             </div>

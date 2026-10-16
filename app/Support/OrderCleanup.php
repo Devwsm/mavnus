@@ -93,11 +93,16 @@ class OrderCleanup
 
                 self::restock($order);
 
-                // Hapus folder snapshot gambar order ini kalau ada
+                // Pesanan TIDAK dihapus: dipertahankan sebagai riwayat (status 'cancelled' +
+                // payment_status 'expired'). Hanya foto snapshot yang dibuang supaya storage hemat,
+                // dan referensinya dikosongkan agar tampilan tidak mencari file yang sudah hilang.
                 Storage::disk('public')->deleteDirectory('orders/' . $order->order_number);
+                $order->items()->update(['product_image' => null]);
 
-                // Hapus order (order_items ikut kehapus karena cascadeOnDelete)
-                $order->delete();
+                $order->update([
+                    'status'         => 'cancelled',
+                    'payment_status' => 'expired',
+                ]);
 
                 return true;
             });
@@ -108,7 +113,7 @@ class OrderCleanup
         }
 
         if ($count > 0) {
-            Log::info("[OrderCleanup] {$count} order pending dibatalkan & dihapus otomatis (lewat {$expireMinutes} menit tanpa pembayaran).");
+            Log::info("[OrderCleanup] {$count} order pending dibatalkan otomatis (lewat {$expireMinutes} menit tanpa pembayaran).");
         }
 
         return $count;

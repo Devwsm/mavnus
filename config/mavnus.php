@@ -13,4 +13,8 @@ return [
 
     // Isi keranjang yang tidak disentuh selama ini (hari) akan dibersihkan
     'cart_retention_days' => (int) env('CART_RETENTION_DAYS', 30),
+
+    // Kirim email konfirmasi ke pembeli setelah checkout. Default MATI: aktifkan hanya setelah
+    // MAIL_* di .env server (SMTP) sudah diisi dan diuji.
+    'order_email_enabled' => (bool) env('ORDER_EMAIL_ENABLED', false),
 ];

@@ -2,7 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Mail\OrderPlaced;
 use App\Models\Order;
+use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 
 class CheckoutTest extends StoreTestCase
 {
@@ -17,6 +20,7 @@ class CheckoutTest extends StoreTestCase
         return array_merge([
             'customer_name'     => 'Budi',
             'customer_phone'    => '081234567890',
+            'customer_email'    => 'budi@example.com',
             'customer_address'  => 'Jl. Merdeka 1',
             'destination_id'    => 1,
             'destination_label' => 'Bandung Wetan, Bandung',
@@ -80,6 +84,76 @@ class CheckoutTest extends StoreTestCase
 
         $this->post('/order', $this->payload(['customer_address' => str_repeat('a', 501)]))
             ->assertSessionHasErrors('customer_address');
+    }
+
+    private function addToCart(int $stock = 5): void
+    {
+        $p = $this->makeAccessory($stock);
+        $this->postJson('/cart/add', ['product_id' => $p->id_product, 'quantity' => 1]);
+    }
+
+    public function test_email_is_required_and_must_be_valid(): void
+    {
+        $this->addToCart();
+
+        $this->post('/order', $this->payload(['customer_email' => '']))->assertSessionHasErrors('customer_email');
+        $this->post('/order', $this->payload(['customer_email' => 'bukan-email']))->assertSessionHasErrors('customer_email');
+
+        $this->assertDatabaseCount('orders', 0);
+    }
+
+    public function test_email_is_saved_in_lowercase(): void
+    {
+        $this->addToCart();
+
+        $this->post('/order', $this->payload(['customer_email' => 'Budi@Example.COM']));
+
+        $this->assertSame('budi@example.com', Order::first()->customer_email);
+    }
+
+    public function test_checkout_form_prefills_email_for_logged_in_user(): void
+    {
+        $user = User::factory()->create(['email' => 'akun@example.com']);
+        $this->actingAs($user);
+        $this->addToCart();
+
+        $this->get('/order/checkout')->assertOk()->assertSee('value="akun@example.com"', false);
+    }
+
+    public function test_confirmation_email_is_not_sent_by_default(): void
+    {
+        Mail::fake();
+        $this->addToCart();
+
+        $this->post('/order', $this->payload())->assertRedirect();
+
+        Mail::assertNothingSent();
+    }
+
+    public function test_confirmation_email_is_sent_when_enabled(): void
+    {
+        Mail::fake();
+        config(['mavnus.order_email_enabled' => true]);
+        $this->addToCart();
+
+        $this->post('/order', $this->payload());
+
+        $order = Order::first();
+        Mail::assertSent(OrderPlaced::class, fn(OrderPlaced $mail) => $mail->hasTo('budi@example.com')
+            && $mail->order->order_number === $order->order_number);
+    }
+
+    public function test_email_failure_does_not_break_checkout(): void
+    {
+        config(['mavnus.order_email_enabled' => true]);
+        Mail::shouldReceive('to')->once()->andThrow(new \RuntimeException('SMTP down'));
+        $this->addToCart();
+
+        $res = $this->post('/order', $this->payload());
+
+        // Pesanan tetap tersimpan dan pembeli tetap sampai ke halaman sukses
+        $this->assertDatabaseCount('orders', 1);
+        $res->assertRedirect(route('order.success', Order::first()));
     }
 
     public function test_empty_cart_cannot_checkout(): void

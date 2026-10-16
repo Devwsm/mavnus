@@ -11,11 +11,12 @@ Toko online merchandise resmi Whisnu Santika. Pembeli bisa belanja tanpa wajib p
 - Dua kategori produk: **Clothes** (ukuran S/M/L/XL) dan **Accessories** (keychain, sticker, totebag).
 - Cari produk (muncul saran saat mengetik) dan filter berdasarkan harga.
 - Keranjang belanja tanpa perlu login.
-- Checkout dengan ongkos kirim otomatis lewat RajaOngkir. Ongkir dan total dihitung ulang oleh server, jadi tidak bisa diubah dari browser. Stok langsung dikurangi, sehingga tidak bisa terjual melebihi stok.
+- Checkout dengan ongkos kirim otomatis lewat RajaOngkir. Ongkir dan total dihitung ulang oleh server, jadi tidak bisa diubah dari browser. Stok langsung dikurangi, sehingga tidak bisa terjual melebihi stok. Pembeli mengisi nama, nomor HP, **email**, dan alamat (untuk pembeli yang login, data terisi otomatis).
 - Akun pembeli (opsional): lihat riwayat dan status pesanan, ubah profil, hapus akun. Jika akun dihapus, pesanan tetap tersimpan untuk rekap toko tetapi tidak lagi terhubung ke akun.
 - Halaman "pesanan berhasil" hanya bisa dibuka oleh pembeli yang membuat pesanan itu.
 - Produk bisa dijadwalkan rilis, dan otomatis ditandai habis saat stok kosong.
-- Pesanan yang masih "menunggu" dibatalkan dan dihapus otomatis setelah 60 menit, stoknya dikembalikan. Tidak butuh pengaturan jadwal di server.
+- Pesanan yang masih "menunggu" dibatalkan otomatis setelah 60 menit dan stoknya dikembalikan. Pesanannya tidak dihapus: tetap tercatat dengan label **Kedaluwarsa**, jadi riwayat tetap ada. Tidak butuh pengaturan jadwal di server.
+- Email konfirmasi "pesanan diterima" bisa diaktifkan lewat `ORDER_EMAIL_ENABLED` (default mati, lihat tabel `.env` di bawah).
 - Berlangganan newsletter lewat footer (email tersimpan di database).
 - Halaman info/bantuan dan sitemap untuk mesin pencari.
 
@@ -29,11 +30,12 @@ Login tim ada di `/crew-portal` dan terpisah dari login pembeli.
 | **Admin Produk**  | Tambah, ubah, hapus produk; atur foto, ukuran, dan stok; export data produk. |
 | **Staff Pesanan** | Lihat pesanan dan ubah statusnya; export pesanan dan invoice.                |
 
+- **Daftar pesanan:** bisa dicari berdasarkan nomor pesanan, nama, nomor HP, atau email, dan difilter berdasarkan status dan rentang tanggal.
 - **Status pesanan:** menunggu → diproses → dikirim → selesai. Pesanan bisa dibatalkan sebelum dikirim (stok dikembalikan). Status bisa dikoreksi mundur jika salah klik, tetapi pesanan yang dibatalkan terkunci.
 - **Foto produk:** maksimal 8 foto per produk, 5 MB per foto. Otomatis dikecilkan dan diubah ke format WebP agar halaman ringan.
 - **Ringkasan owner:** omzet 6 bulan terakhir, omzet per kategori bulan ini, dan produk terlaris. Omzet hanya dihitung dari pesanan yang sudah selesai.
 - **Statistik pengunjung:** perangkat, browser, dan halaman terpopuler, tanpa layanan analitik luar. Sistem mencatat alamat IP pengunjung, jadi sesuaikan kebijakan privasi bila perlu.
-- **Export:** pesanan (Excel), rekap invoice semua pesanan (PDF), data produk dan pesanan (SQL). Khusus Owner: backup database dan backup foto (zip).
+- **Invoice dan export:** invoice satu pesanan (lihat atau PDF) dari halaman detail pesanan. Export pesanan (Excel) dan rekap invoice (PDF) bisa dibatasi rentang tanggal dan status. Data produk dan pesanan juga bisa di-export (SQL). Khusus Owner: backup database dan backup foto (zip).
 - **Akun tim** bisa dinonaktifkan lewat database, tetapi belum ada halaman untuk mengelolanya. Akun awal dibuat oleh seeder (satu per role).
 
 ### Keamanan
@@ -43,7 +45,7 @@ Percobaan login dibatasi, endpoint publik (keranjang, pencarian, checkout, newsl
 ## Belum tersedia
 
 - **Pembayaran online (Midtrans).** Menunggu persetujuan. Kolom di database sudah disiapkan, tetapi belum ada halaman pembayaran: setelah checkout, pesanan tercatat "belum dibayar".
-  **Penting:** selama pembayaran belum aktif, pesanan berstatus "menunggu" akan terhapus otomatis setelah 60 menit. Staff harus memproses pesanan sebelum itu, atau perpanjang waktunya lewat `ORDER_EXPIRE_MINUTES`.
+  **Penting:** selama pembayaran belum aktif, pesanan berstatus "menunggu" akan dibatalkan otomatis (tampil sebagai "Kedaluwarsa") setelah 60 menit. Staff harus memproses pesanan sebelum itu, atau perpanjang waktunya lewat `ORDER_EXPIRE_MINUTES`.
 - **Login dengan Google.** Ditunda karena rumit dan berisiko untuk akun pembeli. Hanya tersisa pengecekan kecil di halaman akun yang belum berpengaruh apa pun.
 
 ## Teknologi
@@ -74,14 +76,15 @@ php artisan serve           # jalankan situs (terminal 2)
 
 **Pengaturan `.env` tambahan** (belum ada di `.env.example`):
 
-| Variabel                         | Fungsi                                                                      |
-| -------------------------------- | --------------------------------------------------------------------------- |
-| `RAJAONGKIR_API_KEY`             | Wajib. Kunci API untuk hitung ongkir.                                       |
-| `RAJAONGKIR_BASE_URL`            | Wajib. Contoh: `https://rajaongkir.komerce.id/api/v1`.                      |
-| `RAJAONGKIR_ORIGIN_ID`           | Wajib. ID lokasi asal pengiriman toko.                                      |
-| `ORDER_EXPIRE_MINUTES`           | Opsional, default 60. Batas waktu pesanan "menunggu" sebelum dibatalkan.    |
-| `ORDER_CLEANUP_THROTTLE_MINUTES` | Opsional, default 5. Jeda minimal antar pemeriksaan pesanan kedaluwarsa.    |
-| `CART_RETENTION_DAYS`            | Opsional, default 30. Keranjang yang ditinggalkan dihapus setelah hari ini. |
+| Variabel                         | Fungsi                                                                                                                                                 |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `RAJAONGKIR_API_KEY`             | Wajib. Kunci API untuk hitung ongkir.                                                                                                                  |
+| `RAJAONGKIR_BASE_URL`            | Wajib. Contoh: `https://rajaongkir.komerce.id/api/v1`.                                                                                                 |
+| `RAJAONGKIR_ORIGIN_ID`           | Wajib. ID lokasi asal pengiriman toko.                                                                                                                 |
+| `ORDER_EXPIRE_MINUTES`           | Opsional, default 60. Batas waktu pesanan "menunggu" sebelum dibatalkan.                                                                               |
+| `ORDER_CLEANUP_THROTTLE_MINUTES` | Opsional, default 5. Jeda minimal antar pemeriksaan pesanan kedaluwarsa.                                                                               |
+| `CART_RETENTION_DAYS`            | Opsional, default 30. Keranjang yang ditinggalkan dihapus setelah hari ini.                                                                            |
+| `ORDER_EMAIL_ENABLED`            | Opsional, default `false`. Isi `true` untuk mengirim email konfirmasi pesanan. Isi dulu `MAIL_*` (SMTP) di `.env` server dan uji sebelum mengaktifkan. |
 
 **Tes otomatis:** jalankan `php artisan test`. Tes memakai database sementara, jadi data MySQL kamu aman.
 

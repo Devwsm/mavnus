@@ -135,10 +135,18 @@
                 <div class="invoice-meta">
                     <div class="order-number">{{ $order->order_number }}</div>
                     <div>{{ $order->created_at->format('d F Y, H:i') }} WIB</div>
+                    @php
+                        if ($order->status === 'cancelled') {
+                            [$badgeColor, $badgeText] = ['#B71C1C', $order->isExpired() ? 'Kedaluwarsa' : 'Dibatalkan'];
+                        } elseif ($order->payment_status === 'paid') {
+                            [$badgeColor, $badgeText] = ['#1C7B1C', 'Lunas'];
+                        } else {
+                            [$badgeColor, $badgeText] = ['#B77B1C', 'Belum Dibayar'];
+                        }
+                    @endphp
                     <div style="margin-top: 6px;">
-                        <span class="status-badge"
-                            style="background: {{ $order->payment_status === 'paid' ? '#1C7B1C' : '#B77B1C' }}; color: #fff;">
-                            {{ $order->payment_status === 'paid' ? 'Lunas' : 'Belum Dibayar' }}
+                        <span class="status-badge" style="background: {{ $badgeColor }}; color: #fff;">
+                            {{ $badgeText }}
                         </span>
                     </div>
                 </div>
@@ -148,6 +156,9 @@
                 <div class="section-title">Ditagihkan Kepada</div>
                 <strong>{{ $order->customer_name }}</strong><br>
                 {{ $order->customer_phone }}<br>
+                @if ($order->customer_email)
+                    {{ $order->customer_email }}<br>
+                @endif
                 {{ $order->customer_address }}
             </div>
 

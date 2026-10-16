@@ -16,10 +16,16 @@
             {{-- Status --}}
             <div class="flex items-center justify-between pb-4 border-b border-black/10">
                 <span class="text-sm text-gray-500">Status Pesanan</span>
+                @php
+                    $badge =
+                        $order->status === 'cancelled'
+                            ? ['bg-red-50 text-red-600', 'bg-red-500']
+                            : ['bg-amber-50 text-amber-600', 'bg-amber-500'];
+                @endphp
                 <span
-                    class="inline-flex items-center gap-1.5 bg-amber-50 text-amber-600 text-xs font-semibold uppercase tracking-wide px-3 py-1.5 rounded-full">
-                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                    {{ ucfirst($order->status) }}
+                    class="inline-flex items-center gap-1.5 {{ $badge[0] }} text-xs font-semibold uppercase tracking-wide px-3 py-1.5 rounded-full">
+                    <span class="w-1.5 h-1.5 rounded-full {{ $badge[1] }}"></span>
+                    {{ $order->statusLabel() }}
                 </span>
             </div>
 
@@ -28,6 +34,9 @@
                 <h2 class="text-sm font-bold uppercase tracking-widest text-black/50 mb-2">Data Penerima</h2>
                 <p class="text-sm"><span class="text-gray-500">Nama:</span> {{ $order->customer_name }}</p>
                 <p class="text-sm"><span class="text-gray-500">No. HP:</span> {{ $order->customer_phone }}</p>
+                @if ($order->customer_email)
+                    <p class="text-sm"><span class="text-gray-500">Email:</span> {{ $order->customer_email }}</p>
+                @endif
                 <p class="text-sm"><span class="text-gray-500">Alamat:</span> {{ $order->customer_address }}</p>
             </div>
 

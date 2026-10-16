@@ -59,7 +59,7 @@
                     <span
                         class="inline-flex items-center gap-1.5 {{ $statusStyle[0] }} {{ $statusStyle[1] }} text-xs font-semibold uppercase tracking-wide px-3 py-1.5 rounded-full shrink-0">
                         <span class="w-1.5 h-1.5 rounded-full {{ $statusStyle[2] }}"></span>
-                        {{ ucfirst($order->status) }}
+                        {{ $order->statusLabel() }}
                     </span>
                 </div>
 

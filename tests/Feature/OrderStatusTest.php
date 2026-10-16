@@ -3,7 +3,9 @@
 namespace Tests\Feature;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Order;
+use App\Models\User;
 use App\Support\OrderCleanup;
 
 class OrderStatusTest extends StoreTestCase
@@ -100,7 +102,7 @@ class OrderStatusTest extends StoreTestCase
 
     // ---------- pembersihan pesanan kedaluwarsa ----------
 
-    public function test_expired_unpaid_order_is_deleted_and_stock_returned(): void
+    public function test_expired_unpaid_order_is_cancelled_not_deleted_and_stock_returned(): void
     {
         $p = $this->makeClothes(['M' => 5]);
         $variant = $p->variants->first();
@@ -110,8 +112,69 @@ class OrderStatusTest extends StoreTestCase
 
         $this->assertSame(1, OrderCleanup::run());
 
-        $this->assertDatabaseMissing('orders', ['id_order' => $order->id_order]);
+        // Riwayat tetap ada: statusnya batal + kedaluwarsa, item pesanan tidak ikut hilang
+        $fresh = $order->fresh();
+        $this->assertNotNull($fresh);
+        $this->assertSame('cancelled', $fresh->status);
+        $this->assertSame('expired', $fresh->payment_status);
+        $this->assertTrue($fresh->isExpired());
+        $this->assertSame('Kedaluwarsa', $fresh->statusLabel());
+        $this->assertCount(1, $fresh->items);
         $this->assertSame(5, $variant->fresh()->stock);
+    }
+
+    public function test_expired_order_snapshot_photo_is_removed_but_order_is_kept(): void
+    {
+        Storage::fake('public');
+        $p = $this->makeAccessory(5);
+        $order = $this->makeOrder($p, null, 1);
+        $path = 'orders/' . $order->order_number . '/foto.webp';
+        Storage::disk('public')->put($path, 'x');
+        $order->items()->update(['product_image' => $path]);
+        $order->forceFill(['created_at' => now()->subMinutes(61)])->save();
+
+        OrderCleanup::run();
+
+        $this->assertFalse(Storage::disk('public')->exists($path));
+        $this->assertNull($order->fresh()->items->first()->product_image);
+    }
+
+    public function test_expiry_does_not_restock_twice(): void
+    {
+        $p = $this->makeAccessory(5);
+        $p->decrement('stock', 2); // stok sudah berkurang saat pesanan dibuat
+        $order = $this->makeOrder($p, null, 2);
+        $order->forceFill(['created_at' => now()->subMinutes(61)])->save();
+
+        $this->assertSame(1, OrderCleanup::run());
+        $this->assertSame(0, OrderCleanup::run());
+
+        $this->assertSame(5, (int) $p->fresh()->stock);
+    }
+
+    public function test_manually_cancelled_order_is_not_labelled_expired(): void
+    {
+        $order = $this->makeOrder($this->makeAccessory(5));
+
+        $this->setStatus($order, 'cancelled');
+
+        $this->assertFalse($order->fresh()->isExpired());
+        $this->assertSame('Cancelled', $order->fresh()->statusLabel());
+    }
+
+    public function test_customer_and_staff_still_see_expired_order(): void
+    {
+        $user = User::factory()->create();
+        $order = $this->makeOrder($this->makeAccessory(5), null, 1, ['user_id' => $user->id]);
+        $order->forceFill(['created_at' => now()->subMinutes(61)])->save();
+        OrderCleanup::run();
+
+        $this->actingAs($user)->get(route('account.orders'))
+            ->assertOk()->assertSee($order->order_number)->assertSee('Kedaluwarsa');
+
+        $this->actingAsStaff($this->makeStaff('owner'))
+            ->get(route('dashboard.orders', ['status' => 'cancelled']))
+            ->assertOk()->assertSee($order->order_number)->assertSee('Kedaluwarsa');
     }
 
     public function test_fresh_order_is_not_expired(): void

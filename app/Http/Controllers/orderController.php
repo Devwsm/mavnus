@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\OrderPlaced;
 use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -14,6 +15,7 @@ use App\Support\OrderCleanup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -22,10 +24,13 @@ class orderController extends Controller
     //
     public function dashboardIndex(Request $request)
     {
-        $status = $request->query('status');
+        // Filter: q (nomor pesanan / nama / HP / email), status, from, to (tanggal).
+        // Nilai yang tidak valid dibuang oleh Order::normalizeFilters().
+        $filters = Order::normalizeFilters($request->only(['q', 'status', 'from', 'to']));
+        $status = $filters['status'] !== '' ? $filters['status'] : null;
 
         $orders = Order::with(['items.product.images'])
-            ->when($status, fn($query) => $query->where('status', $status))
+            ->filter($filters)
             ->latest()
             ->paginate(15)
             ->withQueryString();
@@ -39,7 +44,7 @@ class orderController extends Controller
             'completed'  => Order::where('status', 'completed')->count(),
         ];
 
-        return view('pages.dashboard.orders', compact('orders', 'status', 'statusCounts'));
+        return view('pages.dashboard.orders', compact('orders', 'status', 'statusCounts', 'filters'));
     }
 
     public function dashboardShow(Order $order)
@@ -107,6 +112,7 @@ class orderController extends Controller
         $validated = $request->validate([
             'customer_name'      => 'required|string|max:255',
             'customer_phone'     => ['required', 'regex:/^[0-9]{9,15}$/'],
+            'customer_email'     => ['required', 'email:rfc', 'max:255'],
             'customer_address'   => 'required|string|max:500',
             'destination_id'     => 'required|integer|min:1',
             'destination_label'  => 'required|string|max:255',
@@ -116,6 +122,8 @@ class orderController extends Controller
             'customer_name.required'    => 'Nama wajib diisi.',
             'customer_phone.required'   => 'Nomor HP wajib diisi.',
             'customer_phone.regex'      => 'Nomor HP harus berupa angka saja (9-15 digit), tanpa spasi atau simbol.',
+            'customer_email.required'   => 'Email wajib diisi.',
+            'customer_email.email'      => 'Format email tidak valid.',
             'customer_address.max'      => 'Alamat maksimal 500 karakter.',
             'customer_address.required' => 'Alamat wajib diisi.',
             'destination_id.required'   => 'Silakan pilih kecamatan/kota tujuan.',
@@ -210,6 +218,7 @@ class orderController extends Controller
                     'user_id'           => Auth::id(),
                     'customer_name'     => $validated['customer_name'],
                     'customer_phone'    => $validated['customer_phone'],
+                    'customer_email'    => mb_strtolower(trim($validated['customer_email'])),
                     'customer_address'  => $validated['customer_address'] . ', ' . $validated['destination_label'],
                     // Nama kurir/layanan diambil dari hasil API, bukan dari input browser
                     'shipping_courier'  => $selected['name'],
@@ -284,6 +293,8 @@ class orderController extends Controller
         $owned[] = $order->order_number;
         $request->session()->put('owned_orders', array_slice(array_values(array_unique($owned)), -20));
 
+        $this->sendConfirmationEmail($order);
+
         return redirect()->route('order.success', $order)->with('success', 'Pesanan berhasil dibuat.');
     }
 
@@ -306,6 +317,24 @@ class orderController extends Controller
 
     // Berat dalam gram, minimal 1 (syarat API ongkir). Dipakai di hitung ongkir & di dalam transaksi
     // biar keduanya pakai aturan pembulatan yang sama.
+    /**
+     * Kirim email konfirmasi kalau fitur diaktifkan (ORDER_EMAIL_ENABLED). Kegagalan kirim
+     * (mis. SMTP bermasalah) hanya dicatat di log dan TIDAK boleh menggagalkan pesanan
+     * yang sudah tersimpan.
+     */
+    private function sendConfirmationEmail(Order $order): void
+    {
+        if (! config('mavnus.order_email_enabled') || ! $order->customer_email) {
+            return;
+        }
+
+        try {
+            Mail::to($order->customer_email)->send(new OrderPlaced($order));
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
     private function cartWeight(int|float|string $grams): int
     {
         return max(1, (int) ceil($grams));
