@@ -99,7 +99,7 @@ class orderController extends Controller
             ->get();
 
         if ($cartItems->isEmpty()) {
-            return redirect()->route('home')->with('error', 'Keranjang kamu masih kosong.');
+            return redirect()->route('home')->with('error', __('checkout.msg.cart_empty'));
         }
 
         return view('pages.checkout', compact('cartItems'));
@@ -119,16 +119,16 @@ class orderController extends Controller
             'shipping_courier'   => 'required|string|max:50',
             'shipping_service'   => 'required|string|max:100',
         ], [
-            'customer_name.required'    => 'Nama wajib diisi.',
-            'customer_phone.required'   => 'Nomor HP wajib diisi.',
-            'customer_phone.regex'      => 'Nomor HP harus berupa angka saja (9-15 digit), tanpa spasi atau simbol.',
-            'customer_email.required'   => 'Email wajib diisi.',
-            'customer_email.email'      => 'Format email tidak valid.',
-            'customer_address.max'      => 'Alamat maksimal 500 karakter.',
-            'customer_address.required' => 'Alamat wajib diisi.',
-            'destination_id.required'   => 'Silakan pilih kecamatan/kota tujuan.',
-            'shipping_courier.required' => 'Silakan pilih kurir pengiriman.',
-            'shipping_service.required' => 'Silakan pilih layanan pengiriman.',
+            'customer_name.required'    => __('checkout.validation.name_required'),
+            'customer_phone.required'   => __('checkout.validation.phone_required'),
+            'customer_phone.regex'      => __('checkout.validation.phone_regex'),
+            'customer_email.required'   => __('checkout.validation.email_required'),
+            'customer_email.email'      => __('checkout.validation.email_invalid'),
+            'customer_address.max'      => __('checkout.validation.address_max'),
+            'customer_address.required' => __('checkout.validation.address_required'),
+            'destination_id.required'   => __('checkout.validation.destination_required'),
+            'shipping_courier.required' => __('checkout.validation.courier_required'),
+            'shipping_service.required' => __('checkout.validation.service_required'),
         ]);
 
         $sessionId = CartSession::key();
@@ -137,7 +137,7 @@ class orderController extends Controller
         $previewCart = CartItem::where('session_id', $sessionId)->with('product')->get();
 
         if ($previewCart->isEmpty()) {
-            return redirect()->route('home')->with('error', 'Keranjang kamu masih kosong.');
+            return redirect()->route('home')->with('error', __('checkout.msg.cart_empty'));
         }
 
         $quotedWeight = $this->cartWeight($previewCart->sum(fn($item) => $item->product->weight * $item->quantity));
@@ -154,7 +154,7 @@ class orderController extends Controller
         );
 
         if (! $selected) {
-            return back()->withInput()->with('error', 'Layanan pengiriman yang dipilih tidak tersedia untuk tujuan ini. Silakan pilih ulang kurir.');
+            return back()->withInput()->with('error', __('checkout.msg.service_unavailable'));
         }
 
         $shippingCost = (int) $selected['cost'];
@@ -173,7 +173,7 @@ class orderController extends Controller
                     ->get();
 
                 if ($cartItems->isEmpty()) {
-                    throw new \DomainException('Keranjang kamu masih kosong.');
+                    throw new \DomainException(__('checkout.msg.cart_empty'));
                 }
 
                 // Urutan kunci selalu sama (produk, lalu varian, diurutkan by id)
@@ -200,7 +200,7 @@ class orderController extends Controller
                 foreach ($cartItems as $item) {
                     $prod = $products->get($item->product_id);
                     if (! $prod) {
-                        throw new \DomainException('Ada produk di keranjang yang sudah tidak tersedia.');
+                        throw new \DomainException(__('checkout.msg.product_unavailable'));
                     }
                     $subtotal += $prod->price * $item->quantity;
                     $totalWeight += $prod->weight * $item->quantity;
@@ -208,7 +208,7 @@ class orderController extends Controller
 
                 // Kalau isi cart berubah sejak ongkir dihitung, ongkirnya udah gak valid
                 if ($this->cartWeight($totalWeight) !== $quotedWeight) {
-                    throw new \DomainException('Isi keranjang berubah. Silakan pilih ulang kurir pengiriman.');
+                    throw new \DomainException(__('checkout.msg.cart_changed'));
                 }
 
                 $order = Order::create([
@@ -236,14 +236,14 @@ class orderController extends Controller
                     $variant = $item->variant_id ? $variants->get($item->variant_id) : null;
 
                     if ($item->variant_id && (! $variant || $variant->product_id !== $prod->id_product)) {
-                        throw new \DomainException("Varian {$prod->name} di keranjang tidak valid. Silakan hapus lalu tambahkan lagi.");
+                        throw new \DomainException(__('checkout.msg.variant_invalid', ['name' => $prod->name]));
                     }
 
                     // Cek stok TERBARU (sudah terkunci). Dicek sambil dikurangi satu-satu,
                     // jadi kalau ada 2 baris cart untuk produk yang sama, totalnya tetap kehitung.
                     $available = $variant ? $variant->stock : (int) $prod->stock;
                     if ($item->quantity > $available) {
-                        throw new \DomainException("Stok {$prod->name} tidak mencukupi. Sisa stok: {$available}.");
+                        throw new \DomainException(__('checkout.msg.stock_insufficient', ['name' => $prod->name, 'available' => $available]));
                     }
 
                     // Snapshot foto produk (biar riwayat order gak ikut berubah kalau produk diedit/dihapus)
@@ -295,7 +295,7 @@ class orderController extends Controller
 
         $this->sendConfirmationEmail($order);
 
-        return redirect()->route('order.success', $order)->with('success', 'Pesanan berhasil dibuat.');
+        return redirect()->route('order.success', $order)->with('success', __('checkout.msg.order_created'));
     }
 
     public function success(Request $request, Order $order)

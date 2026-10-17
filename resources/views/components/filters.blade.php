@@ -1,12 +1,12 @@
 <div class="flex items-center justify-between border-b border-black/10 pb-4">
     <div class="relative flex items-center gap-4">
         <p class="text-sm font-semibold uppercase tracking-wide">
-            Filter:
+            {{ __('site.listing.filter') }}
         </p>
 
         <button type="button" onclick="togglePriceFilter()" aria-expanded="false" aria-controls="priceFilterDropdown"
             class="flex items-center gap-1.5 text-sm font-semibold uppercase underline tracking-wide">
-            Price
+            {{ __('site.listing.price') }}
             <i class="bi bi-chevron-down text-xs" aria-hidden="true"></i>
         </button>
 
@@ -19,7 +19,7 @@
 
     <div class="flex">
         <p class="text-sm font-semibold uppercase tracking-wide">
-            {{ $products->total() }} products
+            {{ __('site.listing.products_count', ['count' => $products->total()]) }}
         </p>
     </div>
 </div>
@@ -35,8 +35,9 @@
     flex flex-col -translate-x-full transition-transform duration-300 md:hidden">
 
     <div class="flex items-center justify-between p-6 border-b border-black/10">
-        <h2 class="text-lg font-bold uppercase tracking-wide">Filter Harga</h2>
-        <button type="button" onclick="closePriceFilterMobile()" aria-label="Tutup filter harga" class="text-2xl">
+        <h2 class="text-lg font-bold uppercase tracking-wide">{{ __('site.listing.price_filter_title') }}</h2>
+        <button type="button" onclick="closePriceFilterMobile()"
+            aria-label="{{ __('site.listing.close_price_filter') }}" class="text-2xl">
             <i class="bi bi-x" aria-hidden="true"></i>
         </button>
     </div>

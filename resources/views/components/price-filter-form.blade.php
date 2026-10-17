@@ -10,14 +10,14 @@
         @endphp
         <div class="flex flex-col gap-1 flex-1">
             <label for="{{ $idPrefix }}_price_min"
-                class="text-xs font-semibold uppercase tracking-wide text-black/50">Min</label>
+                class="text-xs font-semibold uppercase tracking-wide text-black/50">{{ __('site.listing.min') }}</label>
             <input type="number" id="{{ $idPrefix }}_price_min" name="price_min" value="{{ $priceMin }}"
                 placeholder="0"
                 class="w-full border border-black/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-black">
         </div>
         <div class="flex flex-col gap-1 flex-1">
             <label for="{{ $idPrefix }}_price_max"
-                class="text-xs font-semibold uppercase tracking-wide text-black/50">Max</label>
+                class="text-xs font-semibold uppercase tracking-wide text-black/50">{{ __('site.listing.max') }}</label>
             <input type="number" id="{{ $idPrefix }}_price_max" name="price_max" value="{{ $priceMax }}"
                 placeholder="1000000"
                 class="w-full border border-black/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-black">
@@ -27,12 +27,12 @@
     <div class="flex items-center gap-2">
         <button type="submit"
             class="flex-1 bg-black hover:bg-black/80 text-white text-sm font-semibold uppercase tracking-wide px-4 py-2 rounded-lg transition">
-            Terapkan
+            {{ __('site.listing.apply') }}
         </button>
         @if ($priceMin !== '' || $priceMax !== '')
             <a href="{{ route(request()->route()->getName()) }}"
                 class="text-sm text-black/50 hover:text-black underline underline-offset-4 px-2 py-2 whitespace-nowrap">
-                Reset
+                {{ __('site.listing.reset') }}
             </a>
         @endif
     </div>

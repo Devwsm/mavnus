@@ -1,7 +1,7 @@
 @extends('template.layout')
 
-@section('title', 'Accessories - Mavnus')
-@section('meta_description', 'Koleksi accessories original Mavnus untuk melengkapi gaya kamu.')
+@section('title', __('site.listing.accessories_title'))
+@section('meta_description', __('site.listing.accessories_description'))
 
 @section('content')
     <main id="main-content" class="flex flex-col justify-center items-center bg-[#FBFBFD] w-full">

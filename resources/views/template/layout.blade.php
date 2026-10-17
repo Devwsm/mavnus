@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" class="bg-black">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="bg-black">
 
 <head>
     <meta charset="UTF-8">
@@ -7,16 +7,16 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#000000">
 
-    <title>@yield('title', 'Mavnus - Clothing & Accessories')</title>
-    <meta name="description" content="@yield('meta_description', 'Mavnus - Belanja clothes dan accessories original dengan kualitas terbaik.')">
+    <title>@yield('title', __('site.meta.default_title'))</title>
+    <meta name="description" content="@yield('meta_description', __('site.meta.default_description'))">
     <link rel="canonical" href="{{ url()->current() }}">
 
     {{-- Open Graph / Social share --}}
     <meta property="og:type" content="@yield('og_type', 'website')">
-    <meta property="og:locale" content="id_ID">
+    <meta property="og:locale" content="{{ app()->getLocale() === 'en' ? 'en_US' : 'id_ID' }}">
     <meta property="og:site_name" content="Mavnus">
-    <meta property="og:title" content="@yield('title', 'Mavnus - Clothing & Accessories')">
-    <meta property="og:description" content="@yield('meta_description', 'Mavnus - Belanja clothes dan accessories original dengan kualitas terbaik.')">
+    <meta property="og:title" content="@yield('title', __('site.meta.default_title'))">
+    <meta property="og:description" content="@yield('meta_description', __('site.meta.default_description'))">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:image" content="@yield('og_image', asset('aset/logo/Whisnu-Santika_Logo-2025-2-White.png'))">
     <meta name="twitter:card" content="summary_large_image">

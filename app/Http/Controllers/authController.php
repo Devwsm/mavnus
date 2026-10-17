@@ -22,13 +22,13 @@ class authController extends Controller
             'email'    => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
         ], [
-            'name.required'     => 'Nama wajib diisi.',
-            'email.required'    => 'Email wajib diisi.',
-            'email.email'       => 'Format email tidak valid.',
-            'email.unique'      => 'Email ini sudah ada.',
-            'password.required' => 'Password wajib diisi.',
-            'password.min'      => 'Password minimal 8 karakter.',
-            'password.confirmed' => 'Konfirmasi password gak cocok.',
+            'name.required'     => __('auth.validation.name_required'),
+            'email.required'    => __('auth.validation.email_required'),
+            'email.email'       => __('auth.validation.email_invalid'),
+            'email.unique'      => __('auth.validation.email_taken'),
+            'password.required' => __('auth.validation.password_required'),
+            'password.min'      => __('auth.validation.password_min'),
+            'password.confirmed' => __('auth.validation.password_confirmed'),
         ]);
 
         $user = User::create([
@@ -41,7 +41,7 @@ class authController extends Controller
         $request->session()->regenerate();
         Auth::login($user);
 
-        return redirect()->intended(route('home'))->with('success', 'Akun berhasil dibuat, selamat datang!');
+        return redirect()->intended(route('home'))->with('success', __('auth.msg.registered'));
     }
 
     public function processLogin(Request $request)
@@ -50,9 +50,9 @@ class authController extends Controller
             'email'    => 'required|email',
             'password' => 'required|string',
         ], [
-            'email.required'    => 'Email wajib diisi.',
-            'email.email'       => 'Format email tidak valid.',
-            'password.required' => 'Password wajib diisi.',
+            'email.required'    => __('auth.validation.email_required'),
+            'email.email'       => __('auth.validation.email_invalid'),
+            'password.required' => __('auth.validation.password_required'),
         ]);
 
         $user = User::where('email', $validated['email'])->first();
@@ -63,11 +63,11 @@ class authController extends Controller
         // enggak, respons yang lebih cepat = email gak terdaftar).
         if (! $user) {
             Hash::make($validated['password']);
-            return back()->withErrors(['login' => 'Email atau password salah, coba lagi.'])->onlyInput('email');
+            return back()->withErrors(['login' => __('auth.msg.login_failed')])->onlyInput('email');
         }
 
         if (! Hash::check($validated['password'], $user->password)) {
-            return back()->withErrors(['login' => 'Email atau password salah, coba lagi.'])->onlyInput('email');
+            return back()->withErrors(['login' => __('auth.msg.login_failed')])->onlyInput('email');
         }
 
         Auth::login($user, $request->boolean('remember'));

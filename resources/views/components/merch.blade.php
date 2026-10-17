@@ -5,11 +5,11 @@
         <!-- ===================== Section Header ===================== -->
         <div class="flex items-end text-black justify-between border-b border-black/10 pb-4">
             <h2 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">
-                Clothes
+                {{ __('site.nav.clothes') }}
             </h2>
             <a href="{{ route('clothes') }}"
                 class="text-sm font-semibold uppercase tracking-wide underline underline-offset-4 decoration-black/30 hover:decoration-black transition">
-                Shop All
+                {{ __('site.home.shop_all') }}
             </a>
         </div>
 
@@ -39,7 +39,7 @@
                 </a>
             @empty
                 <p class="col-span-full text-center text-black/60 text-sm py-10">
-                    Belum ada produk clothes tersedia.
+                    {{ __('site.listing.empty_clothes') }}
                 </p>
             @endforelse
 
@@ -51,11 +51,11 @@
         <!-- ===================== Section Header ===================== -->
         <div class="flex items-end text-black justify-between border-b border-black/10 pb-4">
             <h2 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">
-                Accessoris
+                {{ __('site.nav.accessories') }}
             </h2>
             <a href="{{ route('accessoris') }}"
                 class="text-sm font-semibold uppercase tracking-wide underline underline-offset-4 decoration-black/30 hover:decoration-black transition">
-                Shop All
+                {{ __('site.home.shop_all') }}
             </a>
         </div>
 
@@ -85,7 +85,7 @@
                 </a>
             @empty
                 <p class="col-span-full text-center text-black/60 text-sm py-10">
-                    Belum ada produk accessories tersedia.
+                    {{ __('site.listing.empty_accessories') }}
                 </p>
             @endforelse
 

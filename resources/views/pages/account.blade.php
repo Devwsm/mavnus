@@ -16,8 +16,8 @@
         @include('components/errors/alerts')
 
         <div class="hidden lg:block">
-            <h1 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">Akun Saya</h1>
-            <p class="text-sm text-gray-500 mt-1">Kelola informasi & pesanan kamu di sini.</p>
+            <h1 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">{{ __('account.title') }}</h1>
+            <p class="text-sm text-gray-500 mt-1">{{ __('account.subtitle') }}</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
@@ -33,10 +33,10 @@
                 {{-- Quick-access status pesanan --}}
                 <div class="bg-white rounded-2xl shadow-sm shadow-black/5 p-4 sm:p-5">
                     <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-sm font-bold">Pesanan Saya</h2>
+                        <h2 class="text-sm font-bold">{{ __('account.my_orders') }}</h2>
                         <a href="{{ route('account.orders') }}"
                             class="text-xs font-semibold text-gray-400 hover:text-black transition flex items-center gap-1">
-                            Lihat Semua <i class="bi bi-chevron-right text-[10px]"></i>
+                            {{ __('account.view_all') }} <i class="bi bi-chevron-right text-[10px]"></i>
                         </a>
                     </div>
                     <div class="grid grid-cols-4 gap-2 sm:gap-3">
@@ -53,7 +53,7 @@
                                 <i class="bi bi-hourglass-split"></i>
                             </span>
                             <span
-                                class="text-[11px] sm:text-xs font-medium text-gray-600 text-center leading-tight">Menunggu</span>
+                                class="text-[11px] sm:text-xs font-medium text-gray-600 text-center leading-tight">{{ __('order.status.pending') }}</span>
                         </a>
                         <a href="{{ route('account.orders', ['status' => 'processing']) }}"
                             class="relative flex flex-col items-center gap-2 py-2 rounded-xl hover:bg-gray-50 active:scale-95 transition">
@@ -68,7 +68,7 @@
                                 <i class="bi bi-box-seam"></i>
                             </span>
                             <span
-                                class="text-[11px] sm:text-xs font-medium text-gray-600 text-center leading-tight">Diproses</span>
+                                class="text-[11px] sm:text-xs font-medium text-gray-600 text-center leading-tight">{{ __('order.status.processing') }}</span>
                         </a>
                         <a href="{{ route('account.orders', ['status' => 'shipped']) }}"
                             class="relative flex flex-col items-center gap-2 py-2 rounded-xl hover:bg-gray-50 active:scale-95 transition">
@@ -83,7 +83,7 @@
                                 <i class="bi bi-truck"></i>
                             </span>
                             <span
-                                class="text-[11px] sm:text-xs font-medium text-gray-600 text-center leading-tight">Dikirim</span>
+                                class="text-[11px] sm:text-xs font-medium text-gray-600 text-center leading-tight">{{ __('order.status.shipped') }}</span>
                         </a>
                         <a href="{{ route('account.orders', ['status' => 'completed']) }}"
                             class="relative flex flex-col items-center gap-2 py-2 rounded-xl hover:bg-gray-50 active:scale-95 transition">
@@ -92,7 +92,7 @@
                                 <i class="bi bi-check-circle"></i>
                             </span>
                             <span
-                                class="text-[11px] sm:text-xs font-medium text-gray-600 text-center leading-tight">Selesai</span>
+                                class="text-[11px] sm:text-xs font-medium text-gray-600 text-center leading-tight">{{ __('order.status.completed') }}</span>
                         </a>
                     </div>
                 </div>
@@ -100,7 +100,7 @@
                 {{-- Informasi Akun --}}
                 <div class="bg-white rounded-2xl shadow-sm shadow-black/5 overflow-hidden">
                     <div class="px-4 sm:px-5 py-4">
-                        <h2 class="text-sm font-bold">Informasi Akun</h2>
+                        <h2 class="text-sm font-bold">{{ __('account.info') }}</h2>
                     </div>
 
                     {{-- List info read-only --}}
@@ -111,7 +111,7 @@
                                 <i class="bi bi-person"></i>
                             </span>
                             <div class="min-w-0 flex-1">
-                                <p class="text-[11px] text-gray-400 uppercase tracking-wide">Nama</p>
+                                <p class="text-[11px] text-gray-400 uppercase tracking-wide">{{ __('account.name') }}</p>
                                 <p class="text-sm font-semibold truncate">{{ $user->name }}</p>
                             </div>
                         </div>
@@ -122,7 +122,7 @@
                                 <i class="bi bi-envelope"></i>
                             </span>
                             <div class="min-w-0 flex-1">
-                                <p class="text-[11px] text-gray-400 uppercase tracking-wide">Email</p>
+                                <p class="text-[11px] text-gray-400 uppercase tracking-wide">{{ __('account.email') }}</p>
                                 <p class="text-sm font-semibold truncate">{{ $user->email }}</p>
                             </div>
                         </div>
@@ -133,7 +133,7 @@
                                 <i class="bi bi-telephone"></i>
                             </span>
                             <div class="min-w-0 flex-1">
-                                <p class="text-[11px] text-gray-400 uppercase tracking-wide">Nomor HP</p>
+                                <p class="text-[11px] text-gray-400 uppercase tracking-wide">{{ __('account.phone') }}</p>
                                 <p class="text-sm font-semibold truncate">{{ $user->phone ?: '—' }}</p>
                             </div>
                         </div>
@@ -144,7 +144,8 @@
                                 <i class="bi bi-geo-alt"></i>
                             </span>
                             <div class="min-w-0 flex-1">
-                                <p class="text-[11px] text-gray-400 uppercase tracking-wide">Alamat</p>
+                                <p class="text-[11px] text-gray-400 uppercase tracking-wide">{{ __('account.address') }}
+                                </p>
                                 <p class="text-sm font-semibold wrap-break-word">{{ $user->address ?: '—' }}</p>
                             </div>
                         </div>
@@ -153,7 +154,7 @@
                     <div class="px-4 sm:px-5 pb-4 pt-1">
                         <a href="{{ route('account.edit') }}"
                             class="flex items-center justify-center gap-2 w-full bg-black hover:bg-black/85 text-white text-sm font-bold py-3 rounded-xl transition active:scale-[0.99]">
-                            <i class="bi bi-pencil"></i> Ubah Data
+                            <i class="bi bi-pencil"></i> {{ __('account.edit_data') }}
                         </a>
                     </div>
                 </div>

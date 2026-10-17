@@ -53,18 +53,18 @@ class accountController extends Controller
             'address'          => 'nullable|string|max:1000',
             'current_password' => $requiresPasswordConfirmation ? 'required|string' : 'nullable|string',
         ], [
-            'name.required'             => 'Nama wajib diisi.',
-            'email.required'            => 'Email wajib diisi.',
-            'email.email'               => 'Format email tidak valid.',
-            'email.unique'               => 'Email ini udah dipake akun lain.',
-            'phone.regex'               => 'Nomor HP harus berupa angka saja (9-15 digit), tanpa spasi atau simbol.',
-            'current_password.required' => 'Masukin password saat ini buat konfirmasi perubahan.',
+            'name.required'             => __('account.validation.name_required'),
+            'email.required'            => __('account.validation.email_required'),
+            'email.email'               => __('account.validation.email_invalid'),
+            'email.unique'               => __('account.validation.email_taken'),
+            'phone.regex'               => __('account.validation.phone_regex'),
+            'current_password.required' => __('account.validation.current_password_required'),
         ]);
 
         // Konfirmasi password saat ini - biar perubahan data (apalagi ganti email)
         // gak bisa dilakuin sembarangan kalau sesi ke-hijack orang lain
         if ($requiresPasswordConfirmation && ! Hash::check($validated['current_password'], $user->password)) {
-            return back()->withErrors(['current_password' => 'Password salah.'])->withInput();
+            return back()->withErrors(['current_password' => __('account.msg.wrong_password')])->withInput();
         }
 
         $user->update([
@@ -76,7 +76,7 @@ class accountController extends Controller
 
         // Balik ke halaman overview (bukan back(), biar konsisten abis simpan
         // selalu mendarat di halaman profil, bukan nyangkut di form edit)
-        return redirect()->route('account')->with('success', 'Profil berhasil diperbarui.');
+        return redirect()->route('account')->with('success', __('account.msg.profile_updated'));
     }
 
     // Hapus akun sendiri. Orders yang udah dibuat TETAP disimpan (kolom
@@ -94,11 +94,11 @@ class accountController extends Controller
             $validated = $request->validate([
                 'password' => 'required|string',
             ], [
-                'password.required' => 'Masukin password buat konfirmasi hapus akun.',
+                'password.required' => __('account.msg.delete_password_required'),
             ]);
 
             if (! Hash::check($validated['password'], $user->password)) {
-                return back()->withErrors(['password' => 'Password salah.']);
+                return back()->withErrors(['password' => __('account.msg.wrong_password')]);
             }
         }
 
@@ -106,7 +106,7 @@ class accountController extends Controller
         $user->delete();
         $request->session()->regenerate();
 
-        return redirect()->route('home')->with('success', 'Akun kamu berhasil dihapus. Sampai jumpa lagi!');
+        return redirect()->route('home')->with('success', __('account.msg.deleted'));
     }
 
     // Riwayat pesanan - cuma nampilin order milik akun yang lagi login.
@@ -125,12 +125,12 @@ class accountController extends Controller
             ->withQueryString();
 
         $filters = [
-            'all'        => 'Semua',
-            'pending'    => 'Menunggu',
-            'processing' => 'Diproses',
-            'shipped'    => 'Dikirim',
-            'completed'  => 'Selesai',
-            'cancelled'  => 'Dibatalkan',
+            'all'        => __('account.filter_all'),
+            'pending'    => __('order.status.pending'),
+            'processing' => __('order.status.processing'),
+            'shipped'    => __('order.status.shipped'),
+            'completed'  => __('order.status.completed'),
+            'cancelled'  => __('order.status.cancelled'),
         ];
 
         return view('pages.account-orders', [

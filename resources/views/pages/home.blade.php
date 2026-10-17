@@ -1,9 +1,7 @@
 @extends('template.layout')
 
-@section('title', 'Mavnus - Clothing & Accessories Original')
-@section('meta_description',
-    'Belanja clothes dan accessories original Mavnus. Kualitas terbaik, desain
-    eksklusif, pengiriman ke seluruh Indonesia.')
+@section('title', __('site.home.title'))
+@section('meta_description', __('site.home.description'))
 
 @section('content')
     <main id="main-content" class="flex flex-col justify-center items-center bg-[#FBFBFD] w-full">

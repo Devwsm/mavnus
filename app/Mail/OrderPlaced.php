@@ -22,7 +22,7 @@ class OrderPlaced extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Pesanan ' . $this->order->order_number . ' diterima - Mavnus',
+            subject: __('checkout.mail.subject', ['number' => $this->order->order_number]),
         );
     }
 

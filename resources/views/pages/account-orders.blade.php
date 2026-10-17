@@ -13,8 +13,8 @@
         @include('components/errors/alerts')
 
         <div class="hidden lg:block">
-            <h1 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">Riwayat Pesanan</h1>
-            <p class="text-sm text-gray-500 mt-1">Kelola informasi & pesanan kamu di sini.</p>
+            <h1 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">{{ __('account.orders_title') }}</h1>
+            <p class="text-sm text-gray-500 mt-1">{{ __('account.subtitle') }}</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
@@ -60,7 +60,7 @@
                             <span
                                 class="inline-flex items-center gap-1.5 {{ $statusStyle[0] }} {{ $statusStyle[1] }} text-xs font-semibold px-3 py-1.5 rounded-full shrink-0">
                                 <span class="w-1.5 h-1.5 rounded-full {{ $statusStyle[2] }}"></span>
-                                {{ $order->statusLabel() }}
+                                {{ $order->localizedStatus() }}
                             </span>
                         </div>
 
@@ -72,12 +72,13 @@
                                 </div>
                             @endforeach
                             @if ($order->items->count() > 2)
-                                <p class="text-xs text-gray-400">+{{ $order->items->count() - 2 }} produk lainnya</p>
+                                <p class="text-xs text-gray-400">
+                                    {{ __('account.more_products', ['count' => $order->items->count() - 2]) }}</p>
                             @endif
                         </div>
 
                         <div class="flex items-center justify-between pt-4 border-t border-gray-100">
-                            <span class="text-sm text-gray-500">Total Pesanan</span>
+                            <span class="text-sm text-gray-500">{{ __('account.order_total') }}</span>
                             <span class="text-base font-bold">Rp{{ number_format($order->total, 0, ',', '.') }}</span>
                         </div>
                     </a>
@@ -90,15 +91,14 @@
                         </span>
                         <p class="text-sm text-gray-500">
                             @if ($statusFilter)
-                                Belum ada pesanan dengan status
-                                "{{ $filters[$statusFilter] ?? (null ?? ucfirst($statusFilter)) }}".
+                                {{ __('account.empty_filter', ['status' => $filters[$statusFilter] ?? ucfirst($statusFilter)]) }}
                             @else
-                                Kamu belum punya pesanan apa pun.
+                                {{ __('account.empty') }}
                             @endif
                         </p>
                         <a href="{{ route('home') }}"
                             class="text-sm font-semibold underline underline-offset-4 decoration-black/30 hover:decoration-black transition">
-                            Mulai belanja
+                            {{ __('account.start_shopping') }}
                         </a>
                     </div>
                 @endforelse

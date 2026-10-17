@@ -1,4 +1,4 @@
-<button type="button" onclick="openCart()" aria-label="Buka keranjang belanja"
+<button type="button" onclick="openCart()" aria-label="{{ __('site.cart.open') }}"
     class="relative inline-flex min-h-11 min-w-11 items-center justify-center text-lg">
     <i class="bi bi-bag" aria-hidden="true"></i>
     {{-- Jumlah dirender server ($cartCount dari View composer), jadi tidak perlu fetch() tambahan tiap halaman dibuka --}}
@@ -12,36 +12,49 @@
 </div>
 
 {{-- Cart Drawer (half-screen, dari kanan) --}}
-<div id="cartDrawer" role="dialog" aria-modal="true" aria-label="Keranjang belanja" aria-hidden="true"
+<div id="cartDrawer" role="dialog" aria-modal="true" aria-label="{{ __('site.cart.label') }}" aria-hidden="true"
     class="fixed top-0 right-0 h-full w-3/4 md:w-1/2 bg-black text-white z-80 invisible
     flex flex-col translate-x-full transition-transform duration-300">
 
     <div class="flex items-center justify-between p-6 border-b border-white/10">
-        <h2 class="text-xl font-bold uppercase tracking-wide">Cart</h2>
-        <button id="cartCloseBtn" type="button" aria-label="Tutup keranjang belanja"
+        <h2 class="text-xl font-bold uppercase tracking-wide">{{ __('site.cart.title') }}</h2>
+        <button id="cartCloseBtn" type="button" aria-label="{{ __('site.cart.close') }}"
             class="inline-flex min-h-11 min-w-11 items-center justify-center text-3xl">
             <i class="bi bi-x" aria-hidden="true"></i>
         </button>
     </div>
 
     <div id="cartItemsWrapper" class="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
-        <p class="text-white/60 text-sm text-center py-10">Keranjang masih kosong.</p>
+        <p class="text-white/60 text-sm text-center py-10">{{ __('site.cart.empty') }}</p>
     </div>
 
     <div class="border-t border-white/10 p-6 flex flex-col gap-4">
         <div class="flex items-center justify-between">
-            <span class="text-white/60 text-sm">Total</span>
+            <span class="text-white/60 text-sm">{{ __('site.cart.total') }}</span>
             <span id="cartTotal" class="text-lg font-bold">Rp0</span>
         </div>
         <a href="{{ route('order.checkout') }}"
             class="bg-[#B71C1C] hover:bg-[#891212] text-white uppercase font-bold tracking-widest py-3 rounded-lg transition text-center">
-            Checkout
+            {{ __('site.cart.checkout') }}
         </a>
     </div>
 </div>
 
 @once
     <script>
+        // Teks untuk JavaScript (ikut bahasa yang dipilih)
+        const cartI18n = @js([
+    'empty' => __('site.cart.empty'),
+    'loadFailed' => __('site.cart.load_failed'),
+    'size' => __('site.cart.size'),
+    'decreaseItem' => __('site.cart.decrease_item', ['name' => ':name']),
+    'increaseItem' => __('site.cart.increase_item', ['name' => ':name']),
+    'removeItem' => __('site.cart.remove_item', ['name' => ':name']),
+    'updateFailed' => __('site.cart.update_failed'),
+    'removeFailed' => __('site.cart.remove_failed'),
+    'errorText' => __('site.cart.error_text'),
+]);
+
         const cartBackdrop = document.getElementById('cartBackdrop');
         const cartDrawer = document.getElementById('cartDrawer');
         const cartCloseBtn = document.getElementById('cartCloseBtn');
@@ -83,7 +96,7 @@
                 .then(renderCart)
                 .catch(() => {
                     cartItemsWrapper.innerHTML =
-                        '<p class="text-white/60 text-sm text-center py-10">Gagal memuat keranjang. Coba lagi.</p>';
+                        `<p class="text-white/60 text-sm text-center py-10">${escapeHtml(cartI18n.loadFailed)}</p>`;
                 });
         }
 
@@ -93,7 +106,7 @@
 
             if (data.items.length === 0) {
                 cartItemsWrapper.innerHTML =
-                    '<p class="text-white/60 text-sm text-center py-10">Keranjang masih kosong.</p>';
+                    `<p class="text-white/60 text-sm text-center py-10">${escapeHtml(cartI18n.empty)}</p>`;
                 return;
             }
 
@@ -104,14 +117,14 @@
                     </div>
                     <div class="flex flex-col flex-1 gap-1.5">
                         <span class="text-base font-semibold">${escapeHtml(item.name)}</span>
-                        ${item.size ? `<span class="text-sm text-white/60">Size: ${escapeHtml(item.size)}</span>` : ''}
+                        ${item.size ? `<span class="text-sm text-white/60">${escapeHtml(cartI18n.size)}: ${escapeHtml(item.size)}</span>` : ''}
                         <div class="flex items-center justify-between mt-1">
                             <div class="flex items-center gap-3 border border-white/10 rounded-lg">
-                                <button type="button" onclick="changeQty(${Number(item.id)}, ${Number(item.quantity) - 1})" aria-label="Kurangi jumlah ${escapeHtml(item.name)}" class="min-h-11 min-w-11 px-3 py-1.5 text-white/60 hover:text-white text-lg disabled:opacity-30">-</button>
+                                <button type="button" onclick="changeQty(${Number(item.id)}, ${Number(item.quantity) - 1})" aria-label="${escapeHtml(cartI18n.decreaseItem.replace(':name', item.name))}" class="min-h-11 min-w-11 px-3 py-1.5 text-white/60 hover:text-white text-lg disabled:opacity-30">-</button>
                                 <span class="text-base" aria-live="polite">${Number(item.quantity)}</span>
-                                <button type="button" onclick="changeQty(${Number(item.id)}, ${Number(item.quantity) + 1})" ${item.quantity >= item.max ? 'disabled' : ''} aria-label="Tambah jumlah ${escapeHtml(item.name)}" class="min-h-11 min-w-11 px-3 py-1.5 text-white/60 hover:text-white text-lg disabled:opacity-30">+</button>
+                                <button type="button" onclick="changeQty(${Number(item.id)}, ${Number(item.quantity) + 1})" ${item.quantity >= item.max ? 'disabled' : ''} aria-label="${escapeHtml(cartI18n.increaseItem.replace(':name', item.name))}" class="min-h-11 min-w-11 px-3 py-1.5 text-white/60 hover:text-white text-lg disabled:opacity-30">+</button>
                             </div>
-                            <button type="button" onclick="removeCartItem(${Number(item.id)})" aria-label="Hapus ${escapeHtml(item.name)} dari keranjang" class="min-h-11 min-w-11 text-white/60 hover:text-[#B71C1C] text-base disabled:opacity-30">
+                            <button type="button" onclick="removeCartItem(${Number(item.id)})" aria-label="${escapeHtml(cartI18n.removeItem.replace(':name', item.name))}" class="min-h-11 min-w-11 text-white/60 hover:text-[#B71C1C] text-base disabled:opacity-30">
                                 <i class="bi bi-trash" aria-hidden="true"></i>
                             </button>
                         </div>
@@ -148,8 +161,8 @@
                 .catch(() => {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Gagal mengubah jumlah',
-                        text: 'Terjadi kesalahan, coba lagi.',
+                        title: cartI18n.updateFailed,
+                        text: cartI18n.errorText,
                         confirmButtonColor: '#B71C1C',
                     });
                 })
@@ -176,8 +189,8 @@
                 .catch(() => {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Gagal menghapus item',
-                        text: 'Terjadi kesalahan, coba lagi.',
+                        title: cartI18n.removeFailed,
+                        text: cartI18n.errorText,
                         confirmButtonColor: '#B71C1C',
                     });
                 })

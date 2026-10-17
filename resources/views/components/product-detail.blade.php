@@ -5,7 +5,8 @@
             <!-- Image gallery -->
             <div class="flex flex-col gap-4">
                 <!-- Main image -->
-                <button type="button" onclick="openGallery(0)" aria-label="Lihat foto {{ $product->name }} lebih besar"
+                <button type="button" onclick="openGallery(0)"
+                    aria-label="{{ __('site.product.view_larger', ['name' => $product->name]) }}"
                     class="relative w-full aspect-square bg-gray-100 overflow-hidden rounded-lg cursor-zoom-in group">
                     <img id="mainImage"
                         src="{{ $product->images->first() ? Storage::url($product->images->first()->image_path) : '' }}"
@@ -14,7 +15,7 @@
                         decoding="async" />
                     <span
                         class="absolute bottom-3 right-3 bg-black/70 text-white text-[10px] font-semibold px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition">
-                        <i class="bi bi-arrows-fullscreen"></i> Lihat semua foto
+                        <i class="bi bi-arrows-fullscreen"></i> {{ __('site.product.view_all_photos') }}
                     </span>
                 </button>
 
@@ -23,11 +24,11 @@
                     <div class="flex gap-4">
                         @foreach ($product->images->skip(1) as $index => $image)
                             <button type="button" onclick="openGallery({{ $index }})"
-                                aria-label="Lihat foto {{ $index + 1 }}"
+                                aria-label="{{ __('site.product.view_photo', ['number' => $index + 1]) }}"
                                 class="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden border border-transparent hover:border-gray-400">
                                 <img src="{{ Storage::url($image->image_path) }}"
-                                    alt="{{ $product->name }} - foto {{ $index + 1 }}" width="80" height="80"
-                                    loading="lazy" decoding="async"
+                                    alt="{{ __('site.product.photo_alt', ['name' => $product->name, 'number' => $index + 1]) }}"
+                                    width="80" height="80" loading="lazy" decoding="async"
                                     class="absolute inset-0 w-full h-full object-contain" />
                             </button>
                         @endforeach
@@ -48,19 +49,19 @@
                 </div>
                 <!-- Description -->
                 <p class="text-sm md:text-base text-gray-700 leading-relaxed">
-                    {{ $product->description ?: 'Tidak ada deskripsi untuk produk ini.' }}
+                    {{ $product->description ?: __('site.product.no_description') }}
                 </p>
 
                 @if ($product->category === 'clothes')
                     <!-- Materials -->
                     <div class="text-xs text-gray-500 leading-relaxed">
-                        <p class="mb-2">Warna: {{ $product->clothes->color }}</p>
-                        <p>Material: {{ $product->clothes->material }}</p>
+                        <p class="mb-2">{{ __('site.product.color') }}: {{ $product->clothes->color }}</p>
+                        <p>{{ __('site.product.material') }}: {{ $product->clothes->material }}</p>
                     </div>
 
                     <!-- Sizes -->
                     <div class="flex flex-col gap-3">
-                        <span class="text-sm font-medium">Select Size</span>
+                        <span class="text-sm font-medium">{{ __('site.product.select_size') }}</span>
                         <div class="flex flex-wrap gap-3">
                             @foreach ($product->variants as $variant)
                                 <button type="button"
@@ -79,16 +80,16 @@
                 @else
                     <!-- Detail accessories (gak punya varian ukuran, stok langsung di produk) -->
                     <div class="text-xs text-gray-500 leading-relaxed">
-                        <p>Tipe: {{ optional($product->accessories)->type_label ?? '-' }}</p>
+                        <p>{{ __('site.product.type') }}: {{ optional($product->accessories)->type_label ?? '-' }}</p>
                     </div>
 
                     <div class="flex flex-col gap-3">
                         <p id="size-message" class="text-xs text-red-600"></p>
                         <p id="stock-message" class="text-xs text-gray-500">
                             @if ($product->stock > 0)
-                                Stok tersedia: {{ $product->stock }} pcs
+                                {{ __('site.product.stock_available', ['count' => $product->stock]) }}
                             @else
-                                Stok habis.
+                                {{ __('site.product.out_of_stock') }}
                             @endif
                         </p>
                     </div>
@@ -97,13 +98,14 @@
                 <!-- Quantity + Add to cart -->
                 <div class="flex flex-col md:flex-row gap-4">
                     <div id="qty-wrapper" class="flex items-center justify-center w-fit border rounded-lg opacity-50">
-                        <button id="qty-minus" type="button" disabled aria-label="Kurangi jumlah"
+                        <button id="qty-minus" type="button" disabled aria-label="{{ __('site.product.decrease') }}"
                             class="min-h-11 min-w-11 px-3 py-2 text-gray-700 hover:text-black disabled:cursor-not-allowed">
                             -
                         </button>
                         <input id="qty-input" type="number" min="1" max="1" value="1" disabled
-                            aria-label="Jumlah" class="w-12 text-center outline-none disabled:cursor-not-allowed" />
-                        <button id="qty-plus" type="button" disabled aria-label="Tambah jumlah"
+                            aria-label="{{ __('site.product.quantity') }}"
+                            class="w-12 text-center outline-none disabled:cursor-not-allowed" />
+                        <button id="qty-plus" type="button" disabled aria-label="{{ __('site.product.increase') }}"
                             class="min-h-11 min-w-11 px-3 py-2 text-gray-700 hover:text-black disabled:cursor-not-allowed">
                             +
                         </button>
@@ -111,7 +113,7 @@
 
                     <button id="addToCartBtn" type="button" disabled
                         class="px-6 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-black">
-                        Pilih ukuran
+                        {{ __('site.product.choose_size') }}
                     </button>
                 </div>
 
@@ -122,21 +124,22 @@
 
 {{-- Modal Galeri Foto --}}
 @if ($product->images->count() > 0)
-    <div id="galleryModal" role="dialog" aria-modal="true" aria-label="Galeri foto {{ $product->name }}"
+    <div id="galleryModal" role="dialog" aria-modal="true"
+        aria-label="{{ __('site.product.gallery_label', ['name' => $product->name]) }}"
         class="hidden fixed inset-0 z-100 items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/90" onclick="closeGallery()"></div>
 
-        <button type="button" onclick="closeGallery()"
+        <button type="button" onclick="closeGallery()" aria-label="{{ __('site.product.close') }}"
             class="absolute top-5 right-5 text-white text-2xl w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition z-10">
             <i class="bi bi-x-lg"></i>
         </button>
 
         @if ($product->images->count() > 1)
-            <button type="button" onclick="navigateGallery(-1)"
+            <button type="button" onclick="navigateGallery(-1)" aria-label="{{ __('site.product.prev_photo') }}"
                 class="absolute left-3 md:left-8 top-1/2 -translate-y-1/2 text-white text-2xl w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition z-10">
                 <i class="bi bi-chevron-left"></i>
             </button>
-            <button type="button" onclick="navigateGallery(1)"
+            <button type="button" onclick="navigateGallery(1)" aria-label="{{ __('site.product.next_photo') }}"
                 class="absolute right-3 md:right-8 top-1/2 -translate-y-1/2 text-white text-2xl w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition z-10">
                 <i class="bi bi-chevron-right"></i>
             </button>
@@ -156,6 +159,16 @@
 @endif
 
 <script>
+    // Teks untuk JavaScript (ikut bahasa yang dipilih)
+    const productI18n = @js([
+    'sizeUnavailable' => __('site.product.size_unavailable'),
+    'stockAvailable' => __('site.product.stock_available', ['count' => ':count']),
+    'chooseSize' => __('site.product.choose_size'),
+    'addToCart' => __('site.product.add_to_cart'),
+    'soldOut' => __('site.product.sold_out'),
+    'addFailed' => __('site.product.add_failed'),
+]);
+
     // Clothes punya varian ukuran (harus pilih dulu baru bisa checkout).
     // Accessories gak punya varian, stoknya langsung dari produk itu sendiri,
     // jadi qty & tombol add-to-cart langsung aktif tanpa perlu pilih apa-apa.
@@ -186,7 +199,7 @@
     // Pilih/batalkan size saat diklik (toggle)
     function toggleSize(size, stock, variantId) {
         if (stock === 0) {
-            document.getElementById('size-message').textContent = 'Ukuran ini sedang tidak tersedia.';
+            document.getElementById('size-message').textContent = productI18n.sizeUnavailable;
             return;
         }
 
@@ -206,7 +219,7 @@
         selectedStock = stock;
         selectedVariantId = variantId;
         document.getElementById('size-message').textContent = '';
-        document.getElementById('stock-message').textContent = `Stok tersedia: ${stock} pcs`;
+        document.getElementById('stock-message').textContent = productI18n.stockAvailable.replace(':count', stock);
         updateSizeButtons();
         setQtyEnabled(true);
     }
@@ -225,7 +238,7 @@
         addToCartBtn.disabled = !enabled;
 
         qtyWrapper.classList.toggle('opacity-50', !enabled);
-        addToCartBtn.textContent = enabled ? 'Add to Cart' : 'Pilih ukuran';
+        addToCartBtn.textContent = enabled ? productI18n.addToCart : productI18n.chooseSize;
 
         if (enabled) {
             qtyInput.max = selectedStock;
@@ -291,7 +304,7 @@
         if (accessoryStock > 0) {
             setQtyEnabled(true);
         } else {
-            document.getElementById('size-message').textContent = 'Produk ini sedang habis.';
+            document.getElementById('size-message').textContent = productI18n.soldOut;
         }
     }
 
@@ -325,7 +338,7 @@
             .then(async res => {
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) {
-                    throw new Error(data.message || 'Gagal menambahkan ke keranjang. Coba lagi.');
+                    throw new Error(data.message || productI18n.addFailed);
                 }
                 return data;
             })

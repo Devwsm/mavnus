@@ -52,7 +52,7 @@ class ShippingController extends Controller
             ->sum(fn($item) => $item->product->weight * $item->quantity);
 
         if ($grams <= 0) {
-            return response()->json(['data' => [], 'error' => 'Keranjang kamu masih kosong.'], 422);
+            return response()->json(['data' => [], 'error' => __('checkout.msg.cart_empty')], 422);
         }
 
         try {

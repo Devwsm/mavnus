@@ -1,13 +1,13 @@
 @extends('template.layout')
 
-@section('title', 'Info - Mavnus')
-@section('meta_description', 'Informasi seputar Mavnus: kebijakan, kontak, dan bantuan.')
+@section('title', __('info.title'))
+@section('meta_description', __('info.description'))
 
 @section('content')
     <section class="flex flex-col w-full bg-white gap-10 p-6 lg:p-14 pt-28 md:pt-22 lg:pt-32">
         <div>
-            <h1 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">Informasi & Bantuan</h1>
-            <p class="text-sm text-gray-500 mt-2">Semua yang perlu kamu tahu soal belanja di Mavnus.</p>
+            <h1 class="text-2xl md:text-3xl font-bold uppercase tracking-wide">{{ __('info.heading') }}</h1>
+            <p class="text-sm text-gray-500 mt-2">{{ __('info.subheading') }}</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-10">
@@ -16,22 +16,17 @@
                 <div
                     class="lg:sticky lg:top-28 flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 border-b lg:border-b-0 border-black/10">
                     <a href="#store"
-                        class="footer-info-link whitespace-nowrap text-sm font-semibold uppercase tracking-wide px-3 py-2 rounded-lg hover:bg-black/5 transition">Search</a>
+                        class="footer-info-link whitespace-nowrap text-sm font-semibold uppercase tracking-wide px-3 py-2 rounded-lg hover:bg-black/5 transition">{{ __('info.search.title') }}</a>
                     <a href="#returns"
-                        class="footer-info-link whitespace-nowrap text-sm font-semibold uppercase tracking-wide px-3 py-2 rounded-lg hover:bg-black/5 transition">Returns
-                        & Exchanges</a>
+                        class="footer-info-link whitespace-nowrap text-sm font-semibold uppercase tracking-wide px-3 py-2 rounded-lg hover:bg-black/5 transition">{{ __('info.returns.title') }}</a>
                     <a href="#contact"
-                        class="footer-info-link whitespace-nowrap text-sm font-semibold uppercase tracking-wide px-3 py-2 rounded-lg hover:bg-black/5 transition">Contact
-                        Support</a>
+                        class="footer-info-link whitespace-nowrap text-sm font-semibold uppercase tracking-wide px-3 py-2 rounded-lg hover:bg-black/5 transition">{{ __('info.contact.title') }}</a>
                     <a href="#terms"
-                        class="footer-info-link whitespace-nowrap text-sm font-semibold uppercase tracking-wide px-3 py-2 rounded-lg hover:bg-black/5 transition">Terms
-                        & Conditions</a>
+                        class="footer-info-link whitespace-nowrap text-sm font-semibold uppercase tracking-wide px-3 py-2 rounded-lg hover:bg-black/5 transition">{{ __('info.terms.title') }}</a>
                     <a href="#privacy"
-                        class="footer-info-link whitespace-nowrap text-sm font-semibold uppercase tracking-wide px-3 py-2 rounded-lg hover:bg-black/5 transition">Privacy
-                        Policy</a>
+                        class="footer-info-link whitespace-nowrap text-sm font-semibold uppercase tracking-wide px-3 py-2 rounded-lg hover:bg-black/5 transition">{{ __('info.privacy.title') }}</a>
                     <a href="#cookie"
-                        class="footer-info-link whitespace-nowrap text-sm font-semibold uppercase tracking-wide px-3 py-2 rounded-lg hover:bg-black/5 transition">Cookie
-                        Policy</a>
+                        class="footer-info-link whitespace-nowrap text-sm font-semibold uppercase tracking-wide px-3 py-2 rounded-lg hover:bg-black/5 transition">{{ __('info.cookie.title') }}</a>
                 </div>
             </div>
 
@@ -40,84 +35,65 @@
 
                 {{-- Search --}}
                 <div id="store" class="scroll-mt-28 flex flex-col gap-3">
-                    <h2 class="text-lg font-bold uppercase tracking-wide border-b border-black/10 pb-3">Search</h2>
-                    <p class="text-sm text-gray-600 leading-relaxed">
-                        Gunakan ikon kaca pembesar di navbar untuk mencari produk berdasarkan nama, baik itu clothes
-                        maupun accessories. Hasil pencarian akan muncul secara langsung saat kamu mengetik.
-                    </p>
-                    <p class="text-sm text-gray-600 leading-relaxed">
-                        Belum menemukan yang kamu cari? Coba kata kunci yang lebih umum, atau jelajahi kategori
-                        lewat menu navigasi utama.
-                    </p>
+                    <h2 class="text-lg font-bold uppercase tracking-wide border-b border-black/10 pb-3">
+                        {{ __('info.search.title') }}</h2>
+                    <p class="text-sm text-gray-600 leading-relaxed">{{ __('info.search.p1') }}</p>
+                    <p class="text-sm text-gray-600 leading-relaxed">{{ __('info.search.p2') }}</p>
                 </div>
 
                 {{-- Returns & Exchanges --}}
                 <div id="returns" class="scroll-mt-28 flex flex-col gap-3">
-                    <h2 class="text-lg font-bold uppercase tracking-wide border-b border-black/10 pb-3">Returns & Exchanges
-                    </h2>
-                    <p class="text-sm text-gray-600 leading-relaxed">
-                        Kami menerima pengembalian atau penukaran barang dalam waktu 7 hari sejak barang diterima,
-                        selama produk belum dipakai, masih dalam kondisi asli, dan menyertakan label/kemasan
-                        original.
-                    </p>
+                    <h2 class="text-lg font-bold uppercase tracking-wide border-b border-black/10 pb-3">
+                        {{ __('info.returns.title') }}</h2>
+                    <p class="text-sm text-gray-600 leading-relaxed">{{ __('info.returns.p1') }}</p>
                     <ul class="list-disc list-inside text-sm text-gray-600 leading-relaxed flex flex-col gap-1">
-                        <li>Barang diskon/sale bersifat final sale, tidak dapat dikembalikan.</li>
-                        <li>Biaya pengiriman balik ditanggung oleh pembeli, kecuali barang cacat produksi.</li>
-                        <li>Proses refund diproses dalam 3–5 hari kerja setelah barang kami terima.</li>
+                        <li>{{ __('info.returns.li1') }}</li>
+                        <li>{{ __('info.returns.li2') }}</li>
+                        <li>{{ __('info.returns.li3') }}</li>
                     </ul>
                 </div>
 
                 {{-- Contact Support --}}
                 <div id="contact" class="scroll-mt-28 flex flex-col gap-3">
-                    <h2 class="text-lg font-bold uppercase tracking-wide border-b border-black/10 pb-3">Contact Support</h2>
-                    <p class="text-sm text-gray-600 leading-relaxed">
-                        Ada pertanyaan soal pesanan, produk, atau kendala lainnya? Tim kami siap membantu.
-                    </p>
+                    <h2 class="text-lg font-bold uppercase tracking-wide border-b border-black/10 pb-3">
+                        {{ __('info.contact.title') }}</h2>
+                    <p class="text-sm text-gray-600 leading-relaxed">{{ __('info.contact.p1') }}</p>
                     <div class="flex flex-col gap-2 text-sm text-gray-600">
-                        <p><span class="font-semibold text-black">Email:</span> support@mavnus.com</p>
-                        <p><span class="font-semibold text-black">WhatsApp:</span> +62 812-xxxx-xxxx</p>
-                        <p><span class="font-semibold text-black">Jam operasional:</span> Senin–Jumat, 09.00–17.00 WIB</p>
+                        <p><span class="font-semibold text-black">{{ __('info.contact.email') }}:</span> support@mavnus.com
+                        </p>
+                        <p><span class="font-semibold text-black">{{ __('info.contact.whatsapp') }}:</span> +62
+                            812-xxxx-xxxx</p>
+                        <p><span class="font-semibold text-black">{{ __('info.contact.hours_label') }}:</span>
+                            {{ __('info.contact.hours_value') }}</p>
                     </div>
                 </div>
 
                 {{-- Terms & Conditions --}}
                 <div id="terms" class="scroll-mt-28 flex flex-col gap-3">
-                    <h2 class="text-lg font-bold uppercase tracking-wide border-b border-black/10 pb-3">Terms & Conditions
-                    </h2>
-                    <p class="text-sm text-gray-600 leading-relaxed">
-                        Dengan melakukan pemesanan di Mavnus, kamu dianggap telah membaca dan menyetujui syarat &
-                        ketentuan berikut:
-                    </p>
+                    <h2 class="text-lg font-bold uppercase tracking-wide border-b border-black/10 pb-3">
+                        {{ __('info.terms.title') }}</h2>
+                    <p class="text-sm text-gray-600 leading-relaxed">{{ __('info.terms.p1') }}</p>
                     <ul class="list-disc list-inside text-sm text-gray-600 leading-relaxed flex flex-col gap-1">
-                        <li>Seluruh harga yang tercantum sudah dalam Rupiah dan belum termasuk ongkos kirim.</li>
-                        <li>Stok produk dapat berubah sewaktu-waktu tanpa pemberitahuan sebelumnya.</li>
-                        <li>Mavnus berhak membatalkan pesanan apabila terjadi kendala stok atau pembayaran.</li>
-                        <li>Foto produk adalah representasi asli, namun warna dapat sedikit berbeda tergantung layar
-                            perangkat.</li>
+                        <li>{{ __('info.terms.li1') }}</li>
+                        <li>{{ __('info.terms.li2') }}</li>
+                        <li>{{ __('info.terms.li3') }}</li>
+                        <li>{{ __('info.terms.li4') }}</li>
                     </ul>
                 </div>
 
                 {{-- Privacy Policy --}}
                 <div id="privacy" class="scroll-mt-28 flex flex-col gap-3">
-                    <h2 class="text-lg font-bold uppercase tracking-wide border-b border-black/10 pb-3">Privacy Policy</h2>
-                    <p class="text-sm text-gray-600 leading-relaxed">
-                        Kami menghargai privasi kamu. Data pribadi yang kamu berikan (nama, alamat, kontak) hanya
-                        digunakan untuk keperluan pemrosesan pesanan dan komunikasi terkait transaksi.
-                    </p>
-                    <p class="text-sm text-gray-600 leading-relaxed">
-                        Kami tidak akan membagikan, menjual, atau menyewakan data pribadimu kepada pihak ketiga
-                        tanpa izin, kecuali diwajibkan oleh hukum yang berlaku.
-                    </p>
+                    <h2 class="text-lg font-bold uppercase tracking-wide border-b border-black/10 pb-3">
+                        {{ __('info.privacy.title') }}</h2>
+                    <p class="text-sm text-gray-600 leading-relaxed">{{ __('info.privacy.p1') }}</p>
+                    <p class="text-sm text-gray-600 leading-relaxed">{{ __('info.privacy.p2') }}</p>
                 </div>
 
                 {{-- Cookie Policy --}}
                 <div id="cookie" class="scroll-mt-28 flex flex-col gap-3">
-                    <h2 class="text-lg font-bold uppercase tracking-wide border-b border-black/10 pb-3">Cookie Policy</h2>
-                    <p class="text-sm text-gray-600 leading-relaxed">
-                        Website ini menggunakan cookie untuk meningkatkan pengalaman belanja kamu, seperti
-                        mengingat isi keranjang dan preferensi tampilan. Dengan terus menggunakan situs ini, kamu
-                        menyetujui penggunaan cookie sesuai kebijakan ini.
-                    </p>
+                    <h2 class="text-lg font-bold uppercase tracking-wide border-b border-black/10 pb-3">
+                        {{ __('info.cookie.title') }}</h2>
+                    <p class="text-sm text-gray-600 leading-relaxed">{{ __('info.cookie.p1') }}</p>
                 </div>
 
             </div>

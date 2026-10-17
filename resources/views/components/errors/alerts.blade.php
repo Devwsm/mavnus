@@ -20,7 +20,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             Swal.fire({
                 icon: 'error',
-                title: 'Terjadi kesalahan',
+                title: @json(__('site.alerts.error_title')),
                 // Pesan di-escape lewat JS (bukan disisipkan mentah ke template literal) supaya
                 // karakter ` atau ${ di pesan error tidak bisa merusak/menyuntik script ini
                 html: '<ul style="text-align: left; padding-left: 1.2rem;">' +
@@ -37,7 +37,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             Swal.fire({
                 icon: 'success',
-                title: 'Berhasil',
+                title: @json(__('site.alerts.success_title')),
                 text: @json(session('success')),
                 confirmButtonColor: '#1C7B1C ',
                 timer: 2500,
@@ -52,7 +52,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             Swal.fire({
                 icon: 'error',
-                title: 'Gagal',
+                title: @json(__('site.alerts.failed_title')),
                 text: @json(session('error')),
                 confirmButtonColor: '#B71C1C',
             });

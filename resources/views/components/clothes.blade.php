@@ -2,7 +2,7 @@
 
     <!-- ===================== clothes ===================== -->
     <div class="flex flex-col gap-4">
-        <h1 class="text-2xl md:text-3xl font-bold uppercase tracking-wide mb-2">Clothes</h1>
+        <h1 class="text-2xl md:text-3xl font-bold uppercase tracking-wide mb-2">{{ __('site.nav.clothes') }}</h1>
         @include('components/filters')
 
         <!-- ===================== Product clothes Grid ===================== -->
@@ -32,7 +32,7 @@
                 </a>
             @empty
                 <p class="col-span-full text-center text-black/60 text-sm py-10">
-                    Belum ada produk clothes tersedia.
+                    {{ __('site.listing.empty_clothes') }}
                 </p>
             @endforelse
 

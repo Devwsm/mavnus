@@ -12,28 +12,28 @@
     $navItems = [
         [
             'key' => 'home',
-            'label' => 'Beranda',
+            'label' => __('account.bottom_nav.home'),
             'icon' => 'bi-house',
             'iconActive' => 'bi-house-fill',
             'route' => route('home'),
         ],
         [
             'key' => 'orders',
-            'label' => 'Pesanan',
+            'label' => __('account.bottom_nav.orders'),
             'icon' => 'bi-bag',
             'iconActive' => 'bi-bag-fill',
             'route' => route('account.orders'),
         ],
         [
             'key' => 'account',
-            'label' => 'Akun',
+            'label' => __('account.bottom_nav.account'),
             'icon' => 'bi-person',
             'iconActive' => 'bi-person-fill',
             'route' => route('account'),
         ],
     ];
 @endphp
-<nav aria-label="Navigasi akun"
+<nav aria-label="{{ __('account.bottom_nav.label') }}"
     class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-100 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]"
     style="padding-bottom: env(safe-area-inset-bottom, 0px);">
     <div class="grid grid-cols-4">
@@ -50,7 +50,7 @@
         <button type="button" onclick="confirmLogoutMobile()"
             class="flex flex-col items-center justify-center gap-1 py-2.5 active:bg-gray-50 transition">
             <i class="bi bi-box-arrow-right text-lg text-red-400"></i>
-            <span class="text-[11px] font-semibold text-red-400">Keluar</span>
+            <span class="text-[11px] font-semibold text-red-400">{{ __('account.menu.logout') }}</span>
         </button>
     </div>
 </nav>
@@ -61,11 +61,11 @@
         function confirmLogoutMobile() {
             Swal.fire({
                 icon: 'question',
-                title: 'Keluar dari akun?',
-                text: 'Kamu perlu login lagi untuk mengakses akun & pesanan kamu.',
+                title: @json(__('account.logout.title')),
+                text: @json(__('account.logout.text')),
                 showCancelButton: true,
-                confirmButtonText: 'Ya, keluar',
-                cancelButtonText: 'Batal',
+                confirmButtonText: @json(__('account.logout.confirm')),
+                cancelButtonText: @json(__('account.logout.cancel')),
                 confirmButtonColor: '#B71C1C',
                 cancelButtonColor: '#6b7280',
                 reverseButtons: true,

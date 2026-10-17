@@ -18,7 +18,7 @@
                     class="w-16 h-16 rounded-full bg-white/10 ring-2 ring-white/25 flex items-center justify-center text-2xl font-black uppercase">
                     {{ Str::substr($user->name, 0, 1) }}
                 </div>
-                <a href="{{ route('account.edit') }}" aria-label="Edit Profil"
+                <a href="{{ route('account.edit') }}" aria-label="{{ __('account.menu.edit_profile') }}"
                     class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-white text-black flex items-center justify-center shadow ring-2 ring-black active:scale-90 transition">
                     <i class="bi bi-pencil-fill text-[10px]"></i>
                 </a>
@@ -37,15 +37,15 @@
     <nav class="hidden lg:flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm shadow-black/5">
         <a href="{{ route('account') }}"
             class="flex items-center gap-3 px-5 py-3.5 text-sm font-semibold tracking-wide transition {{ $active === 'account' ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-50' }}">
-            <i class="bi bi-person-fill"></i> Profil Saya
+            <i class="bi bi-person-fill"></i> {{ __('account.menu.profile') }}
         </a>
         <a href="{{ route('account.orders') }}"
             class="flex items-center gap-3 px-5 py-3.5 text-sm font-semibold tracking-wide transition {{ $active === 'orders' ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-50' }}">
-            <i class="bi bi-bag-fill"></i> Riwayat Pesanan
+            <i class="bi bi-bag-fill"></i> {{ __('account.menu.orders') }}
         </a>
         <a href="#" role="button" onclick="event.preventDefault(); confirmLogoutDesktop()"
             class="flex items-center gap-3 px-5 py-3.5 text-sm font-semibold tracking-wide hover:bg-gray-50 transition text-gray-400">
-            <i class="bi bi-box-arrow-right"></i> Keluar
+            <i class="bi bi-box-arrow-right"></i> {{ __('account.menu.logout') }}
         </a>
     </nav>
 </div>
@@ -57,11 +57,11 @@
         function confirmLogoutDesktop() {
             Swal.fire({
                 icon: 'question',
-                title: 'Keluar dari akun?',
-                text: 'Kamu perlu login lagi untuk mengakses akun & pesanan kamu.',
+                title: @json(__('account.logout.title')),
+                text: @json(__('account.logout.text')),
                 showCancelButton: true,
-                confirmButtonText: 'Ya, keluar',
-                cancelButtonText: 'Batal',
+                confirmButtonText: @json(__('account.logout.confirm')),
+                cancelButtonText: @json(__('account.logout.cancel')),
                 confirmButtonColor: '#B71C1C',
                 cancelButtonColor: '#6b7280',
                 reverseButtons: true,

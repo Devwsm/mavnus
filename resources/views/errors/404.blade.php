@@ -2,11 +2,11 @@
 @section('content')
     <div class="min-h-screen bg-black flex flex-col uppercase items-center justify-center text-center px-4">
         <h1 class="text-8xl font-bold text-white">404</h1>
-        <p class="text-2xl font-semibold text-white mt-4">Halaman tidak ditemukan</p>
-        <p class="text-white mt-2">Halaman yang kamu cari tidak ada atau sudah dipindahkan.</p>
+        <p class="text-2xl font-semibold text-white mt-4">{{ __('site.errors.not_found_title') }}</p>
+        <p class="text-white mt-2">{{ __('site.errors.not_found_text') }}</p>
         <a href="{{ route('home') }}"
             class="mt-6 px-4 py-2 bg-white text-black rounded-lg font-semibold hover:bg-gray-100 transition">
-            Kembali ke Beranda
+            {{ __('site.errors.back_home') }}
         </a>
     </div>
 @endsection

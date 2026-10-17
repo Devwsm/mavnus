@@ -37,7 +37,7 @@ class cartController extends Controller
         $product = \App\Models\product::find($validated['product_id']);
         if ($product->is_scheduled) {
             return response()->json([
-                'message' => 'Produk ini belum resmi rilis.',
+                'message' => __('site.cart.not_released'),
             ], 422);
         }
 
@@ -50,17 +50,17 @@ class cartController extends Controller
         if ($product->category === 'clothes') {
             $variant = $variantId ? ProductVariant::find($variantId) : null;
             if (! $variant || $variant->product_id !== $product->id_product) {
-                return response()->json(['message' => 'Pilih ukuran yang tersedia untuk produk ini.'], 422);
+                return response()->json(['message' => __('site.cart.choose_size')], 422);
             }
         } elseif ($variantId) {
-            return response()->json(['message' => 'Produk ini tidak punya pilihan ukuran.'], 422);
+            return response()->json(['message' => __('site.cart.no_sizes')], 422);
         }
 
         // accessories gak punya varian, stoknya langsung dari produk
         $maxStock = $variant ? $variant->stock : (int) $product->stock;
 
         if ($maxStock < 1) {
-            return response()->json(['message' => 'Stok produk ini habis.'], 422);
+            return response()->json(['message' => __('site.cart.sold_out')], 422);
         }
 
         $cartKey = CartSession::key();

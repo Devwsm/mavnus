@@ -36,7 +36,7 @@ class searchController extends Controller
                 return [
                     'name'     => $product->name,
                     'price'    => $product->formatted_price,
-                    'category' => ucfirst($product->category),
+                    'category' => __('site.category.' . $product->category),
                     'image'    => $product->images->first()
                         ? asset('storage/' . $product->images->first()->image_path)
                         : null,

@@ -84,6 +84,12 @@ class Order extends Model
         return $this->isExpired() ? 'Kedaluwarsa' : ucfirst($this->status);
     }
 
+    /** Label status sesuai bahasa yang dipilih pengunjung (dipakai di halaman customer & email). */
+    public function localizedStatus(): string
+    {
+        return __('order.status.' . ($this->isExpired() ? 'expired' : $this->status));
+    }
+
     /**
      * Rapikan filter dari query string: nilai yang bukan string atau tidak valid dibuang
      * (jadi string kosong), tanggal dinormalkan ke Y-m-d, dan from/to ditukar kalau terbalik.

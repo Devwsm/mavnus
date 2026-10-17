@@ -36,12 +36,12 @@ class RajaOngkirService
             ]);
         } catch (ConnectionException $e) {
             Log::warning('RajaOngkir searchDestination gagal konek', ['error' => $e->getMessage()]);
-            throw new RajaOngkirException('Gagal terhubung ke layanan pencarian alamat. Coba lagi dalam beberapa saat.', previous: $e);
+            throw new RajaOngkirException(__('checkout.msg.search_connect_failed'), previous: $e);
         }
 
         if (!$response->successful()) {
             Log::warning('RajaOngkir searchDestination gagal', ['status' => $response->status()]);
-            throw new RajaOngkirException('Layanan pencarian alamat sedang bermasalah. Coba lagi dalam beberapa saat.');
+            throw new RajaOngkirException(__('checkout.msg.search_problem'));
         }
 
         return $response->json('data', []);
@@ -69,12 +69,12 @@ class RajaOngkirService
             ]);
         } catch (ConnectionException $e) {
             Log::warning('RajaOngkir calculateCost gagal konek', ['error' => $e->getMessage()]);
-            throw new RajaOngkirException('Gagal terhubung ke layanan pengiriman. Coba lagi dalam beberapa saat.', previous: $e);
+            throw new RajaOngkirException(__('checkout.msg.cost_connect_failed'), previous: $e);
         }
 
         if (!$response->successful()) {
             Log::warning('RajaOngkir calculateCost gagal', ['status' => $response->status()]);
-            throw new RajaOngkirException('Gagal menghitung ongkos kirim. Coba lagi dalam beberapa saat.');
+            throw new RajaOngkirException(__('checkout.msg.cost_failed'));
         }
 
         $data = $response->json('data', []);

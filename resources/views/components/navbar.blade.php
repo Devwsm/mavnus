@@ -6,7 +6,7 @@
             <!-- Left -->
             <div class="w-1/3 flex items-center">
                 <!-- Burger (mobile/tablet only) -->
-                <button id="menuBtn" type="button" aria-label="Buka menu navigasi" aria-expanded="false"
+                <button id="menuBtn" type="button" aria-label="{{ __('site.nav.open_menu') }}" aria-expanded="false"
                     aria-controls="mobileMenu" class="inline-flex min-h-11 min-w-11 items-center text-3xl lg:hidden">
                     <i class="bi bi-list"></i>
                 </button>
@@ -14,7 +14,7 @@
                 <button id="searchBtnDesktop" type="button" aria-expanded="false" aria-controls="searchBar"
                     class="hidden lg:flex min-h-11 items-center gap-2 text-lg search-toggle-btn">
                     <i class="bi bi-search"></i>
-                    <span class="uppercase text-sm font-semibold tracking-wide">Search</span>
+                    <span class="uppercase text-sm font-semibold tracking-wide">{{ __('site.nav.search') }}</span>
                 </button>
             </div>
 
@@ -37,15 +37,19 @@
 
             <!-- Right -->
             <div class="w-1/3 flex items-center justify-end gap-2 md:gap-4">
+                <!-- Pilih bahasa (desktop). Di mobile/tablet ada di dalam drawer menu -->
+                <div class="hidden lg:block">
+                    @include('components/lang-switcher', ['variant' => 'dropdown', 'uid' => 'langDesktop'])
+                </div>
                 <!-- Account & Cart (selalu tampil) -->
-                <a href="{{ route('account') }}" aria-label="Akun Saya"
+                <a href="{{ route('account') }}" aria-label="{{ __('site.nav.my_account') }}"
                     class="hidden lg:inline-flex min-h-11 min-w-11 items-center justify-center text-lg {{ request()->routeIs('account', 'account.*') ? 'text-white' : 'text-white/70 hover:text-white' }} transition">
                     <i class="bi {{ request()->routeIs('account', 'account.*') ? 'bi-person-fill' : 'bi-person' }}"
                         aria-hidden="true"></i>
                 </a>
                 <!-- Search (mobile/tablet saja, desktop pakai tombol di kiri) -->
-                <button id="searchBtnMobile" type="button" aria-label="Buka pencarian" aria-expanded="false"
-                    aria-controls="searchBar"
+                <button id="searchBtnMobile" type="button" aria-label="{{ __('site.nav.open_search') }}"
+                    aria-expanded="false" aria-controls="searchBar"
                     class="inline-flex min-h-11 min-w-11 items-center justify-center text-lg lg:hidden search-toggle-btn">
                     <i class="bi bi-search"></i>
                 </button>
@@ -57,15 +61,15 @@
         <div class="hidden lg:flex items-center justify-center gap-10 py-3 border-t border-white/10">
             <a href="{{ route('home') }}"
                 class="{{ request()->routeIs('home') ? 'text-white' : 'text-white/50 hover:text-white/80' }} transition">
-                <span class="font-bold uppercase text-sm tracking-wide">Home</span>
+                <span class="font-bold uppercase text-sm tracking-wide">{{ __('site.nav.home') }}</span>
             </a>
             <a href="{{ route('clothes') }}"
                 class="{{ request()->routeIs('clothes', 'product_detail.clothes') ? 'text-white' : 'text-white/50 hover:text-white/80' }} transition">
-                <span class="font-bold uppercase text-sm tracking-wide">clothes</span>
+                <span class="font-bold uppercase text-sm tracking-wide">{{ __('site.nav.clothes') }}</span>
             </a>
             <a href="{{ route('accessoris') }}"
                 class="{{ request()->routeIs('accessoris', 'product_detail.accessories') ? 'text-white' : 'text-white/50 hover:text-white/80' }} transition">
-                <span class="font-bold uppercase text-sm tracking-wide">Accessories</span>
+                <span class="font-bold uppercase text-sm tracking-wide">{{ __('site.nav.accessories') }}</span>
             </a>
         </div>
     </div>
@@ -76,8 +80,8 @@
         -translate-y-full opacity-0 transition-all duration-300">
         <div class="flex items-center gap-3 bg-white/10 rounded-full px-4 py-2 lg:max-w-md lg:mx-auto">
             <i class="bi bi-search text-lg" aria-hidden="true"></i>
-            <label for="searchInput" class="sr-only">Cari produk</label>
-            <input id="searchInput" type="text" placeholder="Clothes, Accessoris....."
+            <label for="searchInput" class="sr-only">{{ __('site.nav.search_label') }}</label>
+            <input id="searchInput" type="text" placeholder="{{ __('site.nav.search_placeholder') }}"
                 class="bg-transparent outline-none placeholder-white/70 text-white w-full text-sm" autocomplete="off">
         </div>
 
@@ -97,22 +101,23 @@
         class="fixed top-0 left-0 h-full w-3/4 md:w-1/2 sm:w-2/5 bg-black text-white z-60
         flex flex-col items-start justify-center gap-7 px-8
         -translate-x-full transition-transform duration-300">
-        <button id="closeBtn" type="button" aria-label="Tutup menu navigasi" class="absolute top-5 right-5 text-3xl">
+        <button id="closeBtn" type="button" aria-label="{{ __('site.nav.close_menu') }}"
+            class="absolute top-5 right-5 text-3xl">
             <i class="bi bi-x"></i>
         </button>
 
         @php
             $drawerLinks = [
-                ['route' => route('home'), 'active' => request()->routeIs('home'), 'label' => 'Home'],
+                ['route' => route('home'), 'active' => request()->routeIs('home'), 'label' => __('site.nav.home')],
                 [
                     'route' => route('clothes'),
                     'active' => request()->routeIs('clothes', 'product_detail.clothes'),
-                    'label' => 'clothes',
+                    'label' => __('site.nav.clothes'),
                 ],
                 [
                     'route' => route('accessoris'),
                     'active' => request()->routeIs('accessoris', 'product_detail.accessories'),
-                    'label' => 'Accessories',
+                    'label' => __('site.nav.accessories'),
                 ],
             ];
         @endphp
@@ -134,12 +139,24 @@
                 <span class="w-1.5 h-1.5 rounded-full bg-[#5E0006] shrink-0"></span>
             @endif
             <i class="bi {{ $accountActive ? 'bi-person-fill' : 'bi-person' }} text-xl" aria-hidden="true"></i>
-            <span class="text-xl font-bold uppercase">Akun Saya</span>
+            <span class="text-xl font-bold uppercase">{{ __('site.nav.my_account') }}</span>
         </a>
+
+        <!-- Pilih bahasa (mobile/tablet) -->
+        <div class="w-full border-t border-white/10 pt-5">
+            <p class="text-xs uppercase tracking-widest text-white/60 mb-2">{{ __('site.lang.label') }}</p>
+            @include('components/lang-switcher', ['variant' => 'list', 'uid' => 'langDrawer'])
+        </div>
     </div>
 </div>
 
 <script>
+    // Teks untuk JavaScript (ikut bahasa yang dipilih)
+    const navI18n = @js([
+    'searchError' => __('site.nav.search_error'),
+    'searchEmpty' => __('site.nav.search_empty'),
+]);
+
     const menuBtn = document.getElementById("menuBtn");
     const closeBtn = document.getElementById("closeBtn");
     const mobileMenu = document.getElementById("mobileMenu");
@@ -259,7 +276,7 @@
                 .catch((err) => {
                     if (err.name === 'AbortError') return;
                     searchResults.innerHTML =
-                        `<p class="text-white/60 text-sm p-4">Terjadi kesalahan, coba lagi.</p>`;
+                        `<p class="text-white/60 text-sm p-4">${escapeHtml(navI18n.searchError)}</p>`;
                     searchResults.classList.remove("hidden");
                 });
         }, 300);
@@ -267,7 +284,7 @@
 
     function renderSearchResults(results) {
         if (results.length === 0) {
-            searchResults.innerHTML = `<p class="text-white/60 text-sm p-4">Produk tidak ditemukan.</p>`;
+            searchResults.innerHTML = `<p class="text-white/60 text-sm p-4">${escapeHtml(navI18n.searchEmpty)}</p>`;
             searchResults.classList.remove("hidden");
             return;
         }

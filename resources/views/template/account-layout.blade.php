@@ -9,7 +9,7 @@
         (dipakai account-edit.blade.php karena udah ada sticky "Simpan Perubahan" sendiri)
 --}}
 <!DOCTYPE html>
-<html lang="id">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="UTF-8">
@@ -17,15 +17,15 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'Mavnus - Clothing & Accessories')</title>
-    <meta name="description" content="@yield('meta_description', 'Mavnus - Belanja clothes dan accessories original dengan kualitas terbaik.')">
+    <title>@yield('title', __('site.meta.default_title'))</title>
+    <meta name="description" content="@yield('meta_description', __('site.meta.default_description'))">
     <link rel="canonical" href="{{ url()->current() }}">
 
     {{-- Open Graph / Social share --}}
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Mavnus">
-    <meta property="og:title" content="@yield('title', 'Mavnus - Clothing & Accessories')">
-    <meta property="og:description" content="@yield('meta_description', 'Mavnus - Belanja clothes dan accessories original dengan kualitas terbaik.')">
+    <meta property="og:title" content="@yield('title', __('site.meta.default_title'))">
+    <meta property="og:description" content="@yield('meta_description', __('site.meta.default_description'))">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:image" content="@yield('og_image', asset('aset/logo/Whisnu-Santika_Logo-2025-2-White.png'))">
 
