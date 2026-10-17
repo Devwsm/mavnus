@@ -28,6 +28,7 @@ class TrackVisit
         'sitemap.xml',
         'robots.txt',
         'newsletter',
+        'lang',
     ];
 
     public function handle(Request $request, Closure $next): Response

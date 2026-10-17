@@ -7,6 +7,7 @@ use App\Http\Controllers\productController;
 use App\Http\Controllers\dashboardController;
 use App\Http\Controllers\homeController;
 use App\Http\Controllers\importExportController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\loginController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\orderController;
@@ -136,6 +137,12 @@ Route::prefix('/')->group(function () {
     });
 
     Route::get('/info', [homeController::class, 'footerInfo'])->name('footer');
+
+    // Ganti bahasa (id / en) - dipakai switcher bendera di navbar & footer
+    Route::get('/lang/{locale}', [LocaleController::class, 'switch'])
+        ->whereIn('locale', ['id', 'en'])
+        ->name('lang.switch')
+        ->middleware('throttle:30,1,lang');
 
     Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
     Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');

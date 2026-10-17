@@ -17,4 +17,14 @@ return [
     // Kirim email konfirmasi ke pembeli setelah checkout. Default MATI: aktifkan hanya setelah
     // MAIL_* di .env server (SMTP) sudah diisi dan diuji.
     'order_email_enabled' => (bool) env('ORDER_EMAIL_ENABLED', false),
+
+    // Bahasa yang tersedia di website (kode => nama asli bahasanya). File terjemahan ada di folder lang/.
+    // Dibaca langsung dari config (bukan APP_LOCALE di .env) supaya default selalu Bahasa Indonesia.
+    'locales' => [
+        'id' => 'Bahasa Indonesia',
+        'en' => 'English',
+    ],
+
+    // Bahasa yang dipakai kalau pengunjung belum pernah memilih
+    'default_locale' => 'id',
 ];
