@@ -29,7 +29,7 @@ class RajaOngkirService
     public function searchDestination(string $keyword): array
     {
         try {
-            $response = Http::withoutVerifying()->timeout(10)->withHeaders([
+            $response = Http::timeout(10)->withHeaders([
                 'key' => $this->apiKey,
             ])->get("{$this->baseUrl}/destination/domestic-destination", [
                 'search' => $keyword,
@@ -58,7 +58,7 @@ class RajaOngkirService
     public function calculateCost(int $destinationId, int $weight, array $couriers = ['jne', 'jnt', 'sicepat']): array
     {
         try {
-            $response = Http::withoutVerifying()->timeout(10)->asForm()->withHeaders([
+            $response = Http::timeout(10)->asForm()->withHeaders([
                 'key' => $this->apiKey,
             ])->post("{$this->baseUrl}/calculate/domestic-cost", [
                 'origin'      => $this->originId,

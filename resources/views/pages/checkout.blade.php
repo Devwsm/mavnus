@@ -95,7 +95,7 @@
                         <input type="email" id="customer_email" name="customer_email" autocomplete="email" required
                             maxlength="255" value="{{ old('customer_email', auth()->user()->email ?? '') }}"
                             class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black"
-                            placeholder="nama@email.com">
+                            placeholder="{{ __('auth.email_placeholder') }}">
                         <p class="text-xs text-gray-400 mt-1.5">{{ __('checkout.email_hint') }}</p>
                     </div>
                     <div class="relative">

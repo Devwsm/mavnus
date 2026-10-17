@@ -40,18 +40,12 @@ class accountController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // Akun yang daftar/login lewat Google gak punya password yang
-        // mereka tau (diisi random di belakang layar, lihat authController),
-        // jadi konfirmasi "password saat ini" cuma diwajibkan buat akun
-        // yang emang daftar manual pakai email & password.
-        $requiresPasswordConfirmation = ! $user->google_id;
-
         $validated = $request->validate([
             'name'             => 'required|string|max:255',
             'email'            => 'required|email|max:255|unique:users,email,' . $user->id,
             'phone'            => ['nullable', 'regex:/^[0-9]{9,15}$/'],
             'address'          => 'nullable|string|max:1000',
-            'current_password' => $requiresPasswordConfirmation ? 'required|string' : 'nullable|string',
+            'current_password' => 'required|string',
         ], [
             'name.required'             => __('account.validation.name_required'),
             'email.required'            => __('account.validation.email_required'),
@@ -63,7 +57,7 @@ class accountController extends Controller
 
         // Konfirmasi password saat ini - biar perubahan data (apalagi ganti email)
         // gak bisa dilakuin sembarangan kalau sesi ke-hijack orang lain
-        if ($requiresPasswordConfirmation && ! Hash::check($validated['current_password'], $user->password)) {
+        if (! Hash::check($validated['current_password'], $user->password)) {
             return back()->withErrors(['current_password' => __('account.msg.wrong_password')])->withInput();
         }
 
@@ -88,18 +82,16 @@ class accountController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // Akun Google gak punya password yang mereka tau (lihat catatan
-        // yang sama di update()), jadi gak perlu konfirmasi password.
-        if (! $user->google_id) {
-            $validated = $request->validate([
-                'password' => 'required|string',
-            ], [
-                'password.required' => __('account.msg.delete_password_required'),
-            ]);
+        // Hapus akun wajib konfirmasi password, supaya sesi yang ke-hijack
+        // gak bisa dipakai buat menghapus akun orang.
+        $validated = $request->validate([
+            'password' => 'required|string',
+        ], [
+            'password.required' => __('account.msg.delete_password_required'),
+        ]);
 
-            if (! Hash::check($validated['password'], $user->password)) {
-                return back()->withErrors(['password' => __('account.msg.wrong_password')]);
-            }
+        if (! Hash::check($validated['password'], $user->password)) {
+            return back()->withErrors(['password' => __('account.msg.wrong_password')]);
         }
 
         Auth::logout();

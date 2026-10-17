@@ -3,6 +3,7 @@
 return [
     'email' => 'Email',
     'password' => 'Password',
+    'email_placeholder' => 'name@email.com',
     'login' => [
         'title' => 'Sign In - Mavnus',
         'heading' => 'Sign In',

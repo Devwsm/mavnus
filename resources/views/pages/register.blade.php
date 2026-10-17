@@ -26,7 +26,7 @@
                         <label for="email" class="block text-sm font-semibold mb-1.5">{{ __('auth.email') }}</label>
                         <input type="email" id="email" name="email" value="{{ old('email') }}"
                             class="w-full border border-black/10 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-black"
-                            placeholder="nama@email.com">
+                            placeholder="{{ __('auth.email_placeholder') }}">
                     </div>
 
                     <div>

@@ -72,9 +72,7 @@
                         </div>
                     </div>
 
-                    @if (!$user->google_id)
-                        <input type="hidden" name="current_password" id="currentPasswordField">
-                    @endif
+                    <input type="hidden" name="current_password" id="currentPasswordField">
 
                     {{-- Tombol simpan: dalam form buat desktop --}}
                     <button type="button" onclick="confirmSaveProfile()"
@@ -92,9 +90,7 @@
                     <form id="deleteAccountForm" action="{{ route('account.destroy') }}" method="POST" class="hidden">
                         @csrf
                         @method('DELETE')
-                        @if (!$user->google_id)
-                            <input type="hidden" name="password" id="deleteAccountPasswordField">
-                        @endif
+                        <input type="hidden" name="password" id="deleteAccountPasswordField">
                     </form>
                     <button type="button" onclick="confirmDeleteAccount()"
                         class="self-start flex items-center gap-2 text-xs font-semibold text-[#B71C1C] hover:underline mt-1">
@@ -115,87 +111,65 @@
                 // duluan padahal ada field lain yang belum keisi bener.
                 if (!form.reportValidity()) return;
 
-                @if ($user->google_id)
-                    form.submit();
-                @else
-                    Swal.fire({
-                        icon: 'question',
-                        title: @json(__('account.edit.save_title')),
-                        text: @json(__('account.edit.save_text')),
-                        input: 'password',
-                        inputPlaceholder: @json(__('account.edit.password_placeholder')),
-                        inputAttributes: {
-                            autocapitalize: 'off',
-                            autocomplete: 'current-password',
-                        },
-                        showCancelButton: true,
-                        confirmButtonText: @json(__('account.edit.yes_save')),
-                        cancelButtonText: @json(__('account.logout.cancel')),
-                        confirmButtonColor: '#000000',
-                        cancelButtonColor: '#6b7280',
-                        reverseButtons: true,
-                        preConfirm: (password) => {
-                            if (!password) {
-                                Swal.showValidationMessage(@json(__('account.edit.password_required')));
-                            }
-                            return password;
-                        },
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            document.getElementById('currentPasswordField').value = result.value;
-                            form.submit();
+                Swal.fire({
+                    icon: 'question',
+                    title: @json(__('account.edit.save_title')),
+                    text: @json(__('account.edit.save_text')),
+                    input: 'password',
+                    inputPlaceholder: @json(__('account.edit.password_placeholder')),
+                    inputAttributes: {
+                        autocapitalize: 'off',
+                        autocomplete: 'current-password',
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: @json(__('account.edit.yes_save')),
+                    cancelButtonText: @json(__('account.logout.cancel')),
+                    confirmButtonColor: '#000000',
+                    cancelButtonColor: '#6b7280',
+                    reverseButtons: true,
+                    preConfirm: (password) => {
+                        if (!password) {
+                            Swal.showValidationMessage(@json(__('account.edit.password_required')));
                         }
-                    });
-                @endif
+                        return password;
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('currentPasswordField').value = result.value;
+                        form.submit();
+                    }
+                });
             }
 
             function confirmDeleteAccount() {
-                @if ($user->google_id)
-                    Swal.fire({
-                        icon: 'warning',
-                        title: @json(__('account.edit.delete_confirm_title')),
-                        text: @json(__('account.edit.delete_confirm_text')),
-                        showCancelButton: true,
-                        confirmButtonText: @json(__('account.edit.yes_delete')),
-                        cancelButtonText: @json(__('account.logout.cancel')),
-                        confirmButtonColor: '#B71C1C',
-                        cancelButtonColor: '#6b7280',
-                        reverseButtons: true,
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            document.getElementById('deleteAccountForm').submit();
+                Swal.fire({
+                    icon: 'warning',
+                    title: @json(__('account.edit.delete_confirm_title')),
+                    text: @json(__('account.edit.delete_confirm_text')),
+                    input: 'password',
+                    inputPlaceholder: @json(__('account.edit.delete_password_placeholder')),
+                    inputAttributes: {
+                        autocapitalize: 'off',
+                        autocomplete: 'current-password',
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: @json(__('account.edit.yes_delete')),
+                    cancelButtonText: @json(__('account.logout.cancel')),
+                    confirmButtonColor: '#B71C1C',
+                    cancelButtonColor: '#6b7280',
+                    reverseButtons: true,
+                    preConfirm: (password) => {
+                        if (!password) {
+                            Swal.showValidationMessage(@json(__('account.edit.password_required')));
                         }
-                    });
-                @else
-                    Swal.fire({
-                        icon: 'warning',
-                        title: @json(__('account.edit.delete_confirm_title')),
-                        text: @json(__('account.edit.delete_confirm_text')),
-                        input: 'password',
-                        inputPlaceholder: @json(__('account.edit.delete_password_placeholder')),
-                        inputAttributes: {
-                            autocapitalize: 'off',
-                            autocomplete: 'current-password',
-                        },
-                        showCancelButton: true,
-                        confirmButtonText: @json(__('account.edit.yes_delete')),
-                        cancelButtonText: @json(__('account.logout.cancel')),
-                        confirmButtonColor: '#B71C1C',
-                        cancelButtonColor: '#6b7280',
-                        reverseButtons: true,
-                        preConfirm: (password) => {
-                            if (!password) {
-                                Swal.showValidationMessage(@json(__('account.edit.password_required')));
-                            }
-                            return password;
-                        },
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            document.getElementById('deleteAccountPasswordField').value = result.value;
-                            document.getElementById('deleteAccountForm').submit();
-                        }
-                    });
-                @endif
+                        return password;
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('deleteAccountPasswordField').value = result.value;
+                        document.getElementById('deleteAccountForm').submit();
+                    }
+                });
             }
         </script>
     @endonce
