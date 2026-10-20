@@ -1,5 +1,5 @@
 <button type="button" onclick="openCart()" aria-label="{{ __('site.cart.open') }}"
-    class="relative inline-flex min-h-11 min-w-11 items-center justify-center text-lg">
+    class="relative inline-flex min-h-11 min-w-10 items-center justify-center text-lg">
     <i class="bi bi-bag" aria-hidden="true"></i>
     {{-- Jumlah dirender server ($cartCount dari View composer), jadi tidak perlu fetch() tambahan tiap halaman dibuka --}}
     <span

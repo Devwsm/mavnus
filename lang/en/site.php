@@ -58,6 +58,8 @@ return [
     'home' => [
         'title' => 'Mavnus - Original Clothing & Accessories',
         'description' => 'Shop original Mavnus clothes and accessories. Top quality, exclusive designs, shipping across Indonesia.',
+        'heading' => 'Mavnus — Official Merchandise Whisnu Santika',
+        'banner_alt' => 'Mavnus - Official Merchandise Whisnu Santika',
         'shop_all' => 'Shop All',
     ],
     'listing' => [

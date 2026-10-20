@@ -16,7 +16,7 @@
     <div class="relative" data-lang-switcher>
         <button type="button" id="{{ $uid }}Btn" aria-haspopup="true" aria-expanded="false"
             aria-controls="{{ $uid }}Menu" aria-label="{{ __('site.lang.change') }}"
-            class="inline-flex min-h-11 items-center gap-1.5 px-2 text-white/80 hover:text-white transition">
+            class="inline-flex min-h-11 items-center gap-1 px-1.5 text-white/80 hover:text-white transition">
             @include('components.flag', ['code' => $current, 'class' => 'w-6 h-4'])
             <i class="bi bi-chevron-down text-xs" aria-hidden="true"></i>
         </button>

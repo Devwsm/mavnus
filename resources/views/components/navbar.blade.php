@@ -36,21 +36,21 @@
             </div>
 
             <!-- Right -->
-            <div class="w-1/3 flex items-center justify-end gap-2 md:gap-4">
+            <div class="w-1/3 flex items-center justify-end gap-0.5 lg:gap-1">
                 <!-- Pilih bahasa (desktop). Di mobile/tablet ada di dalam drawer menu -->
                 <div class="hidden lg:block">
                     @include('components/lang-switcher', ['variant' => 'dropdown', 'uid' => 'langDesktop'])
                 </div>
                 <!-- Account & Cart (selalu tampil) -->
                 <a href="{{ route('account') }}" aria-label="{{ __('site.nav.my_account') }}"
-                    class="hidden lg:inline-flex min-h-11 min-w-11 items-center justify-center text-lg {{ request()->routeIs('account', 'account.*') ? 'text-white' : 'text-white/70 hover:text-white' }} transition">
+                    class="hidden lg:inline-flex min-h-11 min-w-10 items-center justify-center text-lg {{ request()->routeIs('account', 'account.*') ? 'text-white' : 'text-white/70 hover:text-white' }} transition">
                     <i class="bi {{ request()->routeIs('account', 'account.*') ? 'bi-person-fill' : 'bi-person' }}"
                         aria-hidden="true"></i>
                 </a>
                 <!-- Search (mobile/tablet saja, desktop pakai tombol di kiri) -->
                 <button id="searchBtnMobile" type="button" aria-label="{{ __('site.nav.open_search') }}"
                     aria-expanded="false" aria-controls="searchBar"
-                    class="inline-flex min-h-11 min-w-11 items-center justify-center text-lg lg:hidden search-toggle-btn">
+                    class="inline-flex min-h-11 min-w-10 items-center justify-center text-lg lg:hidden search-toggle-btn">
                     <i class="bi bi-search"></i>
                 </button>
                 @include('components/cart')

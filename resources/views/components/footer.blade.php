@@ -39,18 +39,18 @@
                 </a>
                 <p class="text-sm text-white/70 leading-relaxed max-w-xs">{{ __('site.footer.about') }}</p>
 
-                <div class="flex items-center gap-1 text-lg">
+                <div class="flex items-center gap-0.5 text-lg">
                     <a href="https://www.instagram.com/whisnusantika/" target="_blank" rel="noopener noreferrer"
                         aria-label="Instagram Whisnu Santika"
-                        class="inline-flex min-h-11 min-w-11 items-center justify-center hover:opacity-70 transition"><i
+                        class="inline-flex min-h-11 min-w-10 items-center justify-center hover:opacity-70 transition"><i
                             class="bi bi-instagram" aria-hidden="true"></i></a>
                     <a href="https://www.youtube.com/@WhisnuSantika" target="_blank" rel="noopener noreferrer"
                         aria-label="YouTube Whisnu Santika"
-                        class="inline-flex min-h-11 min-w-11 items-center justify-center hover:opacity-70 transition"><i
+                        class="inline-flex min-h-11 min-w-10 items-center justify-center hover:opacity-70 transition"><i
                             class="bi bi-youtube" aria-hidden="true"></i></a>
                     <a href="https://open.spotify.com/artist/6gvsmDZKW5wRvjKCPnbHDh?si=7jt9_kpmTsCcL-pVJYnblQ"
                         target="_blank" rel="noopener noreferrer" aria-label="Spotify Whisnu Santika"
-                        class="inline-flex min-h-11 min-w-11 items-center justify-center hover:opacity-70 transition"><i
+                        class="inline-flex min-h-11 min-w-10 items-center justify-center hover:opacity-70 transition"><i
                             class="bi bi-spotify" aria-hidden="true"></i></a>
                 </div>
             </div>

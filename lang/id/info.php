@@ -7,7 +7,7 @@ return [
     'subheading' => 'Semua yang perlu kamu tahu soal belanja di Mavnus.',
     'search' => [
         'title' => 'Pencarian',
-        'p1' => 'Gunakan ikon kaca pembesar di navbar untuk mencari produk berdasarkan nama, baik itu clothes maupun accessories. Hasil pencarian akan muncul secara langsung saat kamu mengetik.',
+        'p1' => 'Gunakan ikon kaca pembesar di navbar untuk mencari produk berdasarkan nama, baik itu pakaian maupun aksesori. Hasil pencarian akan muncul secara langsung saat kamu mengetik.',
         'p2' => 'Belum menemukan yang kamu cari? Coba kata kunci yang lebih umum, atau jelajahi kategori lewat menu navigasi utama.',
     ],
     'returns' => [
