@@ -6,18 +6,10 @@ use App\Models\account;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
+// Login STAFF/crew (tabel accounts). Login & daftar pembeli ada di authController.
 class loginController extends Controller
 {
-    //
-    // Method login() customer dipindah ke authController.
-    // View 'pages.login' sekarang di-render lewat authController context
-    // (route GET /login masih nunjuk ke sini cuma buat nampilin view-nya doang).
-    public function login()
-    {
-        return view('pages.login');
-    }
-
-    // Login STAFF/crew - halaman terpisah, gak dilink di mana pun di sisi customer
+    // Halaman login staff - gak dilink di mana pun di sisi customer
     public function crewLogin()
     {
         return view('pages.crew-login');
@@ -35,14 +27,10 @@ class loginController extends Controller
         ]);
 
         $user = account::where('username', $request->username)->first();
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            // Pesan sengaja dibuat generik — tidak bocorkan mana yang salah
-            return back()->withErrors(['login' => 'Username atau password salah.'])->onlyInput('username');
-        }
 
-        if (!$user->is_active) {
-            // Akun staff dinonaktifkan (mis. resign) — jangan bocorin alasannya,
-            // cukup pesan generik yang sama kayak "user tidak ditemukan".
+        // Satu pesan generik untuk semua penyebab (user tidak ada, password salah, akun
+        // dinonaktifkan/resign) supaya tidak membocorkan mana yang salah.
+        if (! $user || ! Hash::check($request->password, $user->password) || ! $user->is_active) {
             return back()->withErrors(['login' => 'Username atau password salah.'])->onlyInput('username');
         }
 
@@ -50,11 +38,6 @@ class loginController extends Controller
         $request->session()->regenerate();
         $request->session()->put('login', true);
         $request->session()->put('user', $user->username);
-        // Role & nama disimpan di session saat login supaya middleware/view
-        // gak perlu query ulang tiap request. Konsekuensinya: kalau role
-        // staff diubah lewat "Kelola Akun Staff" pas dia lagi login, efeknya
-        // baru kepakai setelah dia login ulang — cukup buat kasus ini.
-        $request->session()->put('role', $user->role);
         $request->session()->put('name', $user->name);
 
         // Pakai key intended sendiri ('staff_intended_url'), JANGAN pakai
@@ -71,7 +54,7 @@ class loginController extends Controller
         // Cuma bersihkan data punya sesi staff, JANGAN invalidate() seluruh session —
         // itu juga bakal ngehapus status login customer (guard 'web') yang numpang
         // di session yang sama, jadi customer ikut ke-logout.
-        $request->session()->forget(['login', 'user', 'role', 'name']);
+        $request->session()->forget(account::SESSION_KEYS);
         // Tetap regenerate ID + token session buat keamanan, tanpa flush data lain.
         $request->session()->regenerate();
         return redirect()->route('home');

@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\Hash;
 
 class authController extends Controller
 {
+    // Halaman masuk akun customer
+    public function login()
+    {
+        return view('pages.login');
+    }
+
     // Halaman daftar akun customer
     public function register()
     {

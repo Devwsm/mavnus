@@ -43,20 +43,18 @@ class productController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        // Varian clothes dengan stok menipis (1-3 pcs) dari produk yang masih aktif
+        // Varian clothes & accessories dengan stok menipis (1-3 pcs) dari produk yang masih aktif.
+        // Accessories punya stok tunggal di produknya, bukan varian.
         $lowStockVariants = ProductVariant::with('product.images')
-            ->whereHas('product', fn($query) => $query->where('is_active', true))
-            ->where('stock', '>', 0)
-            ->where('stock', '<=', 3)
+            ->forActiveProduct()
+            ->lowStock()
             ->orderBy('stock')
             ->get();
 
-        // Accessories dengan stok menipis (1-3 pcs) — stok tunggal, bukan variant
         $lowStockAccessories = product::accessoriesCategory()
             ->with('images', 'accessories')
             ->where('is_active', true)
-            ->where('stock', '>', 0)
-            ->where('stock', '<=', 3)
+            ->lowStock()
             ->orderBy('stock')
             ->get();
 

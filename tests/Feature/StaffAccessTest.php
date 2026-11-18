@@ -47,31 +47,32 @@ class StaffAccessTest extends StoreTestCase
         $this->get('/dashboard/orders')->assertRedirect(route('crew.login'));
     }
 
-    public function test_role_downgrade_applies_without_relogin(): void
+    public function test_every_active_staff_can_open_every_dashboard_page_regardless_of_role(): void
     {
-        $staff = $this->makeStaff('owner');
-        $this->actingAsStaff($staff);
-        $this->get('/dashboard/visitors')->assertOk();
+        $pages = [
+            '/dashboard',
+            '/dashboard/orders',
+            '/dashboard/members',
+            '/dashboard/produk',
+            '/dashboard/visitors',
+            '/dashboard/import-export',
+        ];
 
-        $staff->update(['role' => 'staff_pesanan']);
+        // Role belum dipakai membatasi akses: semua akun staf aktif punya akses yang sama
+        foreach (['owner', 'admin_produk', 'staff_pesanan'] as $role) {
+            $this->actingAsStaff($this->makeStaff($role, true, "crew-{$role}"));
 
-        $this->get('/dashboard/visitors')->assertRedirect(route('dashboard'));
+            foreach ($pages as $page) {
+                $this->get($page)->assertOk();
+            }
+        }
     }
 
-    public function test_product_admin_cannot_open_orders_or_database_export(): void
+    public function test_dashboard_pages_stay_closed_to_guests(): void
     {
-        $this->actingAsStaff($this->makeStaff('admin_produk'));
-
-        $this->get('/dashboard/orders')->assertRedirect(route('dashboard'));
-        $this->get('/dashboard/import-export/database/export')->assertRedirect(route('dashboard'));
-        $this->get('/dashboard/import-export/storage/export')->assertRedirect(route('dashboard'));
-    }
-
-    public function test_order_staff_cannot_manage_products(): void
-    {
-        $this->actingAsStaff($this->makeStaff('staff_pesanan'));
-
-        $this->get('/dashboard/produk')->assertRedirect(route('dashboard'));
+        foreach (['/dashboard', '/dashboard/orders', '/dashboard/members', '/dashboard/import-export/database/export'] as $page) {
+            $this->get($page)->assertRedirect(route('crew.login'));
+        }
     }
 
     public function test_customer_login_does_not_grant_staff_access(): void

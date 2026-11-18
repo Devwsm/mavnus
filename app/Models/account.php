@@ -13,6 +13,9 @@ class account extends Model
         'username',
         'name',
         'password',
+        // Kolom role masih disimpan di database tapi sementara TIDAK dipakai membatasi akses:
+        // semua akun staf aktif punya akses yang sama ke dashboard. Disimpan supaya role bisa
+        // dihidupkan lagi nanti tanpa migrasi.
         'role',
         'is_active',
     ];
@@ -21,16 +24,7 @@ class account extends Model
         'is_active' => 'boolean',
     ];
 
-    // 3 role yang valid di sistem. Dipakai buat validasi form & referensi
-    // di tempat lain (dropdown pilih role, dsb) biar gak ada string "nyasar".
-    public const ROLES = [
-        'owner'         => 'Owner',
-        'admin_produk'  => 'Admin Produk',
-        'staff_pesanan' => 'Staff Pesanan',
-    ];
-
-    public function isOwner(): bool
-    {
-        return $this->role === 'owner';
-    }
+    // Key session milik sesi staff (login lewat /crew-portal). Dipakai saat login, logout,
+    // dan saat sesi dinyatakan tidak berlaku lagi, supaya daftarnya tidak tersebar di banyak file.
+    public const SESSION_KEYS = ['login', 'user', 'name'];
 }

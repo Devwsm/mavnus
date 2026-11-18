@@ -6,11 +6,19 @@ use App\Exports\OrdersExport;
 use App\Models\Order;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 class importExportController extends Controller
 {
+    /**
+     * Tabel yang isinya tidak ikut backup karena cuma data sementara. Terutama `sessions`
+     * (ID & payload sesi login staf/customer) yang tidak boleh tersebar lewat file backup.
+     * Strukturnya tetap ikut di-backup, datanya saja yang dilewati.
+     */
+    private const SKIP_DATA_TABLES = ['sessions', 'cache', 'cache_locks', 'jobs', 'job_batches', 'failed_jobs', 'password_reset_tokens'];
+
     /**
      * Halaman utama Import/Export di dashboard.
      */
@@ -19,7 +27,7 @@ class importExportController extends Controller
         return view('pages.dashboard.import-export');
     }
 
-    // ================= Export Excel (laporan, buat staff) =================
+    // ================= Invoice & laporan pesanan =================
 
     /**
      * Download data order sebagai Excel — format tabular sederhana untuk diolah,
@@ -27,36 +35,26 @@ class importExportController extends Controller
      */
     public function exportOrders(Request $request)
     {
-        try {
+        return $this->safely('Gagal export data order.', function () use ($request) {
             $export = new OrdersExport($this->orderFilters($request));
 
             if ($export->collection()->isEmpty()) {
                 return $this->noOrdersFound();
             }
 
-            $filename = 'mavnus-order-' . now()->format('Y-m-d_His') . '.xlsx';
-            return Excel::download($export, $filename);
-        } catch (\Throwable $e) {
-            report($e);
-            return redirect()
-                ->route('dashboard.import-export')
-                ->with('error', 'Gagal export data order. Detail error tercatat di log server.');
-        }
+            return Excel::download($export, 'mavnus-order-' . $this->timestamp() . '.xlsx');
+        });
     }
 
     /**
      * Preview invoice semua order dalam bentuk HTML, dibuka di tab baru
-     * sebelum staff memutuskan untuk download versi Excel-nya.
+     * sebelum staff memutuskan untuk download versi PDF/Excel-nya.
      */
     public function ordersInvoicePreview(Request $request)
     {
-        $orders = Order::with('items')->filter($this->orderFilters($request))->latest()->get();
+        $orders = $this->filteredOrders($request);
 
-        if ($orders->isEmpty()) {
-            return $this->noOrdersFound();
-        }
-
-        return view('exports.orders-invoice', compact('orders'));
+        return $orders->isEmpty() ? $this->noOrdersFound() : view('exports.orders-invoice', compact('orders'));
     }
 
     /**
@@ -65,23 +63,13 @@ class importExportController extends Controller
      */
     public function exportOrdersPdf(Request $request)
     {
-        try {
-            $orders = Order::with('items')->filter($this->orderFilters($request))->latest()->get();
+        return $this->safely('Gagal export invoice PDF.', function () use ($request) {
+            $orders = $this->filteredOrders($request);
 
-            if ($orders->isEmpty()) {
-                return $this->noOrdersFound();
-            }
-
-            $pdf = Pdf::loadView('exports.orders-invoice', compact('orders'))
-                ->setPaper('a4', 'portrait');
-            $filename = 'mavnus-invoice-order-' . now()->format('Y-m-d_His') . '.pdf';
-            return $pdf->download($filename);
-        } catch (\Throwable $e) {
-            report($e);
-            return redirect()
-                ->route('dashboard.import-export')
-                ->with('error', 'Gagal export invoice PDF. Detail error tercatat di log server.');
-        }
+            return $orders->isEmpty()
+                ? $this->noOrdersFound()
+                : $this->invoicePdf($orders)->download('mavnus-invoice-order-' . $this->timestamp() . '.pdf');
+        });
     }
 
     /**
@@ -89,8 +77,7 @@ class importExportController extends Controller
      */
     public function orderInvoicePreview(Order $order)
     {
-        $order->load('items');
-        $orders = collect([$order]);
+        $orders = collect([$order->load('items')]);
 
         return view('exports.orders-invoice', compact('orders'));
     }
@@ -100,25 +87,26 @@ class importExportController extends Controller
      */
     public function orderInvoicePdf(Order $order)
     {
-        try {
-            $order->load('items');
-            $orders = collect([$order]);
-
-            return Pdf::loadView('exports.orders-invoice', compact('orders'))
-                ->setPaper('a4', 'portrait')
+        return $this->safely('Gagal membuat invoice PDF.', function () use ($order) {
+            return $this->invoicePdf(collect([$order->load('items')]))
                 ->download('mavnus-invoice-' . $order->order_number . '.pdf');
-        } catch (\Throwable $e) {
-            report($e);
-            return redirect()
-                ->route('dashboard.orders.show', $order)
-                ->with('error', 'Gagal membuat invoice PDF. Detail error tercatat di log server.');
-        }
+        }, route('dashboard.orders.show', $order));
     }
 
     /** Filter yang dipakai export pesanan: status, from, to (tanggal). Pencarian teks hanya untuk daftar pesanan. */
     private function orderFilters(Request $request): array
     {
         return $request->only(['status', 'from', 'to']);
+    }
+
+    private function filteredOrders(Request $request): Collection
+    {
+        return Order::with('items')->filter($this->orderFilters($request))->latest()->get();
+    }
+
+    private function invoicePdf(Collection $orders)
+    {
+        return Pdf::loadView('exports.orders-invoice', compact('orders'))->setPaper('a4', 'portrait');
     }
 
     private function noOrdersFound()
@@ -128,6 +116,8 @@ class importExportController extends Controller
             ->with('error', 'Tidak ada pesanan pada rentang tanggal / status yang dipilih.');
     }
 
+    // ================= Export data (SQL) =================
+
     /**
      * Export data produk (products, clothes, accessories, product_variants,
      * product_images) sebagai SQL — hanya INSERT, tanpa DROP/CREATE TABLE.
@@ -136,19 +126,10 @@ class importExportController extends Controller
      */
     public function exportProductsSql()
     {
-        try {
-            $tables = ['products', 'clothes', 'accessories', 'product_variants', 'product_images'];
-            $sql = $this->generateInsertOnlySql($tables, 'Produk');
-            $filename = 'mavnus-produk-' . now()->format('Y-m-d_His') . '.sql';
-            return response($sql)
-                ->header('Content-Type', 'application/sql')
-                ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
-        } catch (\Throwable $e) {
-            report($e);
-            return redirect()
-                ->route('dashboard.import-export')
-                ->with('error', 'Gagal export SQL produk. Detail error tercatat di log server.');
-        }
+        return $this->safely('Gagal export SQL produk.', fn() => $this->sqlDownload(
+            $this->insertOnlySql(['products', 'clothes', 'accessories', 'product_variants', 'product_images'], 'Produk'),
+            'mavnus-produk'
+        ));
     }
 
     /**
@@ -156,57 +137,11 @@ class importExportController extends Controller
      */
     public function exportOrdersSql()
     {
-        try {
-            $tables = ['orders', 'order_items'];
-            $sql = $this->generateInsertOnlySql($tables, 'Order');
-            $filename = 'mavnus-order-' . now()->format('Y-m-d_His') . '.sql';
-            return response($sql)
-                ->header('Content-Type', 'application/sql')
-                ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
-        } catch (\Throwable $e) {
-            report($e);
-            return redirect()
-                ->route('dashboard.import-export')
-                ->with('error', 'Gagal export SQL order. Detail error tercatat di log server.');
-        }
+        return $this->safely('Gagal export SQL order.', fn() => $this->sqlDownload(
+            $this->insertOnlySql(['orders', 'order_items'], 'Order'),
+            'mavnus-order'
+        ));
     }
-
-    /**
-     * Helper: generate SQL berisi INSERT statement saja (tanpa struktur tabel)
-     * untuk daftar tabel yang diberikan, sesuai urutan yang dikasih (penting untuk
-     * menjaga foreign key, misal 'products' harus diinsert sebelum 'clothes').
-     */
-    private function generateInsertOnlySql(array $tables, string $label): string
-    {
-        $sql = "-- Mavnus {$label} Data Export\n-- Generated: " . now() . "\n\n";
-        $sql .= "SET FOREIGN_KEY_CHECKS=0;\n\n";
-
-        foreach ($tables as $tableName) {
-            $rows = DB::table($tableName)->get();
-            if ($rows->isEmpty()) {
-                $sql .= "-- Tabel `{$tableName}` kosong, tidak ada data.\n\n";
-                continue;
-            }
-
-            foreach ($rows as $row) {
-                $rowArray = (array) $row;
-                $columns = array_map(fn($col) => "`{$col}`", array_keys($rowArray));
-                $values = array_map(function ($value) {
-                    if (is_null($value)) {
-                        return 'NULL';
-                    }
-                    return DB::getPdo()->quote($value);
-                }, array_values($rowArray));
-                $sql .= "INSERT INTO `{$tableName}` (" . implode(', ', $columns) . ") VALUES (" . implode(', ', $values) . ");\n";
-            }
-            $sql .= "\n";
-        }
-
-        $sql .= "SET FOREIGN_KEY_CHECKS=1;\n";
-        return $sql;
-    }
-
-    // ================= Export Database & Storage (buat migrasi/backup) =================
 
     /**
      * Export seluruh isi database jadi file .sql (struktur tabel + data).
@@ -216,54 +151,24 @@ class importExportController extends Controller
      */
     public function exportDatabase()
     {
-        // Tabel ini cuma data sementara. Isinya (terutama `sessions`: ID & payload sesi login
-        // staf/customer) tidak boleh ikut ke file backup karena file bisa tersebar.
-        // Strukturnya tetap ikut di-backup, datanya saja yang dilewati.
-        $skipData = ['sessions', 'cache', 'cache_locks', 'jobs', 'job_batches', 'failed_jobs', 'password_reset_tokens'];
+        return $this->safely('Gagal export database.', function () {
+            $sql = $this->sqlHeader('Database Backup') . "SET FOREIGN_KEY_CHECKS=0;\n\n";
 
-        try {
-            $tables = DB::select('SHOW TABLES');
-            $sql = "-- Mavnus Database Backup\n-- Generated: " . now() . "\n\n";
-            $sql .= "SET FOREIGN_KEY_CHECKS=0;\n\n";
-
-            foreach ($tables as $table) {
+            foreach (DB::select('SHOW TABLES') as $table) {
                 // Ambil nama tabel secara dinamis, karena nama key dari SHOW TABLES
                 // bisa beda case tergantung OS/server (mis. Tables_in_mavnus_db vs _DB)
                 $tableName = array_values((array) $table)[0];
 
-                // Simpan struktur tabel (CREATE TABLE)
-                $createTable = DB::select("SHOW CREATE TABLE `{$tableName}`")[0]->{'Create Table'};
                 $sql .= "DROP TABLE IF EXISTS `{$tableName}`;\n";
-                $sql .= $createTable . ";\n\n";
+                $sql .= DB::select("SHOW CREATE TABLE `{$tableName}`")[0]->{'Create Table'} . ";\n\n";
 
-                // Simpan seluruh isi data tabel sebagai INSERT statement
-                $rows = in_array($tableName, $skipData, true) ? collect() : DB::table($tableName)->get();
-                foreach ($rows as $row) {
-                    $rowArray = (array) $row;
-                    $columns = array_map(fn($col) => "`{$col}`", array_keys($rowArray));
-                    $values = array_map(function ($value) {
-                        if (is_null($value)) {
-                            return 'NULL';
-                        }
-                        return DB::getPdo()->quote($value);
-                    }, array_values($rowArray));
-                    $sql .= "INSERT INTO `{$tableName}` (" . implode(', ', $columns) . ") VALUES (" . implode(', ', $values) . ");\n";
+                if (! in_array($tableName, self::SKIP_DATA_TABLES, true)) {
+                    $sql .= $this->insertStatements($tableName) . "\n";
                 }
-                $sql .= "\n";
             }
-            $sql .= "SET FOREIGN_KEY_CHECKS=1;\n";
 
-            $filename = 'mavnus-database-' . now()->format('Y-m-d_His') . '.sql';
-
-            return response($sql)
-                ->header('Content-Type', 'application/sql')
-                ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
-        } catch (\Throwable $e) {
-            report($e);
-            return redirect()
-                ->route('dashboard.import-export')
-                ->with('error', 'Gagal export database. Detail error tercatat di log server.');
-        }
+            return $this->sqlDownload($sql . "SET FOREIGN_KEY_CHECKS=1;\n", 'mavnus-database');
+        });
     }
 
     /**
@@ -273,18 +178,17 @@ class importExportController extends Controller
      */
     public function exportStorage()
     {
-        try {
-            $zipFileName = 'mavnus-storage-' . now()->format('Y-m-d_His') . '.zip';
-            $zipPath = storage_path('app/' . $zipFileName);
+        return $this->safely('Gagal export foto.', function () {
+            $sourcePath = storage_path('app/public');
+            if (! is_dir($sourcePath)) {
+                throw new \Exception('Folder storage tidak ditemukan.');
+            }
+
+            $zipPath = storage_path('app/mavnus-storage-' . $this->timestamp() . '.zip');
 
             $zip = new \ZipArchive();
             if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
                 throw new \Exception('Tidak bisa membuat file zip.');
-            }
-
-            $sourcePath = storage_path('app/public');
-            if (!is_dir($sourcePath)) {
-                throw new \Exception('Folder storage tidak ditemukan.');
             }
 
             // Iterasi rekursif ke semua file di dalam storage/app/public, termasuk subfolder
@@ -294,10 +198,9 @@ class importExportController extends Controller
             );
 
             foreach ($files as $file) {
-                if (!$file->isDir()) {
+                if (! $file->isDir()) {
                     $filePath = $file->getRealPath();
-                    $relativePath = substr($filePath, strlen($sourcePath) + 1);
-                    $zip->addFile($filePath, $relativePath);
+                    $zip->addFile($filePath, substr($filePath, strlen($sourcePath) + 1));
                 }
             }
             $zip->close();
@@ -305,11 +208,75 @@ class importExportController extends Controller
             // File zip dihapus dari server otomatis setelah selesai didownload,
             // biar tidak numpuk jadi sampah di storage server
             return response()->download($zipPath)->deleteFileAfterSend(true);
+        });
+    }
+
+    // ================= Helper =================
+
+    /**
+     * Jalankan sebuah export; kalau gagal, catat di log dan kembalikan staf ke halaman
+     * dengan pesan error (bukan halaman 500).
+     */
+    private function safely(string $failMessage, callable $export, ?string $redirectTo = null)
+    {
+        try {
+            return $export();
         } catch (\Throwable $e) {
             report($e);
-            return redirect()
-                ->route('dashboard.import-export')
-                ->with('error', 'Gagal export foto. Detail error tercatat di log server.');
+
+            return redirect($redirectTo ?? route('dashboard.import-export'))
+                ->with('error', $failMessage . ' Detail error tercatat di log server.');
         }
+    }
+
+    private function timestamp(): string
+    {
+        return now()->format('Y-m-d_His');
+    }
+
+    private function sqlHeader(string $title): string
+    {
+        return "-- Mavnus {$title}\n-- Generated: " . now() . "\n\n";
+    }
+
+    private function sqlDownload(string $sql, string $filenamePrefix)
+    {
+        return response($sql)
+            ->header('Content-Type', 'application/sql')
+            ->header('Content-Disposition', "attachment; filename=\"{$filenamePrefix}-" . $this->timestamp() . ".sql\"");
+    }
+
+    /**
+     * SQL berisi INSERT statement saja (tanpa struktur tabel) untuk daftar tabel yang diberikan,
+     * sesuai urutan yang dikasih (penting untuk menjaga foreign key, misal 'products'
+     * harus diinsert sebelum 'clothes').
+     */
+    private function insertOnlySql(array $tables, string $label): string
+    {
+        $sql = $this->sqlHeader("{$label} Data Export") . "SET FOREIGN_KEY_CHECKS=0;\n\n";
+
+        foreach ($tables as $tableName) {
+            $statements = $this->insertStatements($tableName);
+            $sql .= ($statements === '' ? "-- Tabel `{$tableName}` kosong, tidak ada data.\n" : $statements) . "\n";
+        }
+
+        return $sql . "SET FOREIGN_KEY_CHECKS=1;\n";
+    }
+
+    /** Satu baris INSERT per baris data di tabel (string kosong kalau tabelnya kosong). */
+    private function insertStatements(string $tableName): string
+    {
+        $pdo = DB::getPdo();
+        $sql = '';
+
+        foreach (DB::table($tableName)->get() as $row) {
+            $row = (array) $row;
+            $columns = implode(', ', array_map(fn($column) => "`{$column}`", array_keys($row)));
+            $values = implode(', ', array_map(fn($value) => is_null($value) ? 'NULL' : $pdo->quote($value), array_values($row)));
+
+            $sql .= "INSERT INTO `{$tableName}` ({$columns}) VALUES ({$values});\n";
+        }
+
+        return $sql;
     }
 }

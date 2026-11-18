@@ -9,6 +9,7 @@ use App\Http\Controllers\homeController;
 use App\Http\Controllers\importExportController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\loginController;
+use App\Http\Controllers\MemberController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\orderController;
 use App\Http\Controllers\searchController;
@@ -19,7 +20,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('/')->group(function () {
     // Login & daftar CUSTOMER - pakai Laravel Auth bawaan (tabel users)
-    Route::get('/login', [loginController::class, 'login'])->name('login');
+    Route::get('/login', [authController::class, 'login'])->name('login');
     Route::post('/login', [authController::class, 'processLogin'])->name('login.proses')->middleware('throttle:5,1,login');
 
     Route::get('/register', [authController::class, 'register'])->name('register');
@@ -43,12 +44,10 @@ Route::prefix('/')->group(function () {
 });
 
 Route::prefix('/dashboard')->middleware('cekLogin')->group(function () {
-    // Landing gak dikunci per role — controller yang milih view mana
-    // yang cocok buat role staff yang login (lihat dashboardController).
+    // Semua akun staf yang aktif punya akses yang sama ke seluruh dashboard (role belum dipakai).
     Route::get('/', [dashboardController::class, 'dashboard'])->name('dashboard');
 
-    // Pesanan: Owner + Staff Pesanan
-    Route::prefix('/orders')->middleware('role:owner,staff_pesanan')->group(function () {
+    Route::prefix('/orders')->group(function () {
         Route::get('/', [orderController::class, 'dashboardIndex'])->name('dashboard.orders');
         Route::get('/{order}', [orderController::class, 'dashboardShow'])->name('dashboard.orders.show');
         // Invoice satu pesanan (preview HTML & PDF)
@@ -57,47 +56,40 @@ Route::prefix('/dashboard')->middleware('cekLogin')->group(function () {
         Route::patch('/{order}/status', [orderController::class, 'updateStatus'])->name('dashboard.orders.updateStatus');
     });
 
-    // Produk (Clothes & Accessories digabung jadi 1 halaman): Owner + Admin Produk
-    Route::prefix('/produk')->middleware('role:owner,admin_produk')->group(function () {
+    // Anggota = pembeli yang punya akun
+    Route::prefix('/members')->group(function () {
+        Route::get('/', [MemberController::class, 'index'])->name('dashboard.members');
+        Route::get('/{user}', [MemberController::class, 'show'])->name('dashboard.members.show');
+    });
+
+    // Produk (Clothes & Accessories digabung jadi 1 halaman)
+    Route::prefix('/produk')->group(function () {
         Route::get('/', [productController::class, 'produk'])->name('dashboard.produk');
         Route::post('/store', [productController::class, 'store'])->name('produk.store');
         Route::delete('/{product}', [productController::class, 'destroy'])->name('produk.destroy');
         Route::put('/{product}', [productController::class, 'update'])->name('produk.update');
     });
 
-    // Statistik pengunjung: Owner only
-    Route::prefix('/visitors')->middleware('role:owner')->group(function () {
+    Route::prefix('/visitors')->group(function () {
         Route::get('/', [visitorController::class, 'dashboardIndex'])->name('dashboard.visitors');
         Route::get('/pages', [visitorController::class, 'pages'])->name('dashboard.visitors.pages');
     });
 
     Route::prefix('/import-export')->group(function () {
-        // Halaman index-nya sendiri dibuka buat 3 role (isinya beda-beda
-        // tombol tergantung role — diatur di view). Yang benar-benar
-        // dikunci ketat adalah tiap endpoint export di bawah ini.
-        Route::get('/', [importExportController::class, 'index'])
-            ->name('dashboard.import-export')
-            ->middleware('role:owner,admin_produk,staff_pesanan');
+        Route::get('/', [importExportController::class, 'index'])->name('dashboard.import-export');
 
-        // Invoice & data pesanan: Owner + Staff Pesanan
-        Route::middleware('role:owner,staff_pesanan')->group(function () {
-            Route::get('/orders/export', [importExportController::class, 'exportOrders'])->name('export.orders');
-            Route::get('/orders/invoice/preview', [importExportController::class, 'ordersInvoicePreview'])->name('export.orders.preview');
-            Route::get('/orders/invoice/pdf', [importExportController::class, 'exportOrdersPdf'])->name('export.orders.pdf');
-        });
+        // Invoice & laporan pesanan
+        Route::get('/orders/export', [importExportController::class, 'exportOrders'])->name('export.orders');
+        Route::get('/orders/invoice/preview', [importExportController::class, 'ordersInvoicePreview'])->name('export.orders.preview');
+        Route::get('/orders/invoice/pdf', [importExportController::class, 'exportOrdersPdf'])->name('export.orders.pdf');
 
-        // Data produk (SQL): Owner + Admin Produk
-        Route::middleware('role:owner,admin_produk')->group(function () {
-            Route::get('/products/export-sql', [importExportController::class, 'exportProductsSql'])->name('export.products.sql');
-        });
+        // Data per modul (SQL)
+        Route::get('/products/export-sql', [importExportController::class, 'exportProductsSql'])->name('export.products.sql');
+        Route::get('/orders/export-sql', [importExportController::class, 'exportOrdersSql'])->name('export.orders.sql');
 
-        // Backup mentah (SQL pesanan, full database, storage): Owner only —
-        // ini yang paling sensitif karena isinya semua data customer.
-        Route::middleware('role:owner')->group(function () {
-            Route::get('/orders/export-sql', [importExportController::class, 'exportOrdersSql'])->name('export.orders.sql');
-            Route::get('/database/export', [importExportController::class, 'exportDatabase'])->name('export.database');
-            Route::get('/storage/export', [importExportController::class, 'exportStorage'])->name('export.storage');
-        });
+        // Backup lengkap (database + foto) - paling sensitif karena isinya semua data customer
+        Route::get('/database/export', [importExportController::class, 'exportDatabase'])->name('export.database');
+        Route::get('/storage/export', [importExportController::class, 'exportStorage'])->name('export.storage');
     });
 });
 

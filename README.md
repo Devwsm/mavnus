@@ -37,18 +37,15 @@ Toko online merchandise resmi **Whisnu Santika**. Pembeli memilih produk, memasu
 
 Login tim ada di `/crew-portal`, terpisah dari login pembeli. Dashboard hanya tersedia dalam Bahasa Indonesia.
 
-| Role              | Yang bisa dilakukan                                                          |
-| ----------------- | ---------------------------------------------------------------------------- |
-| **Owner**         | Semuanya, plus ringkasan omzet, statistik pengunjung, dan backup data.       |
-| **Admin Produk**  | Tambah, ubah, hapus produk; atur foto, ukuran, dan stok; export data produk. |
-| **Staff Pesanan** | Lihat pesanan dan ubah statusnya; export pesanan dan invoice.                |
+Semua akun tim yang aktif punya akses yang sama ke seluruh dashboard. Pembagian role (Owner, Admin Produk, Staff Pesanan) sementara dimatikan; kolom `role` di tabel `accounts` tetap disimpan supaya bisa dihidupkan lagi nanti.
 
 - **Daftar pesanan:** bisa dicari lewat nomor pesanan, nama, nomor HP, atau email, dan difilter berdasarkan status dan tanggal.
 - **Status pesanan:** menunggu → diproses → dikirim → selesai. Pesanan bisa dibatalkan sebelum dikirim (stok dikembalikan). Status boleh dikoreksi mundur jika salah klik, tetapi pesanan yang sudah dibatalkan terkunci.
 - **Foto produk:** maksimal 8 foto per produk, 5 MB per foto. Otomatis dikecilkan dan diubah ke WebP supaya halaman ringan.
-- **Ringkasan owner:** omzet 6 bulan terakhir, omzet per kategori bulan ini, dan produk terlaris. Omzet hanya dihitung dari pesanan yang sudah selesai.
+- **Ringkasan dashboard:** satu halaman untuk semua: produk, stok, pesanan, omzet 6 bulan terakhir, omzet per kategori bulan ini, produk terlaris, pengunjung, dan anggota. Omzet hanya dihitung dari pesanan yang sudah selesai.
+- **Anggota:** daftar pembeli yang punya akun (cari lewat nama, email, atau nomor HP), lengkap dengan jumlah pesanan dan total belanja. Halaman detail menampilkan data anggota dan riwayat pesanannya.
 - **Statistik pengunjung:** perangkat, browser, dan halaman terpopuler, tanpa layanan analitik pihak luar. Alamat IP pengunjung ikut tercatat, jadi sesuaikan kebijakan privasi bila perlu.
-- **Invoice dan export:** invoice satu pesanan (lihat atau PDF), export pesanan (Excel), rekap invoice (PDF), serta data produk dan pesanan (SQL). Khusus Owner: backup database dan backup foto (zip).
+- **Invoice dan export:** invoice satu pesanan (lihat atau PDF), export pesanan (Excel), rekap invoice (PDF), serta data produk dan pesanan (SQL). Juga backup database dan backup foto (zip).
 
 ### Keamanan
 
@@ -138,7 +135,8 @@ Dibangun dengan **Laravel 13** (PHP 8.4.1 atau lebih baru), MySQL, Tailwind CSS 
 | `authController.php`         | Daftar, masuk, dan keluar untuk pembeli.                                                       |
 | `accountController.php`      | Akun pembeli: profil, riwayat pesanan, hapus akun.                                             |
 | `loginController.php`        | Masuk dan keluar untuk tim di `/crew-portal`.                                                  |
-| `dashboardController.php`    | Halaman utama dashboard, isinya menyesuaikan role.                                             |
+| `dashboardController.php`    | Ringkasan dashboard (satu untuk semua).                                                        |
+| `MemberController.php`       | Daftar dan detail anggota (pembeli yang punya akun).                                           |
 | `visitorController.php`      | Statistik pengunjung.                                                                          |
 | `importExportController.php` | Export Excel/PDF/SQL, invoice, dan backup.                                                     |
 | `NewsletterController.php`   | Menyimpan email pelanggan newsletter.                                                          |
@@ -158,7 +156,6 @@ Dibangun dengan **Laravel 13** (PHP 8.4.1 atau lebih baru), MySQL, Tailwind CSS 
 | `AutoCancelExpiredOrders.php` | Membatalkan pesanan kedaluwarsa dan membersihkan keranjang lama, tanpa jadwal khusus di server. |
 | `SecurityHeaders.php`         | Menambahkan header keamanan di semua halaman.                                                   |
 | `cekLogin.php`                | Memastikan anggota tim sudah masuk dan akunnya masih aktif.                                     |
-| `cekRole.php`                 | Membatasi halaman sesuai role tim.                                                              |
 
 </details>
 
@@ -204,7 +201,7 @@ Dibangun dengan **Laravel 13** (PHP 8.4.1 atau lebih baru), MySQL, Tailwind CSS 
 | `config/mavnus.php`                              | Pengaturan khas toko: bahasa tersedia, batas waktu pesanan, retensi keranjang, email.                     |
 | `config/services.php`                            | Pengaturan RajaOngkir. File `config/` lain adalah bawaan Laravel.                                         |
 | `database/migrations/`                           | Riwayat pembuatan dan perubahan tabel database.                                                           |
-| `database/seeders/`                              | Pembuat 3 akun tim awal (satu per role).                                                                  |
+| `database/seeders/`                              | Pembuat 3 akun tim awal.                                                                                  |
 | `lang/id/`, `lang/en/`                           | Terjemahan per topik (lihat [mengubah teks](#mengubah-teks-atau-terjemahan)).                             |
 | `resources/views/pages/`                         | Halaman utuh: beranda, produk, checkout, akun, login, info, dan halaman dashboard.                        |
 | `resources/views/components/`                    | Potongan tampilan yang dipakai ulang: menu atas, banner, footer, keranjang, filter, tombol bahasa.        |

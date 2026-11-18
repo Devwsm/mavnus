@@ -11,6 +11,9 @@ class product extends Model
     //
     use HasFactory;
 
+    /** Stok 1 sampai angka ini dianggap menipis. */
+    public const LOW_STOCK_THRESHOLD = 3;
+
     protected $primaryKey = 'id_product';
 
     protected $fillable = [
@@ -98,6 +101,12 @@ class product extends Model
     public function scopeAccessoriesCategory(Builder $query): Builder
     {
         return $query->where('category', 'accessories');
+    }
+
+    // Scope: produk dengan stok tunggal menipis (hanya relevan untuk accessories, clothes stoknya per varian)
+    public function scopeLowStock(Builder $query): Builder
+    {
+        return $query->where('stock', '>', 0)->where('stock', '<=', self::LOW_STOCK_THRESHOLD);
     }
 
     // Accessor: format harga jadi "Rp250.000", dipanggil lewat $product->formatted_price

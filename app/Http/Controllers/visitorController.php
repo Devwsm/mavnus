@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Visit;
+use App\Support\Stats;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -16,28 +17,14 @@ class visitorController extends Controller
 
         // Ringkasan utama
         $totalVisits = Visit::count();
-        $totalUniqueVisitors = (int) Visit::selectRaw('COUNT(DISTINCT ip_address) as total')->value('total');
+        $totalUniqueVisitors = Visit::uniqueVisitors();
         $visitsToday = Visit::where('created_at', '>=', $today)->count();
-        $uniqueVisitorsToday = (int) Visit::where('created_at', '>=', $today)
-            ->selectRaw('COUNT(DISTINCT ip_address) as total')
-            ->value('total');
+        $uniqueVisitorsToday = Visit::uniqueVisitors($today);
         $visitsThisWeek = Visit::where('created_at', '>=', $weekStart)->count();
 
         // Grafik kunjungan 7 hari terakhir
-        $dailyRaw = Visit::selectRaw('DATE(created_at) as date, COUNT(*) as total')
-            ->where('created_at', '>=', $weekStart)
-            ->groupBy('date')
-            ->pluck('total', 'date');
-
-        $dailyStats = collect(range(6, 0))->map(function ($daysAgo) use ($dailyRaw) {
-            $date = now()->subDays($daysAgo)->format('Y-m-d');
-            return [
-                'label' => now()->subDays($daysAgo)->translatedFormat('D'),
-                'date'  => $date,
-                'total' => (int) $dailyRaw->get($date, 0),
-            ];
-        })->values();
-        $maxDaily = max(1, $dailyStats->max('total'));
+        $dailyStats = Stats::dailyCounts(Visit::query(), 7, 'D');
+        $maxDaily = Stats::max($dailyStats);
 
         // Halaman paling banyak dikunjungi (hanya top 5, sisanya di halaman /visitors/pages)
         $topPages = Visit::select('url', DB::raw('COUNT(*) as total'))
@@ -48,9 +35,7 @@ class visitorController extends Controller
         $maxPageVisit = max(1, optional($topPages->first())->total ?? 1);
 
         // Breakdown perangkat
-        $deviceStats = Visit::select('device_type', DB::raw('COUNT(*) as total'))
-            ->groupBy('device_type')
-            ->pluck('total', 'device_type');
+        $deviceStats = Visit::deviceBreakdown();
         $totalDeviceVisits = max(1, $deviceStats->sum());
 
         // Daftar halaman unik untuk dropdown filter riwayat kunjungan

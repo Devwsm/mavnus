@@ -81,7 +81,6 @@ abstract class StoreTestCase extends TestCase
         return $this->withSession([
             'login' => true,
             'user'  => $staff->username,
-            'role'  => $staff->role,
             'name'  => $staff->name,
         ]);
     }

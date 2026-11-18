@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 
 class orderController extends Controller
@@ -37,12 +38,7 @@ class orderController extends Controller
 
         // Dihitung terpisah dari data yang tampil di halaman (yang cuma 15
         // per page & bisa lagi difilter) supaya angkanya selalu total asli.
-        $statusCounts = [
-            'pending'    => Order::where('status', 'pending')->count(),
-            'processing' => Order::where('status', 'processing')->count(),
-            'shipped'    => Order::where('status', 'shipped')->count(),
-            'completed'  => Order::where('status', 'completed')->count(),
-        ];
+        $statusCounts = Order::countByStatus();
 
         return view('pages.dashboard.orders', compact('orders', 'status', 'statusCounts', 'filters'));
     }
@@ -56,7 +52,7 @@ class orderController extends Controller
     public function updateStatus(Request $request, Order $order)
     {
         $validated = $request->validate([
-            'status' => 'required|in:pending,processing,shipped,completed,cancelled',
+            'status' => ['required', Rule::in(Order::STATUSES)],
         ]);
 
         $newStatus = $validated['status'];

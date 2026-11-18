@@ -6,10 +6,23 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use App\Support\Like;
 
 class Order extends Model
 {
     public const STATUSES = ['pending', 'processing', 'shipped', 'completed', 'cancelled'];
+
+    /**
+     * Label (bahasa dashboard), warna, dan ikon tiap status. Satu-satunya tempat yang mengatur
+     * tampilan status di dashboard (kartu, badge, daftar), jadi mengubah warna cukup di sini.
+     */
+    public const STATUS_META = [
+        'pending'    => ['label' => 'Pending',    'color' => '#B77B1C', 'icon' => 'bi-hourglass-split'],
+        'processing' => ['label' => 'Diproses',   'color' => '#1C1CB7', 'icon' => 'bi-gear-fill'],
+        'shipped'    => ['label' => 'Dikirim',    'color' => '#5E1C5E', 'icon' => 'bi-truck'],
+        'completed'  => ['label' => 'Selesai',    'color' => '#1C7B1C', 'icon' => 'bi-check-circle-fill'],
+        'cancelled'  => ['label' => 'Dibatalkan', 'color' => '#e05656', 'icon' => 'bi-x-circle-fill'],
+    ];
 
     protected $primaryKey = 'id_order';
     protected $fillable = [
@@ -78,6 +91,25 @@ class Order extends Model
         return $this->status === 'cancelled' && $this->payment_status === 'expired';
     }
 
+    /**
+     * Jumlah pesanan per status (semua status selalu ada, minimal 0), dalam satu query.
+     * Isi $userId untuk menghitung pesanan milik satu akun pembeli saja.
+     *
+     * @return array<string, int>
+     */
+    public static function countByStatus(?int $userId = null): array
+    {
+        $counts = static::query()
+            ->when($userId !== null, fn(Builder $query) => $query->where('user_id', $userId))
+            ->selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        return collect(self::STATUSES)
+            ->mapWithKeys(fn(string $status) => [$status => (int) ($counts[$status] ?? 0)])
+            ->all();
+    }
+
     /** Label status untuk badge di tampilan. */
     public function statusLabel(): string
     {
@@ -131,15 +163,12 @@ class Order extends Model
         }
 
         if ($f['q'] !== '') {
-            // '!' dipakai sebagai karakter escape (bukan backslash) supaya hasilnya sama di MySQL dan SQLite;
-            // % dan _ yang diketik staf dicari apa adanya, bukan dianggap wildcard.
-            $like = '%' . str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $f['q']) . '%';
+            $like = Like::contains($f['q']);
 
             $query->where(function (Builder $w) use ($like) {
-                $w->whereRaw("order_number LIKE ? ESCAPE '!'", [$like])
-                    ->orWhereRaw("customer_name LIKE ? ESCAPE '!'", [$like])
-                    ->orWhereRaw("customer_phone LIKE ? ESCAPE '!'", [$like])
-                    ->orWhereRaw("customer_email LIKE ? ESCAPE '!'", [$like]);
+                foreach (['order_number', 'customer_name', 'customer_phone', 'customer_email'] as $column) {
+                    $w->orWhereRaw(Like::sql($column), [$like]);
+                }
             });
         }
 

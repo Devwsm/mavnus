@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\CartItem;
 use App\Support\CartSession;
+use App\Support\Stock;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -38,6 +39,11 @@ class AppServiceProvider extends ServiceProvider
             $view->with('cartCount', $key
                 ? (int) CartItem::where('session_id', $key)->sum('quantity')
                 : 0);
+        });
+
+        // Badge stok menipis di navbar dashboard (dihitung sekali per halaman, dipakai bersama kartu dashboard)
+        View::composer('components.dashboard.navbar', function ($view) {
+            $view->with('navLowStockCount', Stock::lowCount());
         });
     }
 }

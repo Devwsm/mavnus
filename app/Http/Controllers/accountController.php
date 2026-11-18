@@ -12,17 +12,10 @@ class accountController extends Controller
     // Halaman akun customer (read-only overview) - cuma bisa diakses kalau udah login
     public function index()
     {
-        $userId = Auth::id();
-
         return view('pages.account', [
             'user' => Auth::user(),
             // Ringkasan status pesanan buat quick-access di halaman profil
-            'orderCounts' => [
-                'pending'    => Order::where('user_id', $userId)->where('status', 'pending')->count(),
-                'processing' => Order::where('user_id', $userId)->where('status', 'processing')->count(),
-                'shipped'    => Order::where('user_id', $userId)->where('status', 'shipped')->count(),
-                'completed'  => Order::where('user_id', $userId)->where('status', 'completed')->count(),
-            ],
+            'orderCounts' => Order::countByStatus(Auth::id()),
         ]);
     }
 
@@ -105,9 +98,8 @@ class accountController extends Controller
     // Bisa difilter per status lewat query ?status= (dipakai chip filter di halaman).
     public function orders(Request $request)
     {
-        $validStatuses = ['pending', 'processing', 'shipped', 'completed', 'cancelled'];
         $status = $request->query('status');
-        $status = in_array($status, $validStatuses, true) ? $status : null;
+        $status = in_array($status, Order::STATUSES, true) ? $status : null;
 
         $orders = Order::where('user_id', Auth::id())
             ->when($status, fn($query) => $query->where('status', $status))
@@ -116,14 +108,8 @@ class accountController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        $filters = [
-            'all'        => __('account.filter_all'),
-            'pending'    => __('order.status.pending'),
-            'processing' => __('order.status.processing'),
-            'shipped'    => __('order.status.shipped'),
-            'completed'  => __('order.status.completed'),
-            'cancelled'  => __('order.status.cancelled'),
-        ];
+        $filters = ['all' => __('account.filter_all')]
+            + collect(Order::STATUSES)->mapWithKeys(fn($s) => [$s => __('order.status.' . $s)])->all();
 
         return view('pages.account-orders', [
             'user'         => Auth::user(),

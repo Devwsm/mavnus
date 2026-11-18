@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class Visit extends Model
 {
@@ -16,6 +18,28 @@ class Visit extends Model
         'device_type',
         'browser',
     ];
+
+    /**
+     * Jumlah kunjungan per tipe perangkat, mis. ['desktop' => 88, 'mobile' => 4].
+     * Dipakai ringkasan dashboard dan halaman statistik pengunjung.
+     *
+     * @return Collection<string, int>
+     */
+    public static function deviceBreakdown(): Collection
+    {
+        return static::select('device_type', DB::raw('COUNT(*) as total'))
+            ->groupBy('device_type')
+            ->pluck('total', 'device_type');
+    }
+
+    /** Jumlah pengunjung unik (berdasarkan IP) sejak $since, atau sepanjang waktu kalau kosong. */
+    public static function uniqueVisitors(?\DateTimeInterface $since = null): int
+    {
+        return (int) static::query()
+            ->when($since, fn($query) => $query->where('created_at', '>=', $since))
+            ->selectRaw('COUNT(DISTINCT ip_address) as total')
+            ->value('total');
+    }
 
     /**
      * Deteksi ringan tipe perangkat dari user agent (tanpa package tambahan).

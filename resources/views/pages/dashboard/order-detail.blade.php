@@ -13,19 +13,7 @@
                     <h1 class="text-2xl font-bold uppercase tracking-wide">{{ $order->order_number }}</h1>
                     <p class="text-white/40 text-sm mt-1">{{ $order->created_at->format('d M Y, H:i') }} WIB</p>
                 </div>
-                @php
-                    $statusColor = match ($order->status) {
-                        'pending' => 'bg-amber-500/10 text-amber-400',
-                        'processing' => 'bg-blue-500/10 text-blue-400',
-                        'shipped' => 'bg-purple-500/10 text-purple-400',
-                        'completed' => 'bg-green-500/10 text-green-400',
-                        'cancelled' => 'bg-[#B71C1C]/10 text-[#e05656]',
-                    };
-                @endphp
-                <span
-                    class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide {{ $statusColor }}">
-                    {{ $order->statusLabel() }}
-                </span>
+                <x-dashboard.status-badge :order="$order" class="px-3 py-1.5 text-xs" />
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\product;
+use App\Support\Like;
 use Illuminate\Http\Request;
 
 class searchController extends Controller
@@ -18,11 +19,8 @@ class searchController extends Controller
             return response()->json(['results' => []]);
         }
 
-        // Escape \ % _ biar karakter itu dicari apa adanya, bukan dianggap wildcard LIKE
-        // (tanpa ini "%" atau "_" cocok ke semua produk)
-        $escaped = addcslashes($query, '\\%_');
-
-        $products = product::where('name', 'like', "%{$escaped}%")
+        // % dan _ dicari apa adanya, bukan dianggap wildcard LIKE (tanpa ini "%" cocok ke semua produk)
+        $products = product::whereRaw(Like::sql('name'), [Like::contains($query)])
             ->active()
             ->with('images')
             ->limit(8)

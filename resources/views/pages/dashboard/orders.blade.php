@@ -23,26 +23,16 @@
         <div class="flex flex-col w-full max-w-6xl gap-5 p-6 lg:p-14">
             {{-- Ringkasan cepat (angka total asli, sekaligus tombol filter) --}}
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <a href="{{ $cardLink('pending') }}"
-                    class="bg-[#0D0D0D] border rounded-2xl p-5 flex flex-col gap-1 transition {{ $status === 'pending' ? 'border-[#B77B1C]/60' : 'border-white/10 hover:border-white/20' }}">
-                    <span class="text-[#B77B1C] text-2xl font-bold">{{ $statusCounts['pending'] }}</span>
-                    <span class="text-white/40 text-xs uppercase tracking-wide">Pending</span>
-                </a>
-                <a href="{{ $cardLink('processing') }}"
-                    class="bg-[#0D0D0D] border rounded-2xl p-5 flex flex-col gap-1 transition {{ $status === 'processing' ? 'border-[#1C1CB7]/60' : 'border-white/10 hover:border-white/20' }}">
-                    <span class="text-[#1C1CB7] text-2xl font-bold">{{ $statusCounts['processing'] }}</span>
-                    <span class="text-white/40 text-xs uppercase tracking-wide">Diproses</span>
-                </a>
-                <a href="{{ $cardLink('shipped') }}"
-                    class="bg-[#0D0D0D] border rounded-2xl p-5 flex flex-col gap-1 transition {{ $status === 'shipped' ? 'border-[#5E1C5E]/60' : 'border-white/10 hover:border-white/20' }}">
-                    <span class="text-[#5E1C5E] text-2xl font-bold">{{ $statusCounts['shipped'] }}</span>
-                    <span class="text-white/40 text-xs uppercase tracking-wide">Dikirim</span>
-                </a>
-                <a href="{{ $cardLink('completed') }}"
-                    class="bg-[#0D0D0D] border rounded-2xl p-5 flex flex-col gap-1 transition {{ $status === 'completed' ? 'border-[#1C7B1C]/60' : 'border-white/10 hover:border-white/20' }}">
-                    <span class="text-[#1C7B1C] text-2xl font-bold">{{ $statusCounts['completed'] }}</span>
-                    <span class="text-white/40 text-xs uppercase tracking-wide">Selesai</span>
-                </a>
+                @foreach (['pending', 'processing', 'shipped', 'completed'] as $cardStatus)
+                    @php $meta = \App\Models\Order::STATUS_META[$cardStatus]; @endphp
+                    <a href="{{ $cardLink($cardStatus) }}"
+                        class="bg-[#0D0D0D] border rounded-2xl p-5 flex flex-col gap-1 transition {{ $status === $cardStatus ? '' : 'border-white/10 hover:border-white/20' }}"
+                        @if ($status === $cardStatus) style="border-color: {{ $meta['color'] }}99" @endif>
+                        <span class="text-2xl font-bold"
+                            style="color: {{ $meta['color'] }}">{{ $statusCounts[$cardStatus] }}</span>
+                        <span class="text-white/40 text-xs uppercase tracking-wide">{{ $meta['label'] }}</span>
+                    </a>
+                @endforeach
             </div>
 
             {{-- Cari & filter: nomor pesanan / nama / HP / email, status, rentang tanggal --}}
@@ -91,13 +81,6 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 @forelse ($orders as $order)
                     @php
-                        $statusStyle = match ($order->status) {
-                            'pending' => ['bg-[#B77B1C]/10 text-[#B77B1C]', 'bi-hourglass-split'],
-                            'processing' => ['bg-[#1C1CB7]/10 text-[#1C1CB7]', 'bi-gear-fill'],
-                            'shipped' => ['bg-[#5E1C5E]/10 text-[#5E1C5E]', 'bi-truck'],
-                            'completed' => ['bg-[#1C7B1C]/10 text-[#1C7B1C]', 'bi-check-circle-fill'],
-                            'cancelled' => ['bg-[#B71C1C]/10 text-[#e05656]', 'bi-x-circle-fill'],
-                        };
                         $previewImages = $order->items->take(3);
                         $extraItemCount = $order->items->count() - 3;
                     @endphp
@@ -110,11 +93,7 @@
                                 <span class="font-bold text-white tracking-wide">{{ $order->order_number }}</span>
                                 <span class="text-white/40 text-xs mt-0.5">{{ $order->created_at->diffForHumans() }}</span>
                             </div>
-                            <span
-                                class="inline-flex items-center gap-1.5 {{ $statusStyle[0] }} text-[10px] font-semibold uppercase tracking-wide px-2.5 py-1 rounded-full">
-                                <i class="bi {{ $statusStyle[1] }}"></i>
-                                {{ $order->statusLabel() }}
-                            </span>
+                            <x-dashboard.status-badge :order="$order" icon />
                         </div>
 
                         {{-- Preview foto barang --}}

@@ -17,20 +17,19 @@ class cekLogin
             return redirect()->route('crew.login');
         }
 
-        // Cek ulang akunnya di database tiap request. Dulu role & status disimpan di session
+        // Cek ulang akunnya di database tiap request. Dulu status akun disimpan di session
         // saat login dan dipercaya sampai session habis, jadi staf yang SUDAH dinonaktifkan
-        // (resign) atau diturunkan rolenya tetap punya akses penuh sampai logout sendiri.
+        // (resign) tetap punya akses penuh sampai logout sendiri.
         $staff = account::where('username', $request->session()->get('user'))->first();
 
         if (! $staff || ! $staff->is_active) {
-            $request->session()->forget(['login', 'user', 'role', 'name']);
+            $request->session()->forget(account::SESSION_KEYS);
 
             return redirect()->route('crew.login')
                 ->withErrors(['login' => 'Sesi kamu sudah tidak berlaku. Silakan login ulang.']);
         }
 
-        // Role selalu ikut data terbaru di database (cekRole membaca dari session)
-        $request->session()->put('role', $staff->role);
+        // Nama selalu ikut data terbaru di database (dipakai buat sapaan di dashboard)
         $request->session()->put('name', $staff->name);
 
         return $next($request);
