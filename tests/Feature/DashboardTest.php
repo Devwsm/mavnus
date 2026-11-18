@@ -20,9 +20,8 @@ class DashboardTest extends StoreTestCase
             $this->actingAsStaff($this->makeStaff($role, true, "crew-{$role}"))
                 ->get('/dashboard')
                 ->assertOk()
-                ->assertSee('Omzet Bulan Ini')
-                ->assertSee('Stok Menipis')
-                ->assertSee('Pesanan Pending')
+                ->assertSee('Omzet bulan ini')
+                ->assertSee('Produk aktif')
                 ->assertSee('Anggota')
                 // Badge role sudah dihapus dari sapaan
                 ->assertDontSee('Admin Produk')
@@ -83,8 +82,8 @@ class DashboardTest extends StoreTestCase
         $this->staff()->get('/dashboard')
             ->assertOk()
             ->assertSee('Rp280.000')
-            ->assertSee('Rp200.000')   // per kategori: clothes
-            ->assertSee('Rp60.000');   // per kategori: accessories
+            ->assertSee('Rp200.000')   // produk terlaris: kaos
+            ->assertSee('Rp60.000');   // produk terlaris: gantungan
     }
 
     public function test_revenue_chart_groups_by_month_without_month_end_overflow(): void
@@ -105,30 +104,64 @@ class DashboardTest extends StoreTestCase
             ->assertSee('Rp60rb');
     }
 
-    public function test_orders_trend_and_status_counts_cover_all_statuses(): void
+    public function test_status_counts_cover_all_statuses(): void
     {
         $accessory = $this->makeAccessory(5);
         foreach (Order::STATUSES as $status) {
             $this->makeOrder($accessory, null, 1, ['status' => $status]);
         }
 
-        $counts = Order::countByStatus();
-
-        $this->assertSame(array_fill_keys(Order::STATUSES, 1), $counts);
-        $this->staff()->get('/dashboard')->assertOk()->assertSee('Dibatalkan');
+        $this->assertSame(array_fill_keys(Order::STATUSES, 1), Order::countByStatus());
+        $this->staff()->get('/dashboard')->assertOk();
     }
 
-    public function test_dashboard_shows_device_breakdown_and_member_numbers(): void
+    public function test_empty_store_explains_what_will_appear_instead_of_blank_panels(): void
+    {
+        $this->staff()->get('/dashboard')
+            ->assertOk()
+            ->assertSee('Semua beres')
+            ->assertSee('Belum ada pesanan')
+            ->assertSee('Stok aman')
+            ->assertSee('Belum ada penjualan selesai')
+            ->assertDontSee('Perlu ditindak')
+            ->assertDontSee('Omzet 6 bulan terakhir');   // grafik kosong tidak ditampilkan
+    }
+
+    public function test_attention_strip_lists_pending_orders_and_stock_problems_with_links(): void
+    {
+        $clothes = $this->makeClothes(['S' => 0, 'M' => 2, 'L' => 10]);
+        $this->makeOrder($clothes, $clothes->variants->first(), 1);   // pending
+
+        $this->staff()->get('/dashboard')
+            ->assertOk()
+            ->assertSee('Perlu ditindak')
+            ->assertSee('1 pesanan menunggu diproses')
+            ->assertSee('1 stok habis')
+            ->assertSee('1 stok menipis')
+            ->assertSee(route('dashboard.orders', ['status' => 'pending']), false)
+            ->assertDontSee('Semua beres');
+    }
+
+    public function test_traffic_is_reduced_to_one_quiet_line_linking_to_visitors_page(): void
     {
         Visit::create(['ip_address' => '1.1.1.1', 'session_id' => 'a', 'url' => '/', 'device_type' => 'desktop', 'browser' => 'Chrome']);
         Visit::create(['ip_address' => '2.2.2.2', 'session_id' => 'b', 'url' => '/', 'device_type' => 'mobile', 'browser' => 'Safari']);
+
+        $this->staff()->get('/dashboard')
+            ->assertOk()
+            ->assertSee('2 pengunjung hari ini')
+            ->assertSee(route('dashboard.visitors'), false)
+            ->assertDontSee('Perangkat Pengunjung');
+    }
+
+    public function test_member_card_links_to_members_page_and_shows_new_members(): void
+    {
         User::factory()->count(2)->create();
 
         $this->staff()->get('/dashboard')
             ->assertOk()
-            ->assertSee('Desktop (1)')
-            ->assertSee('Mobile (1)')
-            ->assertSee('2 anggota baru bulan ini');
+            ->assertSee('+2 bulan ini')
+            ->assertSee(route('dashboard.members'), false);
     }
 
     public function test_navbar_links_to_members_and_shows_low_stock_badge(): void

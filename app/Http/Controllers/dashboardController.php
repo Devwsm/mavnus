@@ -14,47 +14,40 @@ use Illuminate\Support\Facades\DB;
 
 class dashboardController extends Controller
 {
-    // Satu ringkasan untuk semua staf: produk, stok, pesanan, omzet, pengunjung, dan anggota.
+    // Satu ringkasan untuk semua staf, sengaja singkat: apa yang perlu ditindak, angka utama,
+    // pesanan terbaru, dan (kalau sudah ada penjualan) tren omzet + produk terlaris.
+    // Statistik pengunjung punya halaman sendiri, jadi tidak dicampur di sini.
     public function dashboard()
     {
         $stock = Stock::summary();
-        $ordersTrend = Stats::dailyCounts(Order::query(), 7);
+        $orderStatusCounts = Order::countByStatus();
         $omzetPerBulan = $this->monthlyRevenue(6);
-        $omzetPerKategori = $this->revenueByCategory();
-        $deviceStats = Visit::deviceBreakdown();
 
         return view('pages.dashboard.index', [
-            // Kartu ringkasan
-            'totalProdukAktif'      => product::whereIn('category', ['clothes', 'accessories'])->where('is_active', true)->count(),
-            'scheduledCount'        => product::where('published_at', '>', now())->count(),
-            'lowStockCount'         => $stock['low'],
-            'outOfStockCount'       => $stock['out'],
-            'omzetBulanIni'         => $omzetPerBulan->last()['total'],
-            'visitsToday'           => Visit::where('created_at', '>=', now()->startOfDay())->count(),
-            'visitsThisWeek'        => Visit::where('created_at', '>=', now()->subDays(6)->startOfDay())->count(),
-            'totalMembers'          => User::count(),
-            'newMembersThisMonth'   => User::where('created_at', '>=', now()->startOfMonth())->count(),
+            // Perlu ditindak
+            'pendingOrders'       => $orderStatusCounts['pending'],
+            'lowStockCount'       => $stock['low'],
+            'outOfStockCount'     => $stock['out'],
 
-            // Pesanan
-            'orderStatusCounts'     => Order::countByStatus(),
-            'recentOrders'          => Order::latest()->take(5)->get(),
-            'ordersTrend'           => $ordersTrend,
-            'ordersTrendMax'        => Stats::max($ordersTrend),
+            // Angka utama
+            'omzetBulanIni'       => $omzetPerBulan->last()['total'],
+            'totalOrders'         => array_sum($orderStatusCounts),
+            'totalProdukAktif'    => product::whereIn('category', ['clothes', 'accessories'])->where('is_active', true)->count(),
+            'scheduledCount'      => product::where('published_at', '>', now())->count(),
+            'totalMembers'        => User::count(),
+            'newMembersThisMonth' => User::where('created_at', '>=', now()->startOfMonth())->count(),
 
-            // Stok & produk
-            'criticalItems'         => Stock::critical(5),
-            'topProduk'             => $this->topProducts(5),
+            // Daftar
+            'recentOrders'        => Order::latest()->take(5)->get(),
+            'criticalItems'       => Stock::critical(5),
 
-            // Omzet
-            'omzetPerBulan'         => $omzetPerBulan,
-            'omzetPerBulanMax'      => Stats::max($omzetPerBulan),
-            'omzetPerKategori'      => $omzetPerKategori,
-            'omzetPerKategoriTotal' => max(1, array_sum($omzetPerKategori)),
+            // Penjualan (hanya tampil kalau sudah ada pesanan selesai)
+            'omzetPerBulan'       => $omzetPerBulan,
+            'omzetPerBulanMax'    => Stats::max($omzetPerBulan),
+            'hasSales'            => $omzetPerBulan->sum('total') > 0,
+            'topProduk'           => $this->topProducts(5),
 
-            // Pengunjung & anggota
-            'deviceStats'           => $deviceStats,
-            'totalDeviceVisits'     => max(1, $deviceStats->sum()),
-            'recentMembers'         => User::withCount('orders')->latest()->orderByDesc('id')->take(5)->get(),
+            'visitsToday'         => Visit::where('created_at', '>=', now()->startOfDay())->count(),
         ]);
     }
 
@@ -83,29 +76,6 @@ class dashboardController extends Controller
                 'total' => $totals->get($month->format('Y-m'), 0),
             ];
         })->values();
-    }
-
-    /**
-     * Omzet bulan ini per kategori (clothes vs accessories). Item yang produknya sudah dihapus
-     * (product_id null) tidak ikut breakdown ini, tapi tetap terhitung di omzet bulan ini.
-     *
-     * @return array{clothes: int, accessories: int}
-     */
-    private function revenueByCategory(): array
-    {
-        $raw = OrderItem::query()
-            ->join('orders', 'order_items.order_id', '=', 'orders.id_order')
-            ->join('products', 'order_items.product_id', '=', 'products.id_product')
-            ->where('orders.status', 'completed')
-            ->where('orders.created_at', '>=', now()->startOfMonth())
-            ->select('products.category', DB::raw('SUM(order_items.subtotal) as total'))
-            ->groupBy('products.category')
-            ->pluck('total', 'category');
-
-        return [
-            'clothes'     => (int) ($raw['clothes'] ?? 0),
-            'accessories' => (int) ($raw['accessories'] ?? 0),
-        ];
     }
 
     /**
